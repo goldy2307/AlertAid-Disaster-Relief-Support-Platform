@@ -205,6 +205,15 @@ body.landing-palette .volunteer-card {
   border-left: 4px solid var(--landing-primary) !important;
   background: var(--landing-surface) !important;
 }
+body.landing-palette .card:hover,
+body.landing-palette .stat-card:hover,
+body.landing-palette .dashboard-card:hover,
+body.landing-palette .volunteer-card:hover,
+body.landing-palette .task-card:hover {
+  box-shadow: var(--landing-shadow-lg);
+  border-color: rgba(226, 59, 50, 0.25) !important;
+}
+
 body.landing-palette section,
 body.landing-palette main,
 body.landing-palette .page-content { background: transparent !important; }

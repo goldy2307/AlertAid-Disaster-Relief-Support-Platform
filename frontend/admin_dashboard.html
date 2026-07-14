@@ -162,30 +162,10 @@
       padding: 20px;
     }
 
-    /* === Header === */
-    header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 15px 25px;
-      background: rgba(255,255,255,0.08);
-      backdrop-filter: blur(8px);
-      border-radius: 12px;
-      margin-bottom: 30px;
-    }
-    header h1 {
-      font-size: 1.6rem;
-      display: flex; align-items: center; gap: 10px;
-    }
-    header h1 i { color: #E23B32; }
-    header a {
-      color: #FFD700;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
     /* === Dashboard Grid === */
     .dashboard {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(580px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 20px;
       transition: margin-left .4s ease;
       position: relative;
@@ -195,16 +175,21 @@
     /* === Cards === */
     .card {
       background: rgba(255,255,255,0.1);
-      padding: 25px;
-      border-radius: 15px;
+      padding: 28px 22px;
+      min-height: 168px;
+      border-radius: 16px;
       text-align: center;
-      transition: 0.3s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
       cursor: pointer;
       text-decoration: none;
       color: #fff;
       position: relative;
       z-index: 1000;
-      display: block;
     }
     .card:visited {
       color: #fff;
