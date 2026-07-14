@@ -8,8 +8,8 @@
             --color-surface-soft: #fef3ef;
             --color-muted: #666666;
             --color-text: #1a1a1a;
-            --color-primary: #FF3B30;
-            --color-secondary: #FF6F00;
+            --color-primary: #E23B32;
+            --color-secondary: #F0790A;
             --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
             --color-border: rgba(26, 26, 26, 0.08);
             --color-shadow-soft: 0 20px 45px rgba(17, 24, 39, 0.15);
@@ -22,13 +22,13 @@
             --color-surface-soft: #281c1b;
             --color-muted: #aaaaaa;
             --color-text: #ffffff;
-            --color-primary: #FF6F00;
-            --color-secondary: #FF3B30;
+            --color-primary: #F0790A;
+            --color-secondary: #E23B32;
             --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
             --color-border: rgba(255, 255, 255, 0.1);
             --color-shadow-soft: 0 20px 45px rgba(0, 0, 0, 0.5);
             --color-nav-bg: rgba(30, 30, 30, 0.95);
-            --color-sidebar-bg-top: rgba(255, 111, 0, 0.98);
+            --color-sidebar-bg-top: rgba(240, 121, 10, 0.98);
         }
         body {
             min-height: 100vh;
@@ -74,11 +74,11 @@
         .weather-widget { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 30px; background: linear-gradient(135deg, #4A90E2, #357ABD); color: #fff; cursor: pointer; font-weight: 500; box-shadow: 0 5px 15px rgba(53, 122, 189, 0.3); }
         .weather-widget i { font-size: 1.1rem; color: #fff; }
         .weather-info { font-size: 0.85rem; text-align: left; }
-        .nav-signin { display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; text-decoration: none; background: var(--color-gradient); padding: 10px 26px; border-radius: 999px; box-shadow: 0 12px 25px rgba(255, 59, 48, 0.35); border: none; font-size: 1rem; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .nav-signin { display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; text-decoration: none; background: var(--color-gradient); padding: 10px 26px; border-radius: 999px; box-shadow: 0 12px 25px rgba(226, 59, 50, 0.35); border: none; font-size: 1rem; transition: transform 0.2s ease, box-shadow 0.2s ease; }
         .nav-signin i {
             margin-right: 8px;
         }
-        .nav-signin:hover { transform: translateY(-2px); box-shadow: 0 18px 30px rgba(255, 59, 48, 0.4); }
+        .nav-signin:hover { transform: translateY(-2px); box-shadow: 0 18px 30px rgba(226, 59, 50, 0.4); }
 
         .sidebar { height: 100%; width: 0; position: fixed; top: 0; left: 0; background: none !important; color: var(--color-text); overflow-x: hidden; transition: 0.4s; padding-top: 110px; z-index: 1000; box-shadow: var(--color-shadow-soft); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; }
         .sidebar-content { width: 100%; height: 100%; display: flex; flex-direction: column; overflow-y: auto; background: var(--color-sidebar-bg-top) !important; padding-top: 20px; }
@@ -89,7 +89,7 @@
         .sidebar .closebtn:hover { background: var(--color-surface-soft); }
         .theme-toggle { padding: 10px 18px; border-radius: 16px; cursor: pointer; font-size: 16px; display: flex; align-items: center; gap: 8px; background: var(--color-surface); color: var(--color-primary); border: 1px solid rgba(26,26,26,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         html[data-theme="dark"] .theme-toggle { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); box-shadow: none; }
-        .theme-toggle:hover { transform: translateY(-1px); background: rgba(255,59,48,0.05); }
+        .theme-toggle:hover { transform: translateY(-1px); background: rgba(226,59,50,0.05); }
         html[data-theme="dark"] .theme-toggle:hover { background: rgba(255,255,255,0.2); }
         .app-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:2000}
         .app-modal.show{display:flex}
@@ -102,8 +102,8 @@
         .app-btn{background:var(--color-secondary);color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer; transition: all 0.2s;}
         .app-btn:hover{background: #e66600;}
         .app-btn-secondary { background: var(--color-surface-soft); color: var(--color-text); border: 1px solid var(--color-border); }
-        .app-btn-secondary:hover { background: rgba(255, 59, 48, 0.05); }
-        .app-btn-critical { background: #FF3B30; color: #fff; }
+        .app-btn-secondary:hover { background: rgba(226, 59, 50, 0.05); }
+        .app-btn-critical { background: #E23B32; color: #fff; }
     </style>
     <style id="alertaid-openbtn-override">
         .openbtn {
@@ -130,7 +130,7 @@
             width: 26px;
             height: 2px;
             border-radius: 999px;
-            background: #FF3B30 !important;
+            background: #E23B32 !important;
             transform: translateX(-50%);
         }
         .openbtn::before { top: 16px; }
@@ -281,7 +281,7 @@
       color: #fff;
     }
 
-    .severity-critical { background: linear-gradient(135deg, #d90429, #ff3b30); }
+    .severity-critical { background: linear-gradient(135deg, #d90429, #E23B32); }
     .severity-high { background: linear-gradient(135deg, #f97316, #fb923c); }
     .severity-medium { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
     .severity-low { background: linear-gradient(135deg, #3b82f6, #2563eb); }

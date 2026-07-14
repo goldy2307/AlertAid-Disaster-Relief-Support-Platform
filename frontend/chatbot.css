@@ -39,7 +39,7 @@
   border-radius: 50% !important;
   border: none !important;
   cursor: pointer !important;
-  background: linear-gradient(135deg, #ff512f, #ff6f00) !important;
+  background: linear-gradient(135deg, #ff512f, #F0790A) !important;
   box-shadow: 0 18px 35px rgba(255, 81, 47, 0.35) !important;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   display: flex !important;
@@ -240,7 +240,7 @@
 
 .chatbot-form button {
   border: none;
-  background: linear-gradient(135deg, #ff512f, #ff6f00);
+  background: linear-gradient(135deg, #ff512f, #F0790A);
   color: #fff;
   border-radius: 50%;
   width: 44px;
