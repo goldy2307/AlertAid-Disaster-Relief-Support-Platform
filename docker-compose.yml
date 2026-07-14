@@ -1,0 +1,51 @@
+version: "3.9"
+
+# Local dev stack with Postgres (matches Supabase prod setup).
+# Copy .env.example -> .env and set APP_JWT_SECRET before running.
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: alertaid
+      POSTGRES_USER: alertaid
+      POSTGRES_PASSWORD: alertaid
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alertaid"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  backend:
+    build:
+      context: ./backend/Alertaid
+      dockerfile: Dockerfile
+    environment:
+      # default (non-prod) profile locally -> ddl-auto=update, auto-creates tables on empty db
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-default}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/alertaid
+      SPRING_DATASOURCE_USERNAME: alertaid
+      SPRING_DATASOURCE_PASSWORD: alertaid
+      SPRING_DATASOURCE_DRIVER: org.postgresql.Driver
+      HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      # required, no fallback - set in your local .env file
+      APP_JWT_SECRET: ${APP_JWT_SECRET:?set APP_JWT_SECRET in .env, e.g. openssl rand -base64 32}
+      APP_JWT_EXPIRATION_MS: ${APP_JWT_EXPIRATION_MS:-86400000}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      timeout: 5s
+      retries: 5
+      interval: 30s
+      start_period: 60s
+
+volumes:
+  db_data: {}

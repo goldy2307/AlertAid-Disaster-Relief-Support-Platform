@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <style id="alertaid-shared-components">
+        :root {
+            --color-bg: #fafbfc;
+            --color-surface: #ffffff;
+            --color-surface-soft: #fef3ef;
+            --color-muted: #666666;
+            --color-text: #1a1a1a;
+            --color-primary: #FF3B30;
+            --color-secondary: #FF6F00;
+            --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            --color-border: rgba(26, 26, 26, 0.08);
+            --color-shadow-soft: 0 20px 45px rgba(17, 24, 39, 0.15);
+            --color-nav-bg: rgba(255, 255, 255, 0.95);
+            --color-sidebar-bg-top: rgba(255, 86, 33, 0.98);
+        }
+        html[data-theme="dark"] {
+            --color-bg: #121212;
+            --color-surface: #1e1e1e;
+            --color-surface-soft: #281c1b;
+            --color-muted: #aaaaaa;
+            --color-text: #ffffff;
+            --color-primary: #FF6F00;
+            --color-secondary: #FF3B30;
+            --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            --color-border: rgba(255, 255, 255, 0.1);
+            --color-shadow-soft: 0 20px 45px rgba(0, 0, 0, 0.5);
+            --color-nav-bg: rgba(30, 30, 30, 0.95);
+            --color-sidebar-bg-top: rgba(255, 111, 0, 0.98);
+        }
+        body {
+            min-height: 100vh;
+            background: var(--color-bg) !important;
+            color: var(--color-text);
+            transition: background 0.4s, color 0.4s;
+            font-family: 'Inter', sans-serif;
+            padding-top: 150px;
+        }
+        select option, select optgroup { color: #111 !important; background: #fff !important; }
+        html[data-theme="dark"] select option,
+        html[data-theme="dark"] select optgroup { color: #fff !important; background: #333 !important; }
+        .main-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 24px;
+            background: var(--color-nav-bg);
+            border-radius: 18px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            margin: 12px;
+            width: calc(100% - 24px);
+            max-width: none;
+            z-index: 1000;
+            box-shadow: var(--color-shadow-soft);
+            border: 1px solid var(--color-border);
+            backdrop-filter: blur(10px);
+        }
+        .nav-left, .nav-right { display: flex; align-items: center; gap: 16px; }
+        .nav-spacer {
+            height: 140px;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .nav-spacer { height: 180px; }
+        }
+
+        .nav-brand { font-size: 1.9rem; font-weight: 800; color: var(--color-primary); text-decoration: none; transition: color 0.4s; }
+        .weather-widget { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 30px; background: linear-gradient(135deg, #4A90E2, #357ABD); color: #fff; cursor: pointer; font-weight: 500; box-shadow: 0 5px 15px rgba(53, 122, 189, 0.3); }
+        .weather-widget i { font-size: 1.1rem; color: #fff; }
+        .weather-info { font-size: 0.85rem; text-align: left; }
+        .nav-signin { display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; text-decoration: none; background: var(--color-gradient); padding: 10px 26px; border-radius: 999px; box-shadow: 0 12px 25px rgba(255, 59, 48, 0.35); border: none; font-size: 1rem; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .nav-signin i {
+            margin-right: 8px;
+        }
+        .nav-signin:hover { transform: translateY(-2px); box-shadow: 0 18px 30px rgba(255, 59, 48, 0.4); }
+
+        .sidebar { height: 100%; width: 0; position: fixed; top: 0; left: 0; background: none !important; color: var(--color-text); overflow-x: hidden; transition: 0.4s; padding-top: 110px; z-index: 1000; box-shadow: var(--color-shadow-soft); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; }
+        .sidebar-content { width: 100%; height: 100%; display: flex; flex-direction: column; overflow-y: auto; background: var(--color-sidebar-bg-top) !important; padding-top: 20px; }
+        .sidebar a { color: #fff !important; font-weight: 600; padding: 12px 32px; margin-right: 20px; display: flex; align-items: center; gap: 12px; border-radius: 0 20px 20px 0; transition: background 0.2s ease, transform 0.2s ease; text-decoration: none; }
+        .sidebar a:hover { background: rgba(255,255,255,0.15) !important; transform: translateX(4px); }
+        .sidebar a i { width: 22px; text-align: center; color: #fff !important; }
+        .sidebar .closebtn { position: absolute; top: 24px; right: 24px; width: 42px; height: 42px; border-radius: 14px; background: var(--color-surface); color: var(--color-primary) !important; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 15px 28px rgba(0,0,0,0.25); }
+        .sidebar .closebtn:hover { background: var(--color-surface-soft); }
+        .theme-toggle { padding: 10px 18px; border-radius: 16px; cursor: pointer; font-size: 16px; display: flex; align-items: center; gap: 8px; background: var(--color-surface); color: var(--color-primary); border: 1px solid rgba(26,26,26,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        html[data-theme="dark"] .theme-toggle { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); box-shadow: none; }
+        .theme-toggle:hover { transform: translateY(-1px); background: rgba(255,59,48,0.05); }
+        html[data-theme="dark"] .theme-toggle:hover { background: rgba(255,255,255,0.2); }
+        .app-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:2000}
+        .app-modal.show{display:flex}
+        .app-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.55);backdrop-filter: blur(4px);}
+        .app-modal-dialog{position:relative;background:var(--color-surface);color:var(--color-text);min-width:280px;max-width:520px;width:90%;border-radius:18px;box-shadow:var(--color-shadow-soft);overflow:hidden;border: 1px solid var(--color-border);}
+        .app-modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--color-primary);color:#fff}
+        .app-modal-header button{background:none;border:none;color:#fff;font-size:20px;cursor:pointer}
+        .app-modal-body{padding:16px;white-space:pre-wrap}
+        .app-modal-actions{padding:12px 16px;display:flex;justify-content:flex-end;gap:8px;background:var(--color-surface-soft);}
+        .app-btn{background:var(--color-secondary);color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer; transition: all 0.2s;}
+        .app-btn:hover{background: #e66600;}
+        .app-btn-secondary { background: var(--color-surface-soft); color: var(--color-text); border: 1px solid var(--color-border); }
+        .app-btn-secondary:hover { background: rgba(255, 59, 48, 0.05); }
+        .app-btn-critical { background: #FF3B30; color: #fff; }
+    </style>
+    <style id="alertaid-openbtn-override">
+        .openbtn {
+            width: 48px !important;
+            height: 48px !important;
+            border-radius: 16px !important;
+            background: #ffffff !important;
+            border: 1px solid rgba(15, 23, 42, 0.08) !important;
+            box-shadow: 0 15px 30px rgba(15, 23, 42, 0.12) !important;
+            cursor: pointer;
+            position: relative;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .openbtn::before,
+        .openbtn::after,
+        .openbtn .openbtn-line {
+            content: '';
+            position: absolute;
+            left: 50%;
+            width: 26px;
+            height: 2px;
+            border-radius: 999px;
+            background: #FF3B30 !important;
+            transform: translateX(-50%);
+        }
+        .openbtn::before { top: 16px; }
+        .openbtn .openbtn-line { top: 50%; transform: translate(-50%, -50%); }
+        .openbtn::after { bottom: 16px; }
+        .openbtn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 32px rgba(15, 23, 42, 0.18);
+        }
+    </style>
+
+<title>AlertAid | Profile</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="page-key" content="profile">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <script src="role-router.js"></script>
+  <script src="nav-auth.js"></script>
+  <script type="module" src="./dashboard-guard.js"></script>
+  <style>
+    :root {
+      --bg-start: #0f2027;
+      --bg-mid: #203a43;
+      --bg-end: #2c5364;
+      --card-bg: rgba(255,255,255,0.08);
+      --border-color: rgba(255,255,255,0.2);
+      --accent: #ffb347;
+      --accent-strong: #ffcc33;
+    }
+    * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: #fff;
+      background: linear-gradient(135deg, var(--bg-start), var(--bg-mid), var(--bg-end));
+      padding: 30px;
+    }
+        /* === Navbar === */
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 22px 32px;
+      background: #ffffff;
+      border-radius: 32px;
+      margin: 18px auto 35px;
+      position: relative;
+      z-index: 1000;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+      width: calc(100% - 40px);
+    }
+
+    .nav-brand {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: #FF3B30;
+      text-decoration: none;
+    }
+
+    .weather-widget {
+      margin-left: auto;
+      margin-right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      cursor: pointer;
+    }
+
+    .btn-link {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 25px;
+    }
+    .panel {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 24px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 25px 45px rgba(0,0,0,0.35);
+    }
+    .panel h2 {
+      margin-top: 0;
+      color: var(--accent-strong);
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .profile-summary {
+      text-align: center;
+    }
+    .avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 15px;
+      font-size: 2.7rem;
+      color: var(--accent);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.15);
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    form {
+      display: grid;
+      gap: 18px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+      gap: 16px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.85);
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+    }
+    textarea { min-height: 90px; resize: vertical; }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(255,179,71,0.35);
+    }
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 24px;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+    }
+    .btn-primary {
+      background: linear-gradient(120deg, #ffb347, #ffcc33);
+      color: #1a1a1a;
+    }
+    .status {
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      display: none;
+    }
+    .status.show { display: block; }
+    .status.success { background: rgba(46, 213, 115, 0.2); color: #2ed571; border: 1px solid rgba(46,213,115,0.5); }
+    .status.error { background: rgba(255, 71, 87, 0.2); color: #ff4757; border: 1px solid rgba(255,71,87,0.5); }
+    .section-title {
+      margin-top: 0;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: rgba(255,255,255,0.6);
+    }
+    @media (max-width: 960px) {
+      body { padding: 16px; }
+      .layout { grid-template-columns: 1fr; }
+    }
+  </style>
+  <link rel="stylesheet" href="landing-theme.css">
+  
+
+
+</head>
+<body class="landing-palette">    <nav class="main-nav">
+        <div class="nav-left">
+            <button class="openbtn" onclick="openNav()" aria-label="Open navigation menu">
+                <span class="openbtn-line"></span>
+            </button>
+            <a href="citizen_dashboard.html" class="nav-brand" data-route="dashboard">AlertAid</a>
+        </div>
+
+        <div class="nav-right">
+            <a class="weather-widget" href="https://www.msn.com/en-in/weather/forecast/in-Indore,MP" target="_blank" rel="noopener">
+                <i id="weather-icon" class="fas fa-cloud-sun"></i>
+                <div class="weather-info">
+                    <div id="weather-details">-- | --°C | --</div>
+                    <div id="weather-time">--:-- | --</div>
+                </div>
+            </a>
+
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light and dark mode">
+                <i id="theme-icon" class="fas fa-sun"></i><span id="theme-text">Light Theme</span>
+            </button>
+
+            <a href="login.html" class="nav-signin" id="navAuthLink">Sign In</a>
+        </div>
+    </nav>
+    <div class="nav-spacer"></div>
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="sidebar-content">
+            <a href="citizen_dashboard.html" data-route="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="alerts.html"><i class="fas fa-exclamation-triangle"></i> Active Alerts</a>
+            <a href="helpforpeople.html"><i class="fas fa-hands-helping"></i> Seek Help</a>
+            <a href="report.html"><i class="fas fa-flag"></i> Report Disaster</a>
+            <a href="donatemoney.html"><i class="fas fa-heart"></i> Make Donation</a>
+            <a href="#" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i> My Location</a>
+            <a href="#" onclick="showNotifications()"><i class="fas fa-bell"></i> Notifications</a>
+                        <div id="userOnlyOptions" style="display: none; flex-direction: column">
+                <a href="profile.html" data-route="profile"><i class="fas fa-user"></i> Profile</a>
+                <a href="change_password.html" data-route="change_password"><i class="fas fa-cog"></i> Settings</a>
+                <a href="javascript:void(0)" onclick="signOut()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+            </div>
+            <div id="guestOnlyOptions">
+                <a href="login.html"><i class="fas fa-sign-in-alt"></i> Sign In</a>
+            </div>
+        </div>
+    </div>
+    
+    <div id="app-modal" class="app-modal" role="dialog" aria-modal="true" aria-labelledby="app-modal-title">
+        <div class="app-modal-backdrop"></div>
+        <div class="app-modal-dialog">
+            <div class="app-modal-header">
+                <div id="app-modal-title">Notice</div>
+                <button id="app-modal-close" aria-label="Close">×</button>
+            </div>
+            <div id="app-modal-body" class="app-modal-body"></div>
+            <div class="app-modal-actions">
+                <button id="app-modal-cancel" class="app-btn app-btn-secondary" style="display:none;">Cancel</button>
+                <button id="app-modal-ok" class="app-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+<div class="layout">
+    <section class="panel profile-summary">
+      <div class="avatar" id="avatar"><i class="fas fa-user"></i></div>
+      <h2 id="profileName">Loading...</h2>
+      <p id="profileEmail"></p>
+      <div class="badge" id="roleBadge"><i class="fas fa-id-badge"></i> --</div>
+      <p style="margin-top:18px; font-size:0.95rem; color:rgba(255,255,255,0.75);" id="profileMeta"></p>
+    </section>
+
+    <section class="panel">
+      <h2><i class="fas fa-user-cog"></i> Manage Profile</h2>
+      <form id="profileForm">
+        <div class="grid-2">
+          <div>
+            <label for="name">Full Name</label>
+            <input id="name" name="name" type="text" autocomplete="name">
+          </div>
+          <div>
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel">
+          </div>
+        </div>
+        <div>
+          <label for="address">Address</label>
+          <textarea id="address" name="address"></textarea>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label for="state">State</label>
+            <input id="state" name="state" type="text">
+          </div>
+          <div>
+            <label for="city">City</label>
+            <input id="city" name="city" type="text">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label for="pincode">PIN Code</label>
+            <input id="pincode" name="pincode" type="text">
+          </div>
+          <div>
+            <label for="gender">Gender</label>
+            <input id="gender" name="gender" type="text">
+          </div>
+        </div>
+
+        <h3 class="section-title">Organization (for org users)</h3>
+        <div class="grid-2">
+          <div>
+            <label for="orgName">Organization Name</label>
+            <input id="orgName" name="orgName" type="text">
+          </div>
+          <div>
+            <label for="orgType">Organization Type</label>
+            <input id="orgType" name="orgType" type="text">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label for="licenseNumber">License Number</label>
+            <input id="licenseNumber" name="licenseNumber" type="text">
+          </div>
+          <div>
+            <label for="supportMode">Support Mode</label>
+            <input id="supportMode" name="supportMode" type="text">
+          </div>
+        </div>
+        <div>
+          <label for="services">Services</label>
+          <textarea id="services" name="services"></textarea>
+        </div>
+
+        <h3 class="section-title">Volunteer Details</h3>
+        <div class="grid-2">
+          <div>
+            <label for="expertise">Expertise</label>
+            <input id="expertise" name="expertise" type="text">
+          </div>
+          <div>
+            <label for="availability">Availability</label>
+            <input id="availability" name="availability" type="text">
+          </div>
+        </div>
+        <div>
+          <label for="experienceLevel">Experience Level</label>
+          <input id="experienceLevel" name="experienceLevel" type="text">
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn-secondary" id="resetBtn">Reset</button>
+          <button type="submit" class="btn-primary">Save changes</button>
+        </div>
+        <div class="status" id="statusBanner"></div>
+      </form>
+    </section>
+  </div>
+
+  <script type="module">
+    import { apiFetch } from './auth-client.js';
+
+    const form = document.getElementById('profileForm');
+    const statusBanner = document.getElementById('statusBanner');
+    const resetBtn = document.getElementById('resetBtn');
+    const fields = [
+      'name','phone','address','state','city','pincode','gender',
+      'orgName','orgType','licenseNumber','services','supportMode',
+      'expertise','availability','experienceLevel'
+    ];
+    let loadedProfile = {};
+
+    function setStatus(message, type = 'success') {
+      statusBanner.textContent = message;
+      statusBanner.className = `status show ${type}`;
+    }
+
+    function clearStatus() {
+      statusBanner.className = 'status';
+      statusBanner.textContent = '';
+    }
+
+    function fillForm(data) {
+      loadedProfile = data || {};
+      fields.forEach(key => {
+        const el = form.elements[key];
+        if (el) el.value = data?.[key] ?? '';
+      });
+      document.getElementById('profileName').textContent = data?.name || 'User';
+      document.getElementById('profileEmail').textContent = data?.email || '';
+      document.getElementById('roleBadge').textContent = data?.role || '--';
+      const meta = [];
+      if (data?.city) meta.push(data.city);
+      if (data?.state) meta.push(data.state);
+      if (data?.createdAt) meta.push(`Since ${new Date(data.createdAt).getFullYear()}`);
+      document.getElementById('profileMeta').textContent = meta.join(' • ');
+      const initials = (data?.name || 'A').split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+      document.getElementById('avatar').innerHTML = `<span>${initials}</span>`;
+    }
+
+    async function loadProfile() {
+      try {
+        const res = await apiFetch('/api/profile/me');
+        const data = await res.json();
+        fillForm(data);
+      } catch (err) {
+        console.error('Failed to load profile', err);
+        setStatus('Unable to load profile. Please refresh.', 'error');
+      }
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      clearStatus();
+      const body = {};
+      fields.forEach(key => {
+        const current = form.elements[key]?.value ?? '';
+        if ((loadedProfile[key] ?? '') !== current) {
+          body[key] = current || null;
+        }
+      });
+      try {
+        const res = await apiFetch('/api/profile/me', {
+          method: 'PUT',
+          body: JSON.stringify(body)
+        });
+        const updated = await res.json();
+        fillForm(updated);
+        setStatus('Profile updated successfully.');
+      } catch (err) {
+        console.error(err);
+        setStatus('Unable to update profile. Please try again.', 'error');
+      }
+    });
+
+    resetBtn.addEventListener('click', () => {
+      fillForm(loadedProfile);
+      clearStatus();
+    });
+
+    const logoutLink = document.getElementById('logoutLink');
+    logoutLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      try {
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('alertaid.role');
+      } catch {}
+      window.location.replace('login.html');
+    });
+
+    loadProfile();
+  </script>
+<link rel="stylesheet" href="chatbot.css">
+<script src="chatbot.js"></script>
+    <script id="alertaid-shared-components">
+        const THEME_STORAGE_KEY = 'theme';
+        const HTML_ELEMENT = document.documentElement;
+        function applyTheme(theme) {
+            HTML_ELEMENT.setAttribute('data-theme', theme);
+            document.body.setAttribute('data-theme', theme);
+        }
+        function setTheme(theme) {
+            applyTheme(theme);
+            try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch(e){}
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            const display = document.getElementById('currentThemeDisplay');
+            if (theme === 'dark') {
+                if (icon) icon.className = 'fas fa-sun';
+                if (text) text.textContent = 'Light Theme';
+                if (display) display.textContent = 'Dark';
+            } else {
+                if (icon) icon.className = 'fas fa-moon';
+                if (text) text.textContent = 'Dark Theme';
+                if (display) display.textContent = 'Light';
+            }
+        }
+        window.toggleTheme = function() {
+            const next = HTML_ELEMENT.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            setTheme(next);
+        }
+        window.openNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '260px'; }
+        window.closeNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '0'; }
+        function showPopup(message, opts){
+            const modal = document.getElementById('app-modal');
+            const body = document.getElementById('app-modal-body');
+            const titleEl = document.getElementById('app-modal-title');
+            const closeBtn = document.getElementById('app-modal-close');
+            const okBtn = document.getElementById('app-modal-ok');
+            const cancelBtn = document.getElementById('app-modal-cancel');
+            if (!modal || !body) return console.error('Modal elements missing', message);
+            const options = opts || {};
+            const isConfirm = options.type === 'confirm';
+            titleEl.textContent = options.title || (isConfirm ? 'Confirmation' : 'Notice');
+            body.textContent = (message == null ? '' : String(message));
+            okBtn.textContent = options.okText || (isConfirm ? 'Confirm' : 'OK');
+            okBtn.className = `app-btn ${options.okClass || (isConfirm ? 'app-btn-critical' : '')}`;
+            cancelBtn.style.display = isConfirm ? 'block' : 'none';
+            function hide(result = false){ modal.classList.remove('show'); cleanup(); if(isConfirm && typeof options.callback === 'function'){ options.callback(result); } }
+            function cleanup(){ closeBtn.removeEventListener('click', onClose); okBtn.removeEventListener('click', onOk); cancelBtn.removeEventListener('click', onCancel); modal.removeEventListener('click', onBackdrop); document.removeEventListener('keydown', onEsc); }
+            function onClose(){ hide(false); }
+            function onOk(){ hide(true); }
+            function onCancel(){ hide(false); }
+            function onBackdrop(e){ if(e.target === modal) hide(false); }
+            function onEsc(e){ if(e.key === 'Escape') hide(false); }
+            closeBtn.addEventListener('click', onClose);
+            okBtn.addEventListener('click', onOk);
+            cancelBtn.addEventListener('click', onCancel);
+            modal.addEventListener('click', onBackdrop);
+            document.addEventListener('keydown', onEsc);
+            modal.classList.add('show');
+        }
+        function showConfirm(message, callback){ showPopup(message, { type:'confirm', title:'Action Required', okText:'Yes', okClass:'app-btn-critical', cancelText:'Cancel', callback }); }
+        window.alert = function(msg){ try { showPopup(msg); } catch { console.error('Modal failed', msg); } };
+        window.showPopup = showPopup;
+        window.showConfirm = showConfirm;
+        function getValidToken(){ const token = localStorage.getItem('token'); return token && token !== 'null' ? token : null; }
+        window.checkAuthStatus = function(){
+            const token = getValidToken();
+            const userOptions = document.getElementById('userOnlyOptions');
+            const guestOptions = document.getElementById('guestOnlyOptions');
+            const navAuthLink = document.getElementById('navAuthLink');
+            if (token){
+                if (userOptions) userOptions.style.display = 'flex';
+                if (guestOptions) guestOptions.style.display = 'none';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-tachometer-alt\"></i> Dashboard'; navAuthLink.href = resolveDashboardHref(); }
+            } else {
+                if (userOptions) userOptions.style.display = 'none';
+                if (guestOptions) guestOptions.style.display = 'block';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-sign-in-alt\"></i> Sign In'; navAuthLink.href = 'login.html'; }
+            }
+        }
+        window.getLocation = function(){
+            if (navigator.geolocation){
+                navigator.geolocation.getCurrentPosition((p)=>{
+                    showPopup(`Your Location:
+Latitude: ${p.coords.latitude.toFixed(6)}
+Longitude: ${p.coords.longitude.toFixed(6)}`, { title:'Current Location' });
+                },()=>showPopup('Unable to retrieve your location.', { title:'Location Error' }));
+            } else {
+                showPopup('Geolocation is not supported by this browser.', { title:'Location Error' });
+            }
+        }
+        window.showNotifications = function(){ if (!getValidToken()) { showPopup('Please sign in to view notifications.', { title:'Authorization Required' }); return; } showPopup('Notifications will appear here.', { title:'Notifications' }); }
+        window.showProfile = function(){ if (!getValidToken()) { showPopup('Please sign in to view profile.', { title:'Authorization Required' }); return; } showPopup('Profile Information (demo)', { title:'User Profile' }); }
+        window.signOut = function(){ showConfirm('Are you sure you want to sign out?', (confirmed)=>{ if (confirmed){ try { localStorage.removeItem('token'); } catch {} window.location.replace('login.html'); } }); }
+        document.addEventListener('DOMContentLoaded', function(){ setTheme(localStorage.getItem(THEME_STORAGE_KEY) || 'light'); checkAuthStatus(); });
+    </script>
+</body>
+</html>

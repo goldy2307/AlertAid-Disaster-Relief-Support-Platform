@@ -1,0 +1,2645 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <title>AlertAid</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="chatbot.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* === Base Theme Variables for Dynamic Switching === */
+    :root {
+      /* LIGHT MODE DEFAULTS */
+      --color-bg: #fafbfc;
+      --color-surface: #ffffff;
+      --color-surface-soft: #fef3ef;
+      --color-muted: #666666;
+      --color-text: #1a1a1a;
+      --color-primary: #FF3B30; /* Red/Orange Accent 1 */
+      --color-secondary: #FF6F00; /* Orange/Yellow Accent 2 */
+      --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+      --color-border: rgba(26, 26, 26, 0.08);
+      --color-shadow-soft: 0 20px 45px rgba(17, 24, 39, 0.15);
+      --color-nav-bg: rgba(255, 255, 255, 0.95);
+      --color-sidebar-bg-top: rgba(255, 86, 33, 0.98);
+      --color-sidebar-bg-bottom: #ffffff;
+      --color-badge-critical-bg: var(--color-surface-soft);
+      --color-badge-critical-text: var(--color-primary);
+    }
+
+    /* DARK MODE OVERRIDES */
+    html[data-theme="dark"] {
+      --color-bg: #121212;
+      --color-surface: #1e1e1e;
+      --color-surface-soft: #281c1b;
+      --color-muted: #aaaaaa;
+      --color-text: #ffffff;
+      --color-primary: #FF6F00; /* Brighter accent in dark mode */
+      --color-secondary: #FF3B30; /* Secondary accent */
+      --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+      --color-border: rgba(255, 255, 255, 0.1);
+      --color-shadow-soft: 0 20px 45px rgba(0, 0, 0, 0.5);
+      --color-nav-bg: rgba(30, 30, 30, 0.95);
+      --color-sidebar-bg-top: rgba(255, 111, 0, 0.98);
+      --color-sidebar-bg-bottom: #1e1e1e;
+      --color-badge-critical-bg: #281c1b;
+      --color-badge-critical-text: #FF6F00;
+    }
+    
+    /* === Apply Theme to Elements === */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    
+    body {
+      min-height: 100vh;
+      background: var(--color-bg) !important;
+      color: var(--color-text);
+      transition: background 0.4s, color 0.4s;
+      overflow-x: hidden;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    /* Ensure <select> dropdown options are visible in native menus */
+    select option, select optgroup {
+      color: #111 !important;
+      background: #fff !important;
+    }
+    html[data-theme="dark"] select option,
+    html[data-theme="dark"] select optgroup {
+      color: #fff !important;
+      background: #333 !important;
+    }
+
+    /* === Navbar === */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 24px;
+      background: var(--color-nav-bg);
+      border-radius: 18px;
+      margin: 18px auto 35px;
+      position: relative;
+      z-index: 1000;
+      box-shadow: var(--color-shadow-soft);
+      border: 1px solid var(--color-border);
+      backdrop-filter: blur(10px);
+      width: calc(100% - 40px);
+    }
+    
+    .nav-left, .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-brand {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: var(--color-primary);
+      text-decoration: none;
+      transition: color 0.4s;
+    }
+
+    .weather-widget {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #4A90E2, #357ABD);
+      color: #ffffff;
+      cursor: pointer;
+      font-weight: 500;
+      box-shadow: 0 5px 15px rgba(53, 122, 189, 0.3);
+      transition: transform 0.2s;
+    }
+
+    .weather-widget i { font-size: 1.3rem; color: #fff; }
+    .weather-info { font-size: 0.85rem; text-align: left; }
+    
+    /* Sign In Button */
+    .nav-signin {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 600;
+      text-decoration: none;
+      background: var(--color-gradient);
+      padding: 10px 24px;
+      border-radius: 999px;
+      box-shadow: 0 12px 25px rgba(255, 59, 48, 0.35);
+      border: none;
+      font-size: 1rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .nav-signin:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 30px rgba(255, 59, 48, 0.4);
+    }
+
+    /* Theme Toggle Button (Original) */
+    .theme-toggle {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      box-shadow: 0 15px 30px rgba(15, 23, 42, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .theme-toggle i {
+      font-size: 1.25rem;
+      color: var(--color-primary);
+      transition: color 0.4s;
+    }
+    
+    .theme-toggle:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 32px rgba(15, 23, 42, 0.16);
+    }
+
+    /* New theme toggle styles added here, mapped to existing element .theme-toggle */
+    .theme-toggle {
+      padding: 10px 15px; /* Use the padding from your requested button */
+      width: auto;
+      height: auto;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      color: var(--color-primary); /* Default to primary color */
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* Apply styles for LIGHT theme (when data-theme is light) */
+    html[data-theme="light"] .theme-toggle {
+      background: var(--color-surface);
+      color: var(--color-primary);
+      border: 1px solid rgba(26, 26, 26, 0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    /* Apply styles for DARK theme (when data-theme is dark) */
+    html[data-theme="dark"] .theme-toggle {
+      background: rgba(255, 255, 255, 0.1); /* Equivalent to requested dark background */
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: none; /* Reset soft shadow */
+    }
+    
+    .theme-toggle:hover {
+        transform: translateY(-1px);
+        background: rgba(255, 59, 48, 0.05); /* Light hover effect for light mode */
+    }
+    html[data-theme="dark"] .theme-toggle:hover {
+        background: rgba(255, 255, 255, 0.2); /* Dark hover effect for dark mode */
+    }
+
+
+    /* === Sidebar === */
+    .sidebar {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      top: 0; left: 0;
+      background: none !important; /* Managed by .sidebar-content now */
+      color: var(--color-text);
+      overflow-x: hidden;
+      transition: 0.4s;
+      padding-top: 110px; 
+      z-index: 1000;
+      box-shadow: var(--color-shadow-soft);
+      border-right: 1px solid var(--color-border);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar-content {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        /* FIX: Set uniform background to the primary color (top color) */
+        background: var(--color-sidebar-bg-top) !important;
+        padding-top: 20px;
+        box-shadow: none; 
+    }
+    
+    .sidebar a {
+      /* FIX: Set text color to white for contrast on primary background */
+      color: #ffffff !important; 
+      font-weight: 600;
+      padding: 12px 32px;
+      padding-right: 20px; 
+      margin-right: 20px; 
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-radius: 0 20px 20px 0;
+      transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+      position: relative; 
+    }
+    
+    .sidebar a:hover {
+        /* FIX: Use translucent white for hover effect */
+        background: rgba(255, 255, 255, 0.15) !important; 
+        color: #ffffff !important;
+        transform: translateX(4px); 
+    }
+
+    
+    .sidebar a i {
+      width: 22px;
+      /* FIX: Set icon color to white */
+      color: #ffffff !important; 
+      flex-shrink: 0;
+      text-align: center;
+    }
+    
+    /* Close Button (X) */
+    .sidebar .closebtn {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      background: var(--color-surface);
+      color: var(--color-primary) !important;
+      font-size: 1.5rem !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 15px 28px rgba(0,0,0,0.25);
+      transition: background 0.2s ease;
+      text-decoration: none;
+      z-index: 1010;
+    }
+    
+    .sidebar .closebtn:hover {
+      background: var(--color-surface-soft);
+    }
+
+
+    /* Open Button (=) */
+    .openbtn {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      margin-right: 0; 
+      box-shadow: 0 15px 30px rgba(15, 23, 42, 0.12);
+      cursor: pointer;
+      position: relative;
+      color: transparent;
+      padding: 0;
+      font-size: 0;
+      transition: all 0.2s;
+    }
+    
+    .openbtn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 32px rgba(15, 23, 42, 0.16);
+    }
+
+    .openbtn::before,
+    .openbtn::after,
+    .openbtn .openbtn-line {
+      content: '';
+      position: absolute;
+      left: 50%;
+      width: 22px;
+      height: 2px;
+      border-radius: 999px;
+      background: var(--color-primary);
+      transform: translateX(-50%);
+    }
+
+    .openbtn::before { top: 16px; }
+    .openbtn .openbtn-line { top: 50%; transform: translate(-50%, -50%); }
+    .openbtn::after { bottom: 16px; }
+
+    /* Close Report Button (X) */
+    .close-report-btn {
+      width: 42px; 
+      height: 42px;
+      border-radius: 14px;
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      box-shadow: 0 12px 25px rgba(15,23,42,0.1);
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .close-report-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 15px 30px rgba(15, 23, 42, 0.15);
+    }
+
+    .close-report-btn::before,
+    .close-report-btn::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 2px;
+      background: var(--color-primary);
+      top: 50%;
+      left: 50%;
+      transform-origin: center;
+      transition: background 0.4s;
+    }
+
+    .close-report-btn::before { transform: translate(-50%, -50%) rotate(45deg); }
+    .close-report-btn::after { transform: translate(-50%, -50%) rotate(-45deg); }
+
+/* === Report Cards === */
+    .report-card {
+      background: var(--color-surface);
+      color: var(--color-text);
+      border-radius: 18px; 
+      padding: 25px;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border-left: 6px solid;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 15px 40px rgba(15, 23, 42, 0.12); 
+    }
+
+    .report-card:hover {
+      transform: translateY(-3px);
+      background: rgba(255, 59, 48, 0.04) !important; 
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18); 
+    }
+
+    /* Primary color overrides based on severity */
+    .report-card.critical {
+      border-left-color: var(--color-primary); 
+      background: var(--color-badge-critical-bg) !important;
+    }
+
+    .report-card.high {
+      border-left-color: var(--color-secondary); 
+      background: linear-gradient(135deg, rgba(255, 111, 0, 0.06), rgba(255, 120, 0, 0.03)) !important;
+    }
+
+    .report-card.medium {
+      border-left-color: #f59e0b; 
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), rgba(217, 119, 6, 0.02)) !important;
+    }
+
+    .report-card.low {
+      border-left-color: #3b82f6; 
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(37, 99, 235, 0.02)) !important;
+    }
+    
+    .report-card p {
+      color: var(--color-muted);
+    }
+
+    .urgency-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: white; 
+    }
+
+    .badge-critical {
+      background: var(--color-primary); 
+      animation: pulse 2s infinite;
+    }
+
+    .badge-high {
+      background: var(--color-secondary); 
+    }
+
+    .badge-medium {
+      background: #f59e0b;
+    }
+
+    .badge-low {
+      background: #3b82f6;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    /* AI Analysis Panel */
+    #analysis-results {
+        background: var(--color-surface-soft);
+        border: 1px solid rgba(255, 59, 48, 0.15);
+        border-left: 4px solid var(--color-primary);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 15px;
+        color: var(--color-text);
+    }
+    #analysis-results h4 {
+        color: var(--color-primary);
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    #analysis-results ul {
+        list-style: disc;
+        margin-left: 20px;
+        color: var(--color-muted);
+    }
+
+
+    /* === Form Styles === */
+    .report-form {
+      background: var(--color-surface) !important;
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 25px;
+      box-shadow: 0 24px 55px rgba(15, 23, 42, 0.12);
+      border: 1px solid var(--color-border);
+      color: var(--color-text);
+      display: none;
+      transition: all 0.4s;
+    }
+
+    .report-form.active {
+      display: block;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--color-text);
+      transition: color 0.4s;
+    }
+    
+    .form-input, .form-textarea, .form-select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 1px solid var(--color-border);
+      border-radius: 12px;
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-shadow: inset 0 1px 2px rgba(15,23,42,0.08);
+    }
+
+    html[data-theme="dark"] .form-input, 
+    html[data-theme="dark"] .form-textarea, 
+    html[data-theme="dark"] .form-select {
+      background: #252525;
+    }
+
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.2);
+    }
+
+    .form-input::placeholder, .form-textarea::placeholder {
+      color: var(--color-muted);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    /* submit-btn is already themed via the global btn styles below */
+
+    /* === Severity Selector === */
+    .severity-selector {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .severity-option {
+      padding: 15px 10px;
+      border: 1px solid var(--color-border); 
+      border-radius: 12px;
+      background: var(--color-surface);
+      color: var(--color-text);
+      cursor: pointer;
+      text-align: center;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .severity-option[data-severity="critical"] { border-color: rgba(255,59,48,0.4); background: var(--color-surface-soft); }
+    
+    .severity-option[data-severity="high"] { border-color: rgba(255,111,0,0.4); background: rgba(255, 111, 0, 0.05); }
+    .severity-option[data-severity="medium"] { border-color: rgba(234,179,8,0.4); background: rgba(234, 179, 8, 0.05); }
+    .severity-option[data-severity="low"] { border-color: rgba(59,130,246,0.4); background: rgba(59, 130, 246, 0.05); }
+    
+    html[data-theme="dark"] .severity-option[data-severity="critical"] { background: var(--color-surface-soft); }
+    html[data-theme="dark"] .severity-option[data-severity="high"] { background: rgba(255, 111, 0, 0.1); }
+    html[data-theme="dark"] .severity-option[data-severity="medium"] { background: rgba(234, 179, 8, 0.1); }
+    html[data-theme="dark"] .severity-option[data-severity="low"] { background: rgba(59, 130, 246, 0.1); }
+
+
+    .severity-option.selected {
+      border-color: var(--color-primary);
+      background: rgba(255,59,48,0.08);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(255,59,48,0.15);
+    }
+    
+    .severity-option:hover {
+      border-color: var(--color-secondary);
+    }
+
+    /* === Photo Upload === */
+    .photo-upload {
+      border: 2px dashed var(--color-border);
+      background: rgba(15,23,42,0.02);
+      border-radius: 12px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: var(--color-muted);
+    }
+
+    html[data-theme="dark"] .photo-upload {
+      background: rgba(255,255,255,0.02);
+    }
+
+    .photo-upload:hover {
+      border-color: var(--color-primary);
+      background: rgba(255, 59, 48, 0.05);
+    }
+
+    .photo-upload.dragover {
+      border-color: var(--color-secondary);
+      background: rgba(255, 111, 0, 0.1);
+    }
+
+    .photo-item {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+    }
+    
+    .photo-remove {
+      background: var(--color-primary);
+    }
+
+    /* === Action Buttons (Use GPS, Raise Donation) === */
+    .location-btn, .photo-btn {
+      background: var(--color-secondary) !important; /* Use secondary color for actions */
+      color: white !important;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 12px; 
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin-left: 10px;
+      box-shadow: 0 8px 15px rgba(255, 111, 0, 0.25);
+    }
+
+    .location-btn:hover, .photo-btn:hover {
+      background: #e66600 !important; 
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(255, 111, 0, 0.35);
+    }
+    
+    /* Global Primary Button (Submit, Sign In, etc.) */
+    .submit-btn, .nav-signin {
+        background: var(--color-gradient) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 14px !important;
+        padding: 12px 20px;
+        font-weight: 600;
+        box-shadow: 0 12px 25px rgba(255, 59, 48, 0.3);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .submit-btn:hover, .nav-signin:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 18px 30px rgba(255, 59, 48, 0.35);
+    }
+    
+    /* Ensure Submit button matches the width and look in the image */
+    #disasterForm .submit-btn {
+        padding: 15px 30px;
+        font-size: 18px;
+        border-radius: 10px;
+    }
+
+
+    /* === Reports Section Enhancements === */
+    .recent-reports {
+      background: var(--color-surface);
+      border-radius: 28px;
+      padding: 35px;
+      margin-bottom: 25px;
+      box-shadow: var(--color-shadow-soft);
+      border: 1px solid var(--color-border);
+      color: var(--color-text);
+      transition: all 0.4s;
+    }
+
+    .reports-title {
+      /* Matching image: large, bold, black text */
+      font-size: 2.3rem;
+      font-weight: 700;
+      color: var(--color-text); 
+    }
+    
+    .reports-title i {
+        color: var(--color-primary); /* Keep globe icon primary color */
+    }
+
+    .reports-subtitle {
+      color: var(--color-muted);
+    }
+
+    .reports-meta {
+      /* Matching image: simplified text style */
+      font-size: 0.95rem;
+      background: transparent;
+      color: var(--color-text);
+      font-weight: 600;
+      border: none;
+      padding: 0;
+      border-radius: 0;
+    }
+
+    .reports-meta i {
+      color: var(--color-primary);
+    }
+
+    .report-item {
+      display: flex;
+      align-items: center;
+      padding: 15px; /* Slightly reduced padding to match density */
+      margin-bottom: 15px;
+      border-radius: 18px;
+      background: var(--color-surface);
+      border-left: none; /* Removed thick border-left */
+      box-shadow: 0 5px 20px rgba(15,23,42,0.08); /* Softer shadow */
+      gap: 15px;
+      cursor: pointer; /* Enable click behavior */
+    }
+    
+    html[data-theme="dark"] .report-item {
+        box-shadow: 0 5px 20px rgba(0,0,0,0.3); 
+    }
+    
+    .report-item:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 25px rgba(15,23,42,0.12);
+    }
+
+    .report-item h4 {
+      font-size: 1.1rem; /* Slightly smaller header */
+      font-weight: 600;
+      color: var(--color-text);
+    }
+
+    .report-item p {
+      font-size: 0.9rem; /* Smaller description text */
+      line-height: 1.4;
+      color: var(--color-muted);
+    }
+
+    .report-item .text-xs {
+      font-size: 0.8rem; /* Smaller meta text */
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 5px;
+    }
+    
+    .report-item .text-xs i {
+        color: var(--color-muted); /* Icon color reset */
+        font-size: 0.9rem;
+    }
+
+    .severity-marker {
+      width: 55px; /* Smaller marker size */
+      height: 55px;
+      border-radius: 10px; /* Square/Rectangular border radius */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.0em;
+      box-shadow: 0 8px 15px rgba(15,23,42,0.1);
+      flex-shrink: 0;
+    }
+
+    .severity-marker span {
+      display: none; /* Hide 'CRITICAL' text inside marker for cleaner look */
+    }
+    
+    .severity-marker i {
+        color: #fff !important; /* Ensure icons inside marker are white */
+    }
+
+    .severity-critical { background: linear-gradient(135deg, #FF3B30, #D90429); }
+    .severity-high { background: linear-gradient(135deg, #FF6F00, #F97316); }
+    .severity-medium { background: linear-gradient(135deg, #FBBF24, #F59E0B); }
+    .severity-low { background: linear-gradient(135deg, #3B82F6, #2563EB); }
+
+    .severity-chip {
+      /* Badge style matching image: smaller, uppercase, light background */
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-left: auto; /* Push to the right */
+      flex-shrink: 0;
+    }
+
+    .severity-chip.critical { background: rgba(255, 59, 48, 0.12); color: var(--color-primary); border: 1px solid rgba(255, 59, 48, 0.2); }
+    .severity-chip.high { background: rgba(255, 111, 0, 0.12); color: var(--color-secondary); border: 1px solid rgba(255, 111, 0, 0.2); }
+    .severity-chip.medium { background: rgba(251,191,36,0.18); color: #b45309; border: 1px solid rgba(251,191,36,0.25); }
+    .severity-chip.low { background: rgba(59,130,246,0.18); color: #1d4ed8; border: 1px solid rgba(59,130,246,0.25); }
+    
+    /* Ensure only the description is available next to the marker */
+    .report-details {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 5px;
+    }
+    
+    /* === DETAIL MODAL STYLES === */
+    .detail-modal {
+        position: fixed;
+        inset: 0;
+        display: none; /* Hidden by default */
+        align-items: center;
+        justify-content: center;
+        z-index: 3000;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        overflow-y: auto;
+    }
+
+    .detail-modal.show {
+        display: flex;
+    }
+
+    .detail-content {
+        background: var(--color-surface);
+        color: var(--color-text);
+        width: 95%;
+        max-width: 700px;
+        margin: 20px auto;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: var(--color-shadow-soft);
+        border: 1px solid var(--color-border);
+        transform: scale(0.95);
+        transition: transform 0.3s ease;
+    }
+    
+    .detail-modal.show .detail-content {
+        transform: scale(1);
+    }
+    
+    .detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 1px solid var(--color-border);
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .detail-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: var(--color-muted);
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    
+    .detail-close:hover {
+        color: var(--color-primary);
+    }
+    
+    .detail-key {
+        font-weight: 600;
+        color: var(--color-text);
+        display: block;
+        margin-top: 15px;
+        margin-bottom: 4px;
+        font-size: 0.9rem;
+    }
+    
+    .detail-value {
+        color: var(--color-muted);
+        font-size: 1rem;
+        line-height: 1.5;
+        background: var(--color-bg);
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--color-border);
+        word-break: break-word;
+    }
+    
+    .detail-badge-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+  </style>
+  <link rel="stylesheet" href="landing-theme.css">
+  
+
+
+</head>
+<body class="landing-palette">
+  <nav class="main-nav">
+    <div class="nav-left">
+      <button class="openbtn" onclick="openNav()" aria-label="Open navigation menu">
+        <span class="openbtn-line"></span>
+      </button>
+      <a href="#" class="nav-brand">AlertAid</a>
+    </div>
+
+    <div class="nav-right">
+      <div class="weather-widget" onclick="window.open('https://www.msn.com/en-in/weather/forecast/in-Hatod,MP?loc=eyJsIjoiSGF0b2QiLCJyIjoiTVAiLCJjIjoiSW5kaWEiLCJpIjoiSU4iLCJ4IjoiNzUuODM5OSIsInk6IjIyLjc0OTg5PT%3D&weadegreetype=C&ocid=ansmsnweather', '_blank')">
+        <i id="weather-icon" class="fas fa-cloud-sun"></i>
+        <div class="weather-info">
+          <div id="weather-details">-- | --°C | --</div>
+          <div id="weather-time">--:-- | --</div>
+        </div>
+      </div>
+      
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light and dark mode">
+          <i id="theme-icon" class="fas fa-sun"></i><span id="theme-text">Light Theme</span>
+      </button>
+
+      <a href="login.html" class="nav-signin" id="navAuthLink">Sign In</a>
+    </div>
+  </nav>
+
+  <script src="./role-router.js"></script>
+  <script type="module" src="./dashboard-guard.js"></script>
+
+  <div id="mySidebar" class="sidebar">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <div class="sidebar-content">
+        <a href="javascript:void(0)" data-route="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="alerts.html"><i class="fas fa-exclamation-triangle"></i> Active Alerts</a>
+        <a href="helpforpeople.html"><i class="fas fa-hands-helping"></i> Seek Help</a>
+        <a href="report.html"><i class="fas fa-flag"></i> Report Disaster</a>
+        <a href="donatemoney.html"><i class="fas fa-heart"></i> Make Donation</a>
+        <a href="#" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i> My Location</a>
+        <a href="#" onclick="showNotifications()"><i class="fas fa-bell"></i> Notifications</a>
+        <div id="userOnlyOptions" style="display: none;">
+          <a href="#" onclick="showProfile()"><i class="fas fa-user"></i> Profile</a>
+          <a href="change_password.html"><i class="fas fa-cog"></i> Settings</a>
+          <a href="#" onclick="signOut()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+        </div>
+        <div id="guestOnlyOptions">
+          <a href="login.html"><i class="fas fa-sign-in-alt"></i> Sign In</a>
+        </div>
+    </div>
+  </div>
+
+  <div class="container mx-auto max-w-6xl">
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold mb-4" style="color: var(--color-primary);">
+        <i class="fas fa-flag mr-3" style="color: var(--color-primary);"></i>
+        Report a Disaster or Emergency
+      </h1>
+      <p class="text-lg" style="color: var(--color-muted);">Help keep your community safe by reporting incidents quickly</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div class="report-card critical" onclick="showReportForm('natural')">
+        <div class="urgency-badge badge-critical">CRITICAL</div>
+        <div class="flex items-center mb-4">
+          <i class="fas fa-bolt text-4xl mr-4" style="color: var(--color-primary);"></i>
+          <div>
+            <h3 class="text-xl font-bold" style="color: var(--color-text);">Natural Disasters</h3>
+            <p class="text-sm" style="color: var(--color-muted);">Weather & geological events</p>
+          </div>
+        </div>
+        <p class="mb-3">Earthquakes, floods, storms, wildfires, landslides, and other natural emergencies.</p>
+        <div class="text-sm" style="color: var(--color-muted);">
+          <i class="fas fa-users mr-2" style="color: var(--color-primary);"></i>Affects large areas
+        </div>
+      </div>
+
+      <div class="report-card high" onclick="showReportForm('infrastructure')">
+        <div class="urgency-badge badge-high">HIGH</div>
+        <div class="flex items-center mb-4">
+          <i class="fas fa-tools text-4xl mr-4" style="color: var(--color-secondary);"></i>
+          <div>
+            <h3 class="text-xl font-bold" style="color: var(--color-text);">Infrastructure Failures</h3>
+            <p class="text-sm" style="color: var(--color-muted);">Utilities & systems down</p>
+          </div>
+        </div>
+        <p class="mb-3">Power outages, water main breaks, gas leaks, bridge collapses, and system failures.</p>
+        <div class="text-sm" style="color: var(--color-muted);">
+          <i class="fas fa-exclamation-triangle mr-2" style="color: var(--color-secondary);"></i>Public safety risk
+        </div>
+      </div>
+
+      <div class="report-card high" onclick="showReportForm('safety')">
+        <div class="urgency-badge badge-high">HIGH</div>
+        <div class="flex items-center mb-4">
+          <i class="fas fa-shield-alt text-4xl mr-4" style="color: var(--color-secondary);"></i>
+          <div>
+            <h3 class="text-xl font-bold" style="color: var(--color-text);">Public Safety</h3>
+            <p class="text-sm" style="color: var(--color-muted);">Security incidents</p>
+          </div>
+        </div>
+        <p class="mb-3">Violence, suspicious activities, crowd control issues, and public safety threats.</p>
+        <div class="text-sm" style="color: var(--color-muted);">
+          <i class="fas fa-phone mr-2" style="color: var(--color-secondary);"></i>May require police
+        </div>
+      </div>
+
+      <div class="report-card medium" onclick="showReportForm('environmental')">
+        <div class="urgency-badge badge-medium">MEDIUM</div>
+        <div class="flex items-center mb-4">
+          <i class="fas fa-leaf text-4xl text-yellow-500 mr-4"></i>
+          <div>
+            <h3 class="text-xl font-bold" style="color: var(--color-text);">Environmental Hazards</h3>
+            <p class="text-sm" style="color: var(--color-muted);">Pollution & contamination</p>
+          </div>
+        </div>
+        <p class="mb-3">Chemical spills, air pollution, water contamination, and environmental dangers.</p>
+        <div class="text-sm" style="color: var(--color-muted);">
+          <i class="fas fa-flask mr-2 text-yellow-500"></i>Health impact
+        </div>
+      </div>
+
+      <div class="report-card medium" onclick="showReportForm('transportation')">
+        <div class="urgency-badge badge-medium">MEDIUM</div>
+        <div class="flex items-center mb-4">
+          <i class="fas fa-car-crash text-4xl text-yellow-500 mr-4"></i>
+          <div>
+            <h3 class="text-xl font-bold" style="color: var(--color-text);">Transportation</h3>
+            <p class="text-sm" style="color: var(--color-muted);">Traffic & transit issues</p>
+          </div>
+        </div>
+        <p class="mb-3">Major accidents, road closures, public transit disruptions, and traffic hazards.</p>
+        <div class="text-sm" style="color: var(--color-muted);">
+          <i class="fas fa-road mr-2 text-yellow-500"></i>Travel disruption
+        </div>
+      </div>
+
+      <div class="report-card low" onclick="showReportForm('other')">
+        <div class="urgency-badge badge-low">LOW</div>
+        <div class="flex items-center mb-4">
+          <i class="fas fa-question-circle text-4xl text-blue-500 mr-4"></i>
+          <div>
+            <h3 class="text-xl font-bold" style="color: var(--color-text);">Other Emergencies</h3>
+            <p class="text-sm" style="color: var(--color-muted);">Miscellaneous incidents</p>
+          </div>
+        </div>
+        <p class="mb-3">Animal emergencies, building issues, community concerns, and other incidents.</p>
+        <div class="text-sm" style="color: var(--color-muted);">
+          <i class="fas fa-info-circle mr-2 text-blue-500"></i>General reporting
+        </div>
+      </div>
+    </div>
+
+    <div id="reportForm" class="report-form">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold" style="color: var(--color-text);">Submit Disaster Report</h2>
+        <button type="button" onclick="closeReportForm()" class="close-report-btn" aria-label="Close report form"></button>
+      </div>
+
+      <div class="mb-4">
+        <button onclick="startCampaignFromReport()" class="location-btn" style="margin-left: 0;">
+          <i class="fas fa-bullhorn mr-2"></i>Raise Donation / Start Campaign
+        </button>
+      </div>
+
+      <form id="disasterForm" onsubmit="submitReport(event)">
+        <div class="form-group">
+          <label class="form-label" style="color: var(--color-text);">Severity Level</label>
+          <div class="severity-selector">
+            <div class="severity-option" data-severity="critical" onclick="selectSeverity('critical')">
+              <i class="fas fa-exclamation-triangle mb-2 text-2xl" style="color: var(--color-primary);"></i>
+              <div class="font-bold">Critical</div>
+              <div class="text-xs">Life threatening</div>
+            </div>
+            <div class="severity-option" data-severity="high" onclick="selectSeverity('high')">
+              <i class="fas fa-exclamation mb-2 text-2xl" style="color: var(--color-secondary);"></i>
+              <div class="font-bold">High</div>
+              <div class="text-xs">Major impact</div>
+            </div>
+            <div class="severity-option" data-severity="medium" onclick="selectSeverity('medium')">
+              <i class="fas fa-minus-circle text-yellow-500 mb-2 text-2xl"></i>
+              <div class="font-bold">Medium</div>
+              <div class="text-xs">Moderate risk</div>
+            </div>
+            <div class="severity-option" data-severity="low" onclick="selectSeverity('low')">
+              <i class="fas fa-info-circle text-blue-500 mb-2 text-2xl"></i>
+              <div class="font-bold">Low</div>
+              <div class="text-xs">Minor concern</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="disasterType">Type of Incident</label>
+          <select id="disasterType" class="form-select" required>
+            <option value="">Select incident type...</option>
+            <optgroup label="Natural Disasters">
+              <option value="earthquake">Earthquake</option>
+              <option value="flood">Flood</option>
+              <option value="wildfire">Wildfire</option>
+              <option value="storm">Severe Storm</option>
+              <option value="tornado">Tornado</option>
+              <option value="landslide">Landslide</option>
+            </optgroup>
+            <optgroup label="Infrastructure">
+              <option value="power-outage">Power Outage</option>
+              <option value="water-main">Water Main Break</option>
+              <option value="gas-leak">Gas Leak</option>
+              <option value="building-collapse">Building Collapse</option>
+              <option value="bridge-failure">Bridge Failure</option>
+            </optgroup>
+            <optgroup label="Public Safety">
+              <option value="violence">Violence/Crime</option>
+              <option value="suspicious-activity">Suspicious Activity</option>
+              <option value="crowd-control">Crowd Control Issue</option>
+              <option value="terrorism">Terrorism Threat</option>
+            </optgroup>
+            <optgroup label="Environmental">
+              <option value="chemical-spill">Chemical Spill</option>
+              <option value="air-pollution">Air Pollution</option>
+              <option value="water-contamination">Water Contamination</option>
+              <option value="hazmat">Hazardous Materials</option>
+            </optgroup>
+            <optgroup label="Transportation">
+              <option value="major-accident">Major Accident</option>
+              <option value="road-closure">Road Closure</option>
+              <option value="transit-disruption">Transit Disruption</option>
+              <option value="airport-issue">Airport Emergency</option>
+            </optgroup>
+            <optgroup label="Other">
+              <option value="animal-emergency">Animal Emergency</option>
+              <option value="building-issue">Building Issue</option>
+              <option value="community-concern">Community Concern</option>
+              <option value="other">Other</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <div class="flex justify-between items-center mb-2">
+            <label class="form-label mb-0" for="description">Detailed Description</label>
+            <button type="button" class="location-btn text-sm px-3 py-1.5" style="margin-left: 0;" id="analyzeBtn" onclick="analyzeIncidentDescription()">
+              <i class="fas fa-magic mr-1"></i>
+              AI Analyst
+            </button>
+          </div>
+          <textarea id="description" class="form-textarea" placeholder="Describe what happened, when it started, current conditions, and any immediate dangers..." required></textarea>
+          <div id="analysis-results" class="hidden mt-3">
+            </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="location">Exact Location</label>
+          <div class="flex gap-3">
+            <input type="text" id="location" class="form-input" placeholder="Street address, intersection, or landmark..." required>
+            <button type="button" class="location-btn" onclick="getCurrentLocation()" style="margin-left: 0;">
+              <i class="fas fa-map-marker-alt mr-2"></i>Use GPS
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Photos/Videos (Optional)</label>
+          <div class="photo-upload" onclick="document.getElementById('photoInput').click()" 
+               ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+            <i class="fas fa-camera text-3xl mb-3" style="color: var(--color-muted);"></i>
+            <p class="mb-2">Click to upload or drag photos here</p>
+            <p class="text-sm opacity-70">Supports JPG, PNG, MP4 (Max 10MB each)</p>
+            <input type="file" id="photoInput" multiple accept="image/*,video/*" style="display: none;" onchange="handleFileSelect(event)">
+          </div>
+          <div id="photoPreview" class="photo-preview"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label" for="peopleAffected">Estimated People Affected</label>
+            <select id="peopleAffected" class="form-select" required>
+              <option value="">Select range...</option>
+              <option value="1-5">1-5 people</option>
+              <option value="6-20">6-20 people</option>
+              <option value="21-100">21-100 people</option>
+              <option value="101-500">101-500 people</option>
+              <option value="500+">More than 500 people</option>
+              <option value="unknown">Unknown</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="injuries">Injuries Reported</label>
+            <select id="injuries" class="form-select" required>
+              <option value="">Select...</option>
+              <option value="none">No injuries</option>
+              <option value="minor">Minor injuries</option>
+              <option value="serious">Serious injuries</option>
+              <option value="fatalities">Fatalities</option>
+              <option value="unknown">Unknown</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label" for="reporterName">Your Name</label>
+            <input type="text" id="reporterName" class="form-input" placeholder="Full name..." required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reporterPhone">Phone Number</label>
+            <input type="tel" id="reporterPhone" class="form-input" placeholder="Phone number..." required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="additionalInfo">Additional Information</label>
+          <textarea id="additionalInfo" class="form-textarea" placeholder="Emergency services on scene, evacuation status, road conditions, etc..." style="min-height: 80px;"></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">
+          <i class="fas fa-flag mr-2"></i>
+          Submit Disaster Report
+        </button>
+      </form>
+    </div>
+
+    <div class="recent-reports">
+      <div class="reports-header">
+        <h2 class="reports-title">
+          <i class="fas fa-globe mr-2"></i>
+          All Reports
+        </h2>
+        <div class="reports-meta">
+          <i class="fas fa-sync-alt mr-1"></i>
+          Auto refreshes every minute
+        </div>
+      </div>
+      <p class="reports-subtitle mb-4">Live incident intelligence collected from AlertAid users worldwide.</p>
+      
+      <div id="recentReports">
+        <div class="text-center opacity-80" style="color: var(--color-muted);">Loading reports...</div>
+      </div>
+    </div>
+  </div>
+  
+  
+  <div id="reportDetailModal" class="detail-modal" onclick="if(event.target.id === 'reportDetailModal') closeReportDetailModal()">
+    <div class="detail-content">
+        <div class="detail-header">
+            <div>
+                <h3 class="text-2xl font-bold" id="detailReportTitle"></h3>
+                <div class="detail-badge-group" id="detailBadgeGroup"></div>
+            </div>
+            <button class="detail-close" onclick="closeReportDetailModal()">&times;</button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="detail-key">Severity</label>
+                <span class="detail-value" id="detailSeverity"></span>
+            </div>
+            <div>
+                <label class="detail-key">Incident Type</label>
+                <span class="detail-value" id="detailType"></span>
+            </div>
+        </div>
+
+        <label class="detail-key">Exact Location</label>
+        <span class="detail-value" id="detailLocation"></span>
+
+        <label class="detail-key">Detailed Description</label>
+        <span class="detail-value whitespace-pre-wrap" id="detailDescription"></span>
+
+        <div id="detailAttachments" style="margin-bottom: 20px;"></div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <label class="detail-key">People Affected</label>
+                <span class="detail-value" id="detailPeopleAffected"></span>
+            </div>
+            <div>
+                <label class="detail-key">Injuries Reported</label>
+                <span class="detail-value" id="detailInjuries"></span>
+            </div>
+            <div>
+                <label class="detail-key">Reported By</label>
+                <span class="detail-value" id="detailReporterName"></span>
+            </div>
+            <div>
+                <label class="detail-key">Contact Phone</label>
+                <span class="detail-value" id="detailReporterPhone"></span>
+            </div>
+        </div>
+
+        <label class="detail-key">Additional Information</label>
+        <span class="detail-value whitespace-pre-wrap" id="detailAdditionalInfo"></span>
+        
+        <div class="mt-6 text-right">
+            <button class="submit-btn text-sm" style="width: auto;" onclick="closeReportDetailModal()">
+                Close
+            </button>
+        </div>
+    </div>
+  </div>
+  
+  <style>
+    .app-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:2000}
+    .app-modal.show{display:flex}
+    .app-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.55);backdrop-filter: blur(4px);}
+    .app-modal-dialog{position:relative;background:var(--color-surface);color:var(--color-text);min-width:280px;max-width:520px;width:90%;border-radius:18px;box-shadow:var(--color-shadow-soft);overflow:hidden;border: 1px solid var(--color-border);}
+    .app-modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--color-primary);color:#fff}
+    .app-modal-header button{background:none;border:none;color:#fff;font-size:20px;cursor:pointer}
+    .app-modal-body{padding:16px;white-space:pre-wrap}
+    .app-modal-actions{padding:12px 16px;display:flex;justify-content:flex-end;gap:8px;background:var(--color-surface-soft);}
+    .app-btn{background:var(--color-secondary);color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer; transition: all 0.2s;}
+    .app-btn:hover{background: #e66600;}
+    .app-btn-secondary { background: var(--color-surface-soft); color: var(--color-text); border: 1px solid var(--color-border); }
+    .app-btn-secondary:hover { background: rgba(255, 59, 48, 0.05); }
+    .app-btn-critical { background: var(--color-primary); color: #fff; }
+  </style>
+  <div id="app-modal" class="app-modal" role="dialog" aria-modal="true" aria-labelledby="app-modal-title">
+    <div class="app-modal-backdrop"></div>
+    <div class="app-modal-dialog">
+      <div class="app-modal-header">
+        <div id="app-modal-title">Notice</div>
+        <button id="app-modal-close" aria-label="Close">×</button>
+      </div>
+      <div id="app-modal-body" class="app-modal-body"></div>
+      <div class="app-modal-actions">
+        <button id="app-modal-cancel" class="app-btn app-btn-secondary" style="display:none;">Cancel</button>
+        <button id="app-modal-ok" class="app-btn">OK</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    // --- START Theme Toggle Logic (Replaced/Adapted) ---
+    // Adapted from user's requested logic to use existing IDs and data-theme structure.
+    const THEME_STORAGE_KEY = 'theme'; // Using existing storage key
+    const HTML_ELEMENT = document.documentElement;
+
+    function setTheme(theme) {
+        const icon = document.getElementById('theme-icon');
+        const text = document.getElementById('theme-text');
+        
+        if (theme === 'dark') {
+            HTML_ELEMENT.setAttribute('data-theme', 'dark');
+            try { localStorage.setItem(THEME_STORAGE_KEY, 'dark'); } catch(e){}
+            if (icon) {
+                icon.className = 'fas fa-sun';
+            }
+            if (text) {
+                text.textContent = 'Light Theme';
+            }
+        } else {
+            HTML_ELEMENT.setAttribute('data-theme', 'light');
+            try { localStorage.setItem(THEME_STORAGE_KEY, 'light'); } catch(e){}
+            if (icon) {
+                icon.className = 'fas fa-moon';
+            }
+            if (text) {
+                text.textContent = 'Dark Theme';
+            }
+        }
+    }
+
+    function toggleTheme() {
+        const currentTheme = HTML_ELEMENT.getAttribute('data-theme');
+        setTheme(currentTheme === 'light' ? 'dark' : 'light');
+    }
+
+    // Initial theme load
+    (function applyTheme() {
+        const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || 'light';
+        // Use setTheme for initial load to correctly set icon and text
+        setTheme(savedTheme);
+    })();
+    window.toggleTheme = toggleTheme;
+    // --- END Theme Toggle Logic ---
+    
+    // --- START Modal/Popup Logic (Extended) ---
+    function showPopup(message, opts){
+      const modal = document.getElementById('app-modal');
+      const body = document.getElementById('app-modal-body');
+      const titleEl = document.getElementById('app-modal-title');
+      const closeBtn = document.getElementById('app-modal-close');
+      const okBtn = document.getElementById('app-modal-ok');
+      const cancelBtn = document.getElementById('app-modal-cancel');
+      if (!modal || !body) return window.alert(message);
+      
+      const options = opts || {};
+      const isConfirm = options.type === 'confirm';
+      
+      titleEl.textContent = options.title || (isConfirm ? 'Confirmation' : 'Notice');
+      body.textContent = (message == null ? '' : String(message));
+      
+      okBtn.textContent = options.okText || (isConfirm ? 'Confirm' : 'OK');
+      okBtn.className = `app-btn ${options.okClass || (isConfirm ? 'app-btn-critical' : '')}`;
+      cancelBtn.style.display = isConfirm ? 'block' : 'none';
+
+      function hide(result = false){ 
+        modal.classList.remove('show'); 
+        cleanup(); 
+        if(isConfirm && typeof options.callback === 'function') {
+          options.callback(result);
+        }
+      }
+
+      function cleanup(){
+        closeBtn.removeEventListener('click', onClose);
+        okBtn.removeEventListener('click', onOk);
+        cancelBtn.removeEventListener('click', onCancel);
+        modal.removeEventListener('click', onBackdrop);
+        document.removeEventListener('keydown', onEsc);
+      }
+      
+      function onClose(){ hide(false); }
+      function onOk(){ hide(true); }
+      function onCancel(){ hide(false); }
+      function onBackdrop(e){ if(e.target === modal) hide(false); }
+      function onEsc(e){ if(e.key === 'Escape') hide(false); }
+      
+      closeBtn.addEventListener('click', onClose);
+      okBtn.addEventListener('click', onOk);
+      cancelBtn.addEventListener('click', onCancel);
+      modal.addEventListener('click', onBackdrop);
+      document.addEventListener('keydown', onEsc);
+      
+      modal.classList.add('show');
+    }
+    
+    function showConfirm(message, callback) {
+        showPopup(message, {
+            type: 'confirm',
+            title: 'Action Required',
+            okText: 'Yes',
+            okClass: 'app-btn-critical',
+            cancelText: 'Cancel',
+            callback: callback
+        });
+    }
+
+    // Override browser alert to use modal
+    if (!window.__ALERTAID_ALERT_PATCHED__) {
+      window.alert = function(msg){ try{ showPopup(msg); } catch { /* noop */ } };
+      window.showPopup = showPopup;
+      window.showConfirm = showConfirm;
+      window.__ALERTAID_ALERT_PATCHED__ = true;
+    }
+    // --- END Modal/Popup Logic ---
+  </script>
+
+  <style>
+    #app-toasts{position:fixed;top:16px;right:16px;z-index:2100;display:flex;flex-direction:column;gap:10px}
+    .app-toast{min-width:220px;max-width:360px;background:var(--color-text);color:var(--color-bg);border-radius:8px;box-shadow:0 8px 20px rgba(0,0,0,.35);padding:10px 14px;display:flex;align-items:start;gap:8px;opacity:.98}
+    html[data-theme="dark"] .app-toast { background: var(--color-surface); color: var(--color-text); }
+
+    .app-toast.info{background:#2563eb; color: #fff;}
+    .app-toast.success{background:#10b981; color: #fff;}
+    .app-toast.error{background:var(--color-primary); color: #fff;}
+    .app-toast .close{margin-left:auto;background:none;border:none;color:#fff;font-size:16px;cursor:pointer}
+    
+
+  </style>
+  <div id="app-toasts" aria-live="polite" aria-atomic="true"></div>
+  <script>
+    (function(){
+      function ensureToastHost(){ let host=document.getElementById('app-toasts'); if(!host){ host=document.createElement('div'); host.id='app-toasts'; document.body.appendChild(host);} return host; }
+      function showToast(message, type='info', timeout=3000){
+        const host=ensureToastHost();
+        const el=document.createElement('div');
+        el.className=`app-toast ${type}`;
+        el.innerHTML=`<div>${String(message||'')}</div><button class="close" aria-label="Close">×</button>`;
+        const close=()=>{ el.remove(); };
+        el.querySelector('.close').addEventListener('click', close);
+        host.appendChild(el);
+        if (timeout>0) setTimeout(close, timeout);
+        return el;
+      }
+      if (!window.showToast) window.showToast = showToast;
+    })();
+  </script>
+  
+
+
+
+  <script>
+    // Global API configuration
+    window.AlertAidConfig = window.AlertAidConfig || {};
+    
+    // --- API Configuration & URL Fix ---
+    function getApiBase() {
+      if (window.location.protocol === 'file:') return 'http://localhost:8080';
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return `http://${window.location.hostname}:8080`;
+      return ''; // Default to same origin
+    }
+    
+    const API_BASE = getApiBase();
+    const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
+    
+    // FIX for 'Failed to parse URL' error
+    function apiUrl(path) {
+      const cleanPath = path.startsWith('/') ? path : '/' + path;
+      const base = API_BASE || window.location.origin;
+      // Ensure the base path ends without a slash before appending the clean path
+      return `${base.replace(/\/$/, '')}${cleanPath}`;
+    }
+    
+    console.log('API Base configured as:', API_BASE || 'same-origin');
+    // --- END API Configuration & URL Fix ---
+
+    // Enhanced fetch with backoff and error handling
+    async function exponentialBackoffFetch(url, options = {}, maxRetries = 3) {
+        for (let i = 0; i < maxRetries; i++) {
+            try {
+                const response = await fetch(url, options);
+                if (response.status !== 429) { // 429 Too Many Requests
+                    return response;
+                }
+                const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                await new Promise(resolve => setTimeout(resolve, delay));
+            } catch (error) {
+                if (i === maxRetries - 1) throw error;
+            }
+        }
+        throw new Error('API request failed after multiple retries.');
+    }
+
+    // Generic API fetch (used for application backend)
+    async function apiFetch(path, options = {}) {
+      const url = apiUrl(path);
+      const method = (options.method || 'GET').toUpperCase();
+      
+      const headers = { ...(options.headers || {}) };
+      const hasBody = options.body !== undefined && options.body !== null;
+      const isFormPayload = typeof FormData !== 'undefined' && options.body instanceof FormData;
+      const isBlobPayload = typeof Blob !== 'undefined' && options.body instanceof Blob;
+      
+      if (method !== 'GET' && hasBody && !isFormPayload && !isBlobPayload && !headers['Content-Type']) {
+        headers['Content-Type'] = 'application/json';
+      }
+      if (!headers['Accept']) {
+        headers['Accept'] = 'application/json';
+      }
+
+      try {
+        const response = await exponentialBackoffFetch(url, {
+          ...options,
+          method,
+          headers
+        });
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`API Error ${response.status}: ${errorText}`);
+        }
+        
+        return response;
+      } catch (error) {
+        console.error('Fetch Error:', url, error);
+        throw error;
+      }
+    }
+
+
+    // --- GEMINI API CALL LOGIC ---
+    const apiKey = ""; // Canvas will inject API key
+    async function callGeminiAPI(userQuery, responseSchema) {
+        const url = `${GEMINI_API_URL}?key=${apiKey}`;
+        const payload = {
+            contents: [{ parts: [{ text: userQuery }] }],
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: responseSchema
+            }
+        };
+
+        try {
+            const response = await exponentialBackoffFetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+            if (jsonText) {
+                return JSON.parse(jsonText);
+            } else {
+                console.error("Gemini API returned no valid JSON content:", result);
+                throw new Error("AI analysis failed: Could not parse response.");
+            }
+        } catch (e) {
+            console.error("Gemini API Call Error:", e);
+            throw new Error(`AI analysis failed: ${e.message}`);
+        }
+    }
+
+    async function analyzeIncidentDescription() {
+        const descriptionInput = document.getElementById('description');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const resultsDiv = document.getElementById('analysis-results');
+
+        const description = descriptionInput.value.trim();
+
+        if (description.length < 50) {
+            resultsDiv.innerHTML = '<div style="color: var(--color-primary);">Please provide a more detailed description (at least 50 characters) for accurate AI analysis.</div>';
+            resultsDiv.classList.remove('hidden');
+            return;
+        }
+
+        const originalBtnText = analyzeBtn.innerHTML;
+        analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Analyzing...';
+        analyzeBtn.disabled = true;
+        resultsDiv.classList.remove('hidden');
+        resultsDiv.innerHTML = '<p style="color: var(--color-muted);">Processing description with AI...</p>';
+
+        const analysisSchema = {
+            type: "OBJECT",
+            properties: {
+                immediateDangers: {
+                    type: "ARRAY",
+                    description: "A list of critical, immediate threats to life or property.",
+                    items: { type: "STRING" }
+                },
+                resourceNeeds: {
+                    type: "ARRAY",
+                    description: "A list of the necessary emergency services and equipment required immediately.",
+                    items: { type: "STRING" }
+                }
+            },
+            propertyOrdering: ["immediateDangers", "resourceNeeds"]
+        };
+
+        const userQuery = `Analyze the following disaster report description. Identify the immediate dangers and the necessary emergency resources required. Only respond with a JSON object.
+Description: "${description}"`;
+
+        try {
+            const analysis = await callGeminiAPI(userQuery, analysisSchema);
+            
+            let html = '<h4><i class="fas fa-microchip mr-2"></i>AI Incident Analysis</h4>';
+
+            html += '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">';
+            
+            // Dangers
+            html += '<div><h5 class="font-bold text-lg text-red-600 mb-1">Immediate Dangers:</h5><ul>';
+            if (analysis.immediateDangers && analysis.immediateDangers.length > 0) {
+                analysis.immediateDangers.forEach(danger => {
+                    html += `<li>${danger}</li>`;
+                });
+            } else {
+                html += '<li>None explicitly mentioned, or analysis inconclusive.</li>';
+            }
+            html += '</ul></div>';
+
+            // Resources
+            html += '<div><h5 class="font-bold text-lg text-blue-600 mb-1">Resource Needs:</h5><ul>';
+            if (analysis.resourceNeeds && analysis.resourceNeeds.length > 0) {
+                analysis.resourceNeeds.forEach(resource => {
+                    html += `<li>${resource}</li>`;
+                });
+            } else {
+                html += '<li>Requires standard first response teams (Police/Fire/Ambulance).</li>';
+            }
+            html += '</ul></div>';
+            
+            html += '</div>';
+            
+            resultsDiv.innerHTML = html;
+        } catch (e) {
+            resultsDiv.innerHTML = `<p style="color: var(--color-primary);"><i class="fas fa-exclamation-triangle mr-2"></i>${e.message}</p>`;
+        } finally {
+            analyzeBtn.innerHTML = originalBtnText;
+            analyzeBtn.disabled = false;
+        }
+    }
+    window.analyzeIncidentDescription = analyzeIncidentDescription;
+    // --- END GEMINI API CALL LOGIC ---
+
+
+    let selectedSeverity = '';
+    let selectedReportType = '';
+    let uploadedFiles = [];
+    
+    // Global cache to store reports keyed by ID for quick lookup
+    const reportCache = new Map();
+
+    // --- REPORT DETAIL MODAL FUNCTIONS ---
+    async function openReportDetailModal(reportId) {
+        let report = reportCache.get(reportId);
+        
+        // ALWAYS fetch full details if report has photoCount > 0
+        // List endpoints may exclude attachments for performance, so we need to fetch by ID
+        const needsFetch = !report || (report.photoCount > 0 && (
+            !report.attachments || 
+            report.attachments === null || 
+            report.attachments === undefined ||
+            (typeof report.attachments === 'string' && (report.attachments.trim() === '' || report.attachments.trim() === 'null'))
+        ));
+        
+        if (needsFetch) {
+            console.log(`[ATTACHMENTS DEBUG] Fetching full report details for ID ${reportId}`);
+            console.log(`[ATTACHMENTS DEBUG] Cached report state:`, {
+                exists: !!report,
+                photoCount: report?.photoCount,
+                hasAttachments: !!report?.attachments,
+                attachmentsType: typeof report?.attachments,
+                attachmentsValue: report?.attachments ? (report.attachments.length > 50 ? report.attachments.substring(0, 50) + '...' : report.attachments) : 'null/undefined'
+            });
+            
+            try {
+                const res = await apiFetch(`/api/reports/${reportId}`);
+                console.log(`[ATTACHMENTS DEBUG] API Response status:`, res.status, res.statusText);
+                
+                if (res.ok) {
+                    const fullReport = await res.json();
+                    console.log(`[ATTACHMENTS DEBUG] Fetched full report:`, {
+                        id: fullReport.id,
+                        photoCount: fullReport.photoCount,
+                        hasAttachments: !!fullReport.attachments,
+                        attachmentsType: typeof fullReport.attachments,
+                        attachmentsLength: fullReport.attachments ? fullReport.attachments.length : 0,
+                        attachmentsPreview: fullReport.attachments ? (fullReport.attachments.length > 100 ? fullReport.attachments.substring(0, 100) + '...' : fullReport.attachments) : 'null/empty'
+                    });
+                    reportCache.set(reportId, fullReport);
+                    report = fullReport;
+                } else {
+                    const errorText = await res.text();
+                    console.error(`[ATTACHMENTS DEBUG] Failed to fetch report ${reportId}:`, res.status, res.statusText, errorText);
+                    if (!report) {
+                        showPopup("Report details not found.", { title: "Error" });
+                        return;
+                    }
+                }
+            } catch (e) {
+                console.error('[ATTACHMENTS DEBUG] Error fetching report details:', e);
+                if (!report) {
+                    showPopup("Report details not found.", { title: "Error" });
+                    return;
+                }
+            }
+        } else {
+            console.log(`[ATTACHMENTS DEBUG] Using cached report for ID ${reportId}, attachments already present`);
+        }
+        
+        if (!report) {
+            showPopup("Report details not found.", { title: "Error" });
+            return;
+        }
+        
+        console.log('Displaying report:', {
+            id: report.id,
+            photoCount: report.photoCount,
+            attachments: report.attachments ? 'present' : 'missing',
+            attachmentsLength: report.attachments ? report.attachments.length : 0
+        });
+        
+        const visual = getSeverityVisual(report.severity);
+
+        // Populate Modal Fields
+        document.getElementById('detailReportTitle').textContent = getDisasterTypeLabel(report.disasterType);
+        
+        // Populate badges
+        const badgeGroup = document.getElementById('detailBadgeGroup');
+        badgeGroup.innerHTML = `
+            <span class="severity-chip ${visual.chipClass}" style="margin-left: 0;">${visual.label}</span>
+            <span class="text-sm px-2 py-1 rounded bg-gray-500 text-white">${formatDate(report.createdAt)}</span>
+        `;
+        
+        document.getElementById('detailSeverity').textContent = visual.label;
+        document.getElementById('detailType').textContent = getDisasterTypeLabel(report.disasterType);
+        document.getElementById('detailLocation').textContent = report.location || 'N/A';
+        document.getElementById('detailDescription').textContent = report.description || 'No detailed description provided.';
+        document.getElementById('detailPeopleAffected').textContent = report.peopleAffected || 'Unknown';
+        document.getElementById('detailInjuries').textContent = report.injuries || 'Unknown';
+        document.getElementById('detailReporterName').textContent = report.reporterName || 'Anonymous';
+        document.getElementById('detailReporterPhone').textContent = report.reporterPhone || 'N/A';
+        document.getElementById('detailAdditionalInfo').textContent = report.additionalInfo || 'No additional notes.';
+
+        // Display attachments
+        const attachmentsDiv = document.getElementById('detailAttachments');
+        attachmentsDiv.innerHTML = '';
+        
+        console.log('Processing attachments:', {
+            hasAttachments: !!report.attachments,
+            attachmentsType: typeof report.attachments,
+            attachmentsValue: report.attachments ? (report.attachments.length > 200 ? report.attachments.substring(0, 200) + '...' : report.attachments) : 'null/undefined',
+            photoCount: report.photoCount
+        });
+        
+        if (report.attachments && report.attachments.trim() !== '' && report.attachments.trim() !== 'null') {
+          let attachments = [];
+          try {
+            const attachmentsStr = typeof report.attachments === 'string' ? report.attachments : JSON.stringify(report.attachments);
+            console.log('Parsing attachments string, length:', attachmentsStr?.length);
+            if (attachmentsStr && attachmentsStr.trim() !== '' && attachmentsStr.trim() !== 'null') {
+              attachments = JSON.parse(attachmentsStr);
+              console.log('Parsed attachments:', attachments.length, 'items');
+            }
+          } catch (e) {
+            console.error('Error parsing attachments:', e);
+            console.log('Raw attachments value (first 500 chars):', report.attachments ? report.attachments.substring(0, 500) : 'null');
+          }
+          
+          if (attachments && Array.isArray(attachments) && attachments.length > 0) {
+            console.log('Displaying', attachments.length, 'attachments');
+            const attachmentsHtml = document.createElement('div');
+            attachmentsHtml.innerHTML = `
+              <label class="detail-key" style="display: block; font-weight: 600; color: var(--color-text); margin-bottom: 10px;">
+                <i class="fas fa-camera mr-2"></i>Attachments (${attachments.length})
+              </label>
+              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
+            `;
+            
+            attachments.forEach((attachment, index) => {
+              const isVideo = attachment.type && attachment.type.startsWith('video/');
+              const isImage = attachment.type && attachment.type.startsWith('image/');
+              
+              if (isImage) {
+                attachmentsHtml.innerHTML += `
+                  <div style="position: relative; border-radius: 8px; overflow: hidden; border: 2px solid var(--color-border);">
+                    <img src="${attachment.data}" alt="${attachment.name || 'Image ' + (index + 1)}" style="width: 100%; height: 150px; object-fit: cover; cursor: pointer;" onclick="window.open('${attachment.data}', '_blank')">
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 5px; font-size: 11px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${attachment.name || 'Image ' + (index + 1)}</div>
+                  </div>
+                `;
+              } else if (isVideo) {
+                attachmentsHtml.innerHTML += `
+                  <div style="position: relative; border-radius: 8px; overflow: hidden; border: 2px solid var(--color-border);">
+                    <video src="${attachment.data}" controls style="width: 100%; height: 150px; object-fit: cover;"></video>
+                    <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 5px; font-size: 11px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">${attachment.name || 'Video ' + (index + 1)}</div>
+                  </div>
+                `;
+              }
+            });
+            
+            attachmentsHtml.innerHTML += '</div>';
+            attachmentsDiv.appendChild(attachmentsHtml);
+          } else if (report.photoCount > 0) {
+            console.warn('Attachments array is empty but photoCount > 0');
+            attachmentsDiv.innerHTML = `
+              <div style="padding: 15px; background: var(--color-surface-soft); border-radius: 8px; text-align: center; color: var(--color-muted); border: 1px solid var(--color-border);">
+                <i class="fas fa-info-circle mr-2"></i>This report has ${report.photoCount} attachment(s), but they are not available for display.
+              </div>
+            `;
+          } else {
+            console.log('No attachments and photoCount is 0 or null');
+          }
+        } else if (report.photoCount > 0) {
+          console.warn('[ATTACHMENTS WARNING] Attachments field is null/empty but photoCount > 0. photoCount:', report.photoCount);
+          console.warn('[ATTACHMENTS WARNING] This indicates database inconsistency. The report was likely created before attachments were properly saved.');
+          attachmentsDiv.innerHTML = `
+            <div style="padding: 15px; background: #fff3cd; border-radius: 8px; text-align: center; color: #856404; border: 1px solid #ffc107;">
+              <i class="fas fa-exclamation-triangle mr-2"></i>
+              <strong>Attachment Data Issue</strong><br>
+              <small>This report indicates ${report.photoCount} attachment(s) were uploaded, but the attachment data is not available in the database. This may be due to a previous system issue. Please contact support if this report is important.</small>
+            </div>
+          `;
+        } else {
+          console.log('[ATTACHMENTS DEBUG] No attachments to display (photoCount is 0 or null)');
+        }
+
+        document.getElementById('reportDetailModal').classList.add('show');
+    }
+    window.showReportDetails = openReportDetailModal;
+
+    function closeReportDetailModal() {
+        document.getElementById('reportDetailModal').classList.remove('show');
+    }
+    window.closeReportDetailModal = closeReportDetailModal;
+    // --- END REPORT DETAIL MODAL FUNCTIONS ---
+
+
+    // Sidebar functionality
+    function openNav() {
+      document.getElementById("mySidebar").style.width = "250px";
+    }
+
+    function closeNav() {
+      document.getElementById("mySidebar").style.width = "0";
+    }
+
+    // Real-time weather
+    const openWeatherApiKey = "d5ba883585912ea79e3e8f5b813e2158";
+    async function fetchWeather(lat, lon) {
+      const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${openWeatherApiKey}&units=metric`;
+      const geoUrl = `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${openWeatherApiKey}`;
+      try {
+        const weatherRes = await fetch(weatherUrl);
+        const weatherData = await weatherRes.json();
+        const temp = Math.round(weatherData.main.temp);
+        const condition = weatherData.weather[0].main;
+        const sunrise = weatherData.sys.sunrise * 1000;
+        const sunset = weatherData.sys.sunset * 1000;
+        const now = new Date().getTime();
+        const isDay = now >= sunrise && now <= sunset;
+        const geoRes = await fetch(geoUrl);
+        const geoData = await geoRes.json();
+        const city = geoData[0]?.name || "Unknown";
+        document.getElementById("weather-details").innerText = `${city} | ${temp}°C | ${condition}`;
+        const localTime = new Date(weatherData.dt * 1000 + weatherData.timezone * 1000);
+        const hours = localTime.getUTCHours().toString().padStart(2, "0");
+        const minutes = localTime.getUTCMinutes().toString().padStart(2, "0");
+        document.getElementById("weather-time").innerText = `${hours}:${minutes} | ${isDay ? "Day" : "Night"}`;
+        const iconEl = document.getElementById("weather-icon");
+        iconEl.className = "fas";
+        if (condition === "Clear") iconEl.classList.add(isDay ? "fa-sun" : "fa-moon");
+        else if (condition === "Clouds") iconEl.classList.add(isDay ? "fa-cloud-sun" : "fa-cloud-moon");
+        else if (condition === "Rain") iconEl.classList.add("fa-cloud-showers-heavy");
+        else if (condition === "Drizzle") iconEl.classList.add("fa-cloud-rain");
+        else if (condition === "Thunderstorm") iconEl.classList.add("fa-bolt");
+        else if (condition === "Snow") iconEl.classList.add("fa-snowflake");
+        else if (["Mist","Fog","Haze","Smoke"].includes(condition)) iconEl.classList.add("fa-smog");
+        else iconEl.classList.add(isDay ? "fa-cloud-sun" : "fa-cloud-moon");
+      } catch (e) {
+        document.getElementById("weather-details").innerText = "-- | --°C | Unavailable";
+        document.getElementById("weather-time").innerText = "--:-- | --";
+      }
+    }
+    function getLocationAndWeather() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => fetchWeather(pos.coords.latitude, pos.coords.longitude),
+          () => {
+            document.getElementById("weather-details").innerText = "Location blocked";
+            document.getElementById("weather-time").innerText = "--:-- | --";
+          }
+        );
+      }
+    }
+
+    // Show report form for specific category
+    function showReportForm(type) {
+      selectedReportType = type;
+      const form = document.getElementById('reportForm');
+      const disasterTypeSelect = document.getElementById('disasterType');
+      
+      // Set appropriate severity based on report type
+      if (type === 'natural' || type === 'safety') {
+        selectSeverity('critical');
+      } else if (type === 'infrastructure') {
+        selectSeverity('high');
+      } else if (type === 'environmental' || type === 'transportation') {
+        selectSeverity('medium');
+      } else {
+        selectSeverity('low');
+      }
+      // Preselect a disaster type for better UX
+      try {
+        const defaults = {
+          natural: 'earthquake',
+          infrastructure: 'power-outage',
+          safety: 'violence',
+          environmental: 'chemical-spill',
+          transportation: 'major-accident',
+          other: 'other'
+        };
+        const val = defaults[type] || 'other';
+        if (disasterTypeSelect) disasterTypeSelect.value = val;
+      } catch(e) {}
+      
+      form.classList.add('active');
+      form.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Close report form
+    function closeReportForm() {
+      document.getElementById('reportForm').classList.remove('active');
+      document.getElementById('analysis-results').classList.add('hidden'); // Hide analysis when closing
+    }
+
+    // Select severity level
+    function selectSeverity(severity) {
+      selectedSeverity = severity;
+      
+      // Update visual selection
+      document.querySelectorAll('.severity-option').forEach(option => {
+        option.classList.remove('selected');
+      });
+      document.querySelector(`[data-severity="${severity}"]`).classList.add('selected');
+    }
+
+    // Get current location using GPS
+    async function getCurrentLocation() {
+      const locationInput = document.getElementById('location');
+      
+      if (!navigator.geolocation) {
+        showPopup("Geolocation is not supported by this browser. Please enter the address manually.", { title: "Location Error" });
+        return;
+      }
+      
+      locationInput.value = "Getting your location...";
+      locationInput.disabled = true;
+      
+      try {
+        const position = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+          });
+        });
+        
+        const lat = position.coords.latitude.toFixed(6);
+        const lng = position.coords.longitude.toFixed(6);
+        
+        // Use OpenStreetMap Nominatim for reverse geocoding (free, no API key needed)
+        try {
+          const geocodeUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`;
+          const geocodeRes = await fetch(geocodeUrl, {
+            headers: {
+              'User-Agent': 'AlertAid/1.0'
+            }
+          });
+          
+          if (geocodeRes.ok) {
+            const geocodeData = await geocodeRes.json();
+            const address = geocodeData.address || {};
+            let addressString = '';
+            
+            // Build address string from components
+            if (address.road) addressString += address.road;
+            if (address.house_number) addressString = address.house_number + ' ' + addressString;
+            if (address.suburb || address.neighbourhood) {
+              if (addressString) addressString += ', ';
+              addressString += address.suburb || address.neighbourhood;
+            }
+            if (address.city || address.town || address.village) {
+              if (addressString) addressString += ', ';
+              addressString += address.city || address.town || address.village;
+            }
+            if (address.state) {
+              if (addressString) addressString += ', ';
+              addressString += address.state;
+            }
+            if (address.country) {
+              if (addressString) addressString += ', ';
+              addressString += address.country;
+            }
+            
+            if (addressString) {
+              // Use the full address as the exact location
+              locationInput.value = addressString;
+            } else {
+              // Fallback: try to use display_name from geocodeData
+              const displayName = geocodeData.display_name;
+              if (displayName) {
+                locationInput.value = displayName;
+              } else {
+                locationInput.value = `GPS: ${lat}, ${lng}`;
+              }
+            }
+          } else {
+            // Fallback to just GPS coordinates if geocoding fails
+            locationInput.value = `Latitude: ${lat}, Longitude: ${lng}`;
+          }
+        } catch (geocodeError) {
+          // Fallback to just GPS coordinates if geocoding fails
+          console.warn('Reverse geocoding failed:', geocodeError);
+          // Still try to use coordinates as location
+          locationInput.value = `Latitude: ${lat}, Longitude: ${lng}`;
+        }
+      } catch (error) {
+        locationInput.value = "";
+        let errorMsg = "Unable to get your location. ";
+        if (error.code === 1) {
+          errorMsg += "Location permission denied. Please enable location access and try again.";
+        } else if (error.code === 2) {
+          errorMsg += "Location unavailable. Please enter the address manually.";
+        } else if (error.code === 3) {
+          errorMsg += "Location request timed out. Please try again.";
+        } else {
+          errorMsg += "Please enter the address manually.";
+        }
+        showPopup(errorMsg, { title: "Location Error" });
+      } finally {
+        locationInput.disabled = false;
+      }
+    }
+
+    // File upload handling
+    function handleFileSelect(event) {
+      const files = Array.from(event.target.files);
+      processFiles(files);
+    }
+
+    function handleDrop(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      const uploadArea = event.target.closest('.photo-upload');
+      uploadArea.classList.remove('dragover');
+      
+      const files = Array.from(event.dataTransfer.files);
+      processFiles(files);
+    }
+
+    function handleDragOver(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.target.closest('.photo-upload').classList.add('dragover');
+    }
+
+    function handleDragLeave(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.target.closest('.photo-upload').classList.remove('dragover');
+    }
+
+    function processFiles(files) {
+      const preview = document.getElementById('photoPreview');
+      
+      files.forEach(file => {
+        if (file.size > 10 * 1024 * 1024) {
+          showPopup(`File ${file.name} is too large. Maximum size is 10MB.`, { title: "Upload Error" });
+          return;
+        }
+        
+        if (!file.type.match(/^(image|video)\//)) {
+          showPopup(`File ${file.name} is not a supported format.`, { title: "Upload Error" });
+          return;
+        }
+        
+        uploadedFiles.push(file);
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const photoItem = document.createElement('div');
+          photoItem.className = 'photo-item';
+          photoItem.innerHTML = `
+            <img src="${e.target.result}" alt="Upload preview">
+            <button class="photo-remove" onclick="removePhoto(${uploadedFiles.length - 1})">×</button>
+          `;
+          preview.appendChild(photoItem);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    
+    // Helper to fix photo re-rendering after removal
+    window.removePhoto = (index) => {
+        uploadedFiles.splice(index, 1);
+        const preview = document.getElementById('photoPreview');
+        preview.innerHTML = ''; // Clear preview
+        // Re-render remaining photos, generating new closures for removePhoto
+        uploadedFiles.forEach((file, i) => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const photoItem = document.createElement('div');
+                photoItem.className = 'photo-item';
+                photoItem.innerHTML = `
+                    <img src="${e.target.result}" alt="Upload preview">
+                    <button class="photo-remove" onclick="removePhoto(${i})">×</button>
+                `;
+                preview.appendChild(photoItem);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+
+    // Submit report
+    async function submitReport(event) {
+      event.preventDefault();
+      
+      if (!selectedSeverity) {
+        showPopup("Please select a severity level for your report.", { title: "Validation Error" });
+        return;
+      }
+      
+      // Get form data
+      const formData = {
+        severity: selectedSeverity,
+        disasterType: document.getElementById('disasterType').value,
+        description: document.getElementById('description').value,
+        location: document.getElementById('location').value,
+        peopleAffected: document.getElementById('peopleAffected').value,
+        injuries: document.getElementById('injuries').value,
+        reporterName: document.getElementById('reporterName').value,
+        reporterPhone: document.getElementById('reporterPhone').value,
+        additionalInfo: document.getElementById('additionalInfo').value,
+        photoCount: uploadedFiles.length
+      };
+      
+      // Parse GPS coordinates if available
+      if (formData.location.includes('GPS:')) {
+        const gpsMatch = formData.location.match(/GPS:\s*([0-9.-]+),\s*([0-9.-]+)/);
+        if (gpsMatch) {
+          formData.latitude = parseFloat(gpsMatch[1]);
+          formData.longitude = parseFloat(gpsMatch[2]);
+        }
+      }
+
+      const submitBtn = event.target.querySelector('.submit-btn');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting Report...';
+      submitBtn.disabled = true;
+
+      try {
+        const token = getValidToken();
+
+        // Convert uploaded files to base64
+        const attachments = [];
+        for (const file of uploadedFiles) {
+          const base64 = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+          attachments.push({
+            name: file.name,
+            type: file.type,
+            data: base64
+          });
+        }
+
+        // Add attachments to formData
+        formData.attachments = attachments.length > 0 ? JSON.stringify(attachments) : null;
+        
+        // Validate consistency between photoCount and attachments
+        if (formData.photoCount > 0 && (!formData.attachments || formData.attachments === null)) {
+          console.error('[ATTACHMENTS ERROR] Inconsistency detected: photoCount=' + formData.photoCount + ' but attachments is null');
+          showPopup('Error: Files were selected but could not be processed. Please try uploading the files again.', { title: "Upload Error" });
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+          return;
+        }
+        
+        console.log('[ATTACHMENTS DEBUG] Submitting report:', {
+          photoCount: formData.photoCount,
+          hasAttachments: !!formData.attachments,
+          attachmentsLength: formData.attachments ? formData.attachments.length : 0,
+          attachmentsPreview: formData.attachments ? formData.attachments.substring(0, 100) + '...' : 'null',
+          uploadedFilesCount: uploadedFiles.length
+        });
+        
+        // Verify attachments array was created correctly
+        if (attachments.length > 0) {
+          console.log('[ATTACHMENTS DEBUG] Attachments array:', attachments.map(a => ({ name: a.name, type: a.type, dataLength: a.data ? a.data.length : 0 })));
+        }
+
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const res = await apiFetch('/api/reports', {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify(formData)
+        });
+        
+        if (!res.ok) {
+          if (res.status === 401 && token) {
+            showPopup('Your previous session token was invalid. Report submitted anonymously.', { title: "Authentication Notice" });
+            localStorage.removeItem('token');
+          }
+          const errorText = await res.text();
+          showPopup(`Failed to submit report: ${errorText}`, { title: "Submission Error" });
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+          return;
+        }
+        
+        const saved = await res.json();
+        const reportId = `DR-${saved.id}`;
+        
+        // IMPORTANT: Cache the saved report immediately with full attachment data
+        // This ensures attachments are available when viewing the report
+        console.log('[ATTACHMENTS DEBUG] Response from server:', {
+          id: saved.id,
+          photoCount: saved.photoCount,
+          hasAttachments: !!saved.attachments,
+          attachmentsType: typeof saved.attachments,
+          attachmentsLength: saved.attachments ? saved.attachments.length : 0,
+          attachmentsPreview: saved.attachments ? (saved.attachments.length > 100 ? saved.attachments.substring(0, 100) + '...' : saved.attachments) : 'null'
+        });
+        
+        // Verify the saved report has attachments before caching
+        if (saved.photoCount > 0 && (!saved.attachments || saved.attachments === null || saved.attachments.trim() === '')) {
+          console.error('[ATTACHMENTS ERROR] Server returned report with photoCount=' + saved.photoCount + ' but attachments is missing!');
+          console.error('[ATTACHMENTS ERROR] This indicates the backend did not save attachments properly.');
+        }
+        
+        reportCache.set(saved.id, saved);
+        console.log('[ATTACHMENTS DEBUG] Cached report ID ' + saved.id + ' with attachments:', !!saved.attachments);
+        
+        // Use custom confirm logic
+        showConfirm(`Disaster report submitted successfully!\n\nReport ID: ${reportId}\nSeverity: ${selectedSeverity.toUpperCase()}\nStatus: Under Review\n\nWould you like to view your submitted report now?`, (viewReport) => {
+          if (viewReport) {
+            // Open the detail modal to show the newly submitted report
+            setTimeout(() => {
+              openReportDetailModal(saved.id);
+            }, 100);
+          }
+        });
+
+        // Reset form
+        document.getElementById('disasterForm').reset();
+        document.querySelectorAll('.severity-option').forEach(option => option.classList.remove('selected'));
+        document.getElementById('photoPreview').innerHTML = '';
+        selectedSeverity = '';
+        uploadedFiles = [];
+
+        // Hide analysis panel
+        document.getElementById('analysis-results').classList.add('hidden');
+
+        // Close form
+        closeReportForm();
+        
+        // Refresh the reports list (but keep the cached version with attachments)
+        loadAllReports(); // Refresh public feed after successful submission
+      } catch (e) {
+        console.error('Error submitting report:', e);
+        showPopup('An error occurred while submitting the report. Please try again.', { title: "Error" });
+      } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
+    }
+
+    // Get disaster type label
+    function getDisasterTypeLabel(type) {
+      const labels = {
+        'earthquake': 'Earthquake',
+        'flood': 'Flood Emergency',
+        'wildfire': 'Wildfire',
+        'storm': 'Severe Storm',
+        'power-outage': 'Power Outage',
+        'gas-leak': 'Gas Leak',
+        'chemical-spill': 'Chemical Spill',
+        'major-accident': 'Major Accident',
+        'violence': 'Violence/Crime',
+        'suspicious-activity': 'Suspicious Activity',
+        'crowd-control': 'Crowd Control Issue',
+        'terrorism': 'Terrorism Threat',
+        'air-pollution': 'Air Pollution',
+        'water-contamination': 'Water Contamination',
+        'road-closure': 'Road Closure',
+        'transit-disruption': 'Transit Disruption',
+        'animal-emergency': 'Animal Emergency',
+        'building-issue': 'Building Issue',
+        'community-concern': 'Community Concern',
+        'other': 'Other Emergency'
+      };
+      return labels[type] || 'Emergency Incident';
+    }
+
+    function getSeverityVisual(level) {
+      const normalized = (level || 'MEDIUM').toString().toUpperCase();
+      const config = {
+        'CRITICAL': {
+          icon: 'fas fa-bolt',
+          markerClass: 'severity-critical',
+          chipClass: 'critical',
+          borderColor: 'var(--color-primary)',
+          label: 'CRITICAL',
+          impact: 'CRITICAL impact'
+        },
+        'HIGH': {
+          icon: 'fas fa-exclamation-triangle',
+          markerClass: 'severity-high',
+          chipClass: 'high',
+          borderColor: 'var(--color-secondary)',
+          label: 'HIGH',
+          impact: 'HIGH impact'
+        },
+        'MEDIUM': {
+          icon: 'fas fa-wave-square',
+          markerClass: 'severity-medium',
+          chipClass: 'medium',
+          borderColor: '#fbbf24',
+          label: 'MEDIUM',
+          impact: 'MEDIUM impact'
+        },
+        'LOW': {
+          icon: 'fas fa-info-circle',
+          markerClass: 'severity-low',
+          chipClass: 'low',
+          borderColor: '#3b82f6',
+          label: 'LOW',
+          impact: 'LOW impact'
+        }
+      };
+      return config[normalized] || config['MEDIUM'];
+    }
+
+    // Auth/UI helpers shared with sidebar
+    function isTokenExpired(token) {
+      try {
+        const parts = token.split('.');
+        if (parts.length !== 3) return true;
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        if (!payload.exp) return false; // treat as valid if no exp
+        const nowSec = Math.floor(Date.now() / 1000);
+        return payload.exp < nowSec;
+      } catch { return true; }
+    }
+    function sanitizeTokenValue(raw) {
+      if (!raw) return null;
+      const trimmed = raw.trim();
+      if (!trimmed || trimmed === 'null' || trimmed === 'undefined') return null;
+      return trimmed;
+    }
+    function getValidToken() {
+      let token = sanitizeTokenValue(localStorage.getItem('token'));
+      if (!token) {
+        try { localStorage.removeItem('token'); } catch {}
+        return null;
+      }
+      if (token && isTokenExpired(token)) {
+        try { localStorage.removeItem('token'); } catch {}
+        token = null;
+      }
+      return token;
+    }
+
+    function checkAuthStatus() {
+      const token = getValidToken();
+      const userOnlyOptions = document.getElementById('userOnlyOptions');
+      const guestOnlyOptions = document.getElementById('guestOnlyOptions');
+      const navAuthLink = document.getElementById('navAuthLink');
+      if (token) {
+        try {
+          const storedRole = localStorage.getItem('role');
+          const rr = mapRoleForRouter(storedRole);
+          if (rr && window.RoleRouter && typeof window.RoleRouter.setRole === 'function') {
+            window.RoleRouter.setRole(rr);
+          } else if (rr) {
+            try { localStorage.setItem('alertaid.role', rr); } catch(e){}
+          }
+        } catch(e){}
+        if (userOnlyOptions) userOnlyOptions.style.display = 'block';
+        if (guestOnlyOptions) guestOnlyOptions.style.display = 'none';
+        if (navAuthLink) {
+          navAuthLink.textContent = 'Dashboard';
+          const r = (localStorage.getItem('role') || '').toUpperCase();
+          if (r === 'ADMIN') navAuthLink.href = 'admin_dashboard.html';
+          else if (r === 'VOLUNTEER') navAuthLink.href = 'volunteer_dashboard.html';
+          else if (r === 'ORG') navAuthLink.href = 'organization_dashboard.html';
+          else navAuthLink.href = 'citizen_dashboard.html';
+        }
+      } else {
+        if (userOnlyOptions) userOnlyOptions.style.display = 'none';
+        if (guestOnlyOptions) guestOnlyOptions.style.display = 'block';
+        if (navAuthLink) { navAuthLink.textContent = 'Sign In'; navAuthLink.href = 'login.html'; }
+      }
+    }
+    function getLocation(){
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((p)=>{
+          showPopup(`Your Location:\nLatitude: ${p.coords.latitude.toFixed(6)}\nLongitude: ${p.coords.longitude.toFixed(6)}`, { title: "Current Location" });
+        },()=>showPopup('Unable to retrieve your location.', { title: "Location Error" }));
+      }
+    }
+    function showNotifications(){
+      const token = getValidToken();
+      if (!token) { showPopup('Please sign in to view notifications.', { title: "Authorization Required" }); return; }
+      showPopup('Notifications will appear here.', { title: "Notifications" });
+    }
+    function showProfile(){
+      const token = getValidToken();
+      if (!token) { showPopup('Please sign in to view profile.', { title: "Authorization Required" }); return; }
+      showPopup('Profile Information (demo)', { title: "User Profile" });
+    }
+    function signOut(){
+      showConfirm('Are you sure you want to sign out?', (confirmed) => {
+        if (confirmed) {
+          try {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('role');
+            localStorage.removeItem('email');
+            localStorage.removeItem('alertaid.role');
+            sessionStorage.clear();
+            document.cookie.split(';').forEach(c => {
+              const eq = c.indexOf('=');
+              const name = eq > -1 ? c.substr(0, eq).trim() : c.trim();
+              if (name) document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;';
+            });
+          } catch {}
+          checkAuthStatus();
+          window.location.replace('login.html');
+        }
+      });
+    }
+    window.getLocation = getLocation;
+    window.showNotifications = showNotifications;
+    window.showProfile = showProfile;
+    window.signOut = signOut;
+
+    function startCampaignFromReport(){
+      window.location.href = 'donation.html#raise';
+    }
+    window.startCampaignFromReport = startCampaignFromReport;
+    
+    // Load ALL reports (public feed)
+    async function loadAllReports() {
+      const container = document.getElementById('recentReports');
+      reportCache.clear(); // Clear cache before loading new reports
+      
+      try {
+        let data;
+        try {
+          const res = await apiFetch('/api/reports/public?page=0&size=50');
+          data = await res.json();
+        } catch (error) {
+          if (error.message.includes('Failed to fetch') || error.message.includes('Connection refused')) {
+            container.innerHTML = `
+              <div class="text-center opacity-80 mb-4" style="color: var(--color-muted);">
+                Backend unavailable. Showing demo data:<br>
+                <small>Start backend server to see real reports</small>
+              </div>
+            `;
+            const demoReports = [
+              { id: 1, disasterType: 'wildfire', severity: 'MEDIUM', description: 'szcxvbn m, short demo description...', createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), location: 'Deogurariya, Bhicholi Hapsi Ta...', peopleAffected: '21-100', injuries: 'Minor injuries', reporterName: 'Demo User', reporterPhone: 'N/A', additionalInfo: 'Demo reports are static.' },
+              { id: 2, disasterType: 'wildfire', severity: 'MEDIUM', description: 'szcxvbn m, short demo description...', createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), location: 'Deogurariya, Bhicholi Hapsi Ta...', peopleAffected: '21-100', injuries: 'Minor injuries', reporterName: 'Demo User', reporterPhone: 'N/A', additionalInfo: 'Demo reports are static.' },
+              { id: 3, disasterType: 'gas-leak', severity: 'CRITICAL', description: 'qwertyuioplmnhgfdsa, critical gas leak detected...', createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), location: 'A.B. Road, Indore...', peopleAffected: '500+', injuries: 'Serious injuries', reporterName: 'Demo Admin', reporterPhone: 'N/A', additionalInfo: 'Critical infrastructure failure.' }
+            ];
+            
+            // Cache demo reports and generate HTML
+            const fragment = document.createDocumentFragment();
+            demoReports.forEach(report => {
+                reportCache.set(report.id, report);
+                const severityVisual = getSeverityVisual(report.severity);
+                const item = document.createElement('div');
+                item.className = 'report-item';
+                item.setAttribute('onclick', `showReportDetails(${report.id})`); // Add click handler
+                
+                item.innerHTML = `
+                    <div class="severity-marker ${severityVisual.markerClass}">
+                        <i class="${severityVisual.icon}"></i>
+                    </div>
+                    <div class="report-details">
+                        <h4 class="font-bold">${getDisasterTypeLabel(report.disasterType)}</h4>
+                        <p>${report.description.substring(0, 30)}...</p>
+                        <div class="text-xs">
+                            <span style="color: var(--color-primary);">${severityVisual.impact}</span>
+                            <span><i class="fas fa-clock"></i> ${formatDate(report.createdAt)}</span>
+                            <span><i class="fas fa-map-marker-alt"></i> ${report.location.substring(0, 30)}...</span>
+                        </div>
+                    </div>
+                    <span class="severity-chip ${severityVisual.chipClass}">${severityVisual.label}</span>
+                `;
+                fragment.appendChild(item);
+            });
+            container.appendChild(fragment);
+            return;
+          }
+          container.innerHTML = `<div class="text-center opacity-80" style="color: var(--color-muted);">Unable to load reports. Error: ${error.message}</div>`;
+          return;
+        }
+
+        const reports = Array.isArray(data) ? data : (data.content || []);
+        
+        container.innerHTML = '';
+        if (!reports.length) {
+          container.innerHTML = '<div class="text-center opacity-80" style="color: var(--color-muted);">No public reports available yet.</div>';
+          return;
+        }
+        
+        const fragment = document.createDocumentFragment();
+        reports.forEach(report => {
+          // Only cache if not already cached with attachments
+          // This preserves the full report data from submission
+          if (!reportCache.has(report.id) || 
+              (reportCache.get(report.id).photoCount > 0 && !reportCache.get(report.id).attachments)) {
+            reportCache.set(report.id, report); // Cache live reports
+          }
+          const severityVisual = getSeverityVisual(report.severity);
+          const item = document.createElement('div');
+          item.className = 'report-item';
+          item.setAttribute('onclick', `showReportDetails(${report.id})`); // Add click handler
+          
+          item.innerHTML = `
+            <div class="severity-marker ${severityVisual.markerClass}">
+              <i class="${severityVisual.icon}"></i>
+            </div>
+            <div class="report-details">
+              <h4 class="font-bold">${getDisasterTypeLabel(report.disasterType)}</h4>
+              <p>${(report.description||'').substring(0, 30)}...</p>
+              <div class="text-xs">
+                <span style="color: var(--color-primary);">${severityVisual.impact}</span>
+                <span><i class="fas fa-clock"></i> ${formatDate(report.createdAt)}</span>
+                <span><i class="fas fa-map-marker-alt"></i> ${(report.location||'').substring(0, 30)}...</span>
+              </div>
+            </div>
+            <span class="severity-chip ${severityVisual.chipClass}">${severityVisual.label}</span>
+          `;
+          fragment.appendChild(item);
+        });
+        container.appendChild(fragment);
+
+      } catch (e) {
+        container.innerHTML = '<div class="text-center opacity-80" style="color: var(--color-muted);">Error loading reports. Check console for details.</div>';
+      }
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffTime = Math.abs(now - date);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 1) {
+        return 'Yesterday';
+      } else if (diffDays < 7) {
+        return `${diffDays} days ago`;
+      } else {
+        return date.toLocaleDateString();
+      }
+    }
+
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', async function() {
+      try {
+        checkAuthStatus();
+        getLocationAndWeather();
+        setInterval(getLocationAndWeather, 600000);
+
+        try { var rr=document.createElement('script'); rr.src='./role-router.js'; document.head.appendChild(rr);} catch(e){}
+
+        await loadAllReports();
+        setInterval(loadAllReports, 60000);
+
+        // Real-time updates via SSE (public channel)
+        try {
+          const sseUrl = apiUrl('/api/stream/reports/public');
+          const es = new EventSource(sseUrl);
+          es.addEventListener('reports-updated', async () => {
+            await loadAllReports(); 
+          });
+          es.onerror = (error) => { 
+            try { es.close(); } catch(e){} 
+          };
+        } catch (e) {
+        }
+      } catch (e) {
+      }
+    });
+  </script>
+<script src="./role-router.js"></script>
+<script src="chatbot.js"></script>
+</body>
+</html>

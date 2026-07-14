@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>AlertAid</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <script type="module" src="./auth-client.js"></script>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 20px; }
+    form { display: grid; gap: 10px; max-width: 500px; }
+    label { font-weight: 600; }
+    input[type="text"], textarea { width: 100%; padding: 8px; }
+    .status { margin-top: 8px; }
+  </style>
+  <link rel="stylesheet" href="landing-theme.css">
+  
+
+<link rel="stylesheet" href="chatbot.css">
+</head>
+<body class="landing-palette">
+  <h1>Submit an Incident Report</h1>
+  <p>Login required. <a href="login.html">Login</a></p>
+
+  <form id="form">
+    <div>
+      <label for="location">Location</label>
+      <input type="text" id="location" required placeholder="Nearest landmark or address" />
+    </div>
+    <div>
+      <label for="description">Description</label>
+      <textarea id="description" rows="4" required placeholder="What happened?" ></textarea>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <div>
+        <label for="lat">Latitude</label>
+        <input type="text" id="lat" placeholder="Optional" />
+      </div>
+      <div>
+        <label for="lng">Longitude</label>
+        <input type="text" id="lng" placeholder="Optional" />
+      </div>
+    </div>
+    <button type="submit">Submit</button>
+  </form>
+  <p class="status" id="status"></p>
+
+  <script type="module">
+    import { apiFetch } from './auth-client.js';
+
+    const form = document.getElementById('form');
+    const status = document.getElementById('status');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.textContent = 'Submitting...';
+      try {
+        const body = {
+          location: document.getElementById('location').value,
+          description: document.getElementById('description').value,
+        };
+        const lat = document.getElementById('lat').value.trim();
+        const lng = document.getElementById('lng').value.trim();
+        if (lat) body.latitude = parseFloat(lat);
+        if (lng) body.longitude = parseFloat(lng);
+
+        const res = await apiFetch('/api/reports', {
+          method: 'POST',
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error('Failed to submit report');
+        status.textContent = 'Report submitted and pending admin approval.';
+        form.reset();
+      } catch (err) {
+        status.textContent = err.message;
+        status.style.color = '#b00';
+      }
+    });
+  </script>
+<script src="chatbot.js"></script>
+</body>
+</html>

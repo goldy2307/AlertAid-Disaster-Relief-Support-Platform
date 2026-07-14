@@ -1,0 +1,152 @@
+function showToast(message, variant = 'info') {
+      let container = document.getElementById('toastContainer');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.style.position = 'fixed';
+        container.style.top = '20px';
+        container.style.right = '20px';
+        container.style.zIndex = '10000';
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.gap = '10px';
+        document.body.appendChild(container);
+      }
+      const toast = document.createElement('div');
+      toast.textContent = message;
+      toast.style.padding = '12px 16px';
+      toast.style.borderRadius = '10px';
+      toast.style.minWidth = '220px';
+      toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.35)';
+      toast.style.background = variant === 'error' ? 'rgba(239,68,68,0.95)' :
+        variant === 'warning' ? 'rgba(253,224,71,0.95)' :
+        variant === 'success' ? 'rgba(16,185,129,0.95)' :
+        'rgba(15,23,42,0.95)';
+      toast.style.color = '#fff';
+      toast.style.fontWeight = '600';
+      toast.style.display = 'flex';
+      toast.style.alignItems = 'center';
+      toast.style.justifyContent = 'space-between';
+
+      const closeBtn = document.createElement('button');
+      closeBtn.textContent = '×';
+      closeBtn.style.marginLeft = '16px';
+      closeBtn.style.color = '#fff';
+      closeBtn.style.background = 'transparent';
+      closeBtn.style.border = 'none';
+      closeBtn.style.fontSize = '18px';
+      closeBtn.style.cursor = 'pointer';
+      closeBtn.onclick = () => toast.remove();
+
+      toast.appendChild(closeBtn);
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add('fade-out');
+        toast.style.transition = 'opacity 0.5s ease';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 500);
+      }, 5000);
+    }
+<script>
+    function openChatbot() {
+        window.open("chatbot.html", "AlertAid AI Assistant", "width=500,height=700,resizable=yes,scrollbars=yes");
+    }
+</script>
+<link rel="stylesheet" href="chatbot.css">
+<script src="chatbot.js"></script>
+    <script id="alertaid-shared-components">
+        const THEME_STORAGE_KEY = 'theme';
+        const HTML_ELEMENT = document.documentElement;
+        function applyTheme(theme) {
+            HTML_ELEMENT.setAttribute('data-theme', theme);
+            document.body.setAttribute('data-theme', theme);
+        }
+        function setTheme(theme) {
+            applyTheme(theme);
+            try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch(e){}
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            const display = document.getElementById('currentThemeDisplay');
+            if (theme === 'dark') {
+                if (icon) icon.className = 'fas fa-sun';
+                if (text) text.textContent = 'Light Theme';
+                if (display) display.textContent = 'Dark';
+            } else {
+                if (icon) icon.className = 'fas fa-moon';
+                if (text) text.textContent = 'Dark Theme';
+                if (display) display.textContent = 'Light';
+            }
+        }
+        window.toggleTheme = function() {
+            const next = HTML_ELEMENT.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            setTheme(next);
+        }
+        window.openNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '260px'; }
+        window.closeNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '0'; }
+        function showPopup(message, opts){
+            const modal = document.getElementById('app-modal');
+            const body = document.getElementById('app-modal-body');
+            const titleEl = document.getElementById('app-modal-title');
+            const closeBtn = document.getElementById('app-modal-close');
+            const okBtn = document.getElementById('app-modal-ok');
+            const cancelBtn = document.getElementById('app-modal-cancel');
+            if (!modal || !body) return console.error('Modal elements missing', message);
+            const options = opts || {};
+            const isConfirm = options.type === 'confirm';
+            titleEl.textContent = options.title || (isConfirm ? 'Confirmation' : 'Notice');
+            body.textContent = (message == null ? '' : String(message));
+            okBtn.textContent = options.okText || (isConfirm ? 'Confirm' : 'OK');
+            okBtn.className = `app-btn ${options.okClass || (isConfirm ? 'app-btn-critical' : '')}`;
+            cancelBtn.style.display = isConfirm ? 'block' : 'none';
+            function hide(result = false){ modal.classList.remove('show'); cleanup(); if(isConfirm && typeof options.callback === 'function'){ options.callback(result); } }
+            function cleanup(){ closeBtn.removeEventListener('click', onClose); okBtn.removeEventListener('click', onOk); cancelBtn.removeEventListener('click', onCancel); modal.removeEventListener('click', onBackdrop); document.removeEventListener('keydown', onEsc); }
+            function onClose(){ hide(false); }
+            function onOk(){ hide(true); }
+            function onCancel(){ hide(false); }
+            function onBackdrop(e){ if(e.target === modal) hide(false); }
+            function onEsc(e){ if(e.key === 'Escape') hide(false); }
+            closeBtn.addEventListener('click', onClose);
+            okBtn.addEventListener('click', onOk);
+            cancelBtn.addEventListener('click', onCancel);
+            modal.addEventListener('click', onBackdrop);
+            document.addEventListener('keydown', onEsc);
+            modal.classList.add('show');
+        }
+        function showConfirm(message, callback){ showPopup(message, { type:'confirm', title:'Action Required', okText:'Yes', okClass:'app-btn-critical', cancelText:'Cancel', callback }); }
+        window.alert = function(msg){ try { showPopup(msg); } catch { console.error('Modal failed', msg); } };
+        window.showPopup = showPopup;
+        window.showConfirm = showConfirm;
+        function getValidToken(){ const token = localStorage.getItem('token'); return token && token !== 'null' ? token : null; }
+        window.checkAuthStatus = function(){
+            const token = getValidToken();
+            const userOptions = document.getElementById('userOnlyOptions');
+            const guestOptions = document.getElementById('guestOnlyOptions');
+            const navAuthLink = document.getElementById('navAuthLink');
+            if (token){
+                if (userOptions) userOptions.style.display = 'flex';
+                if (guestOptions) guestOptions.style.display = 'none';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-tachometer-alt\"></i> Dashboard'; navAuthLink.href = resolveDashboardHref(); }
+            } else {
+                if (userOptions) userOptions.style.display = 'none';
+                if (guestOptions) guestOptions.style.display = 'block';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-sign-in-alt\"></i> Sign In'; navAuthLink.href = 'login.html'; }
+            }
+        }
+        window.getLocation = function(){
+            if (navigator.geolocation){
+                navigator.geolocation.getCurrentPosition((p)=>{
+                    showPopup(`Your Location:
+Latitude: ${p.coords.latitude.toFixed(6)}
+Longitude: ${p.coords.longitude.toFixed(6)}`, { title:'Current Location' });
+                },()=>showPopup('Unable to retrieve your location.', { title:'Location Error' }));
+            } else {
+                showPopup('Geolocation is not supported by this browser.', { title:'Location Error' });
+            }
+        }
+        window.showNotifications = function(){ if (!getValidToken()) { showPopup('Please sign in to view notifications.', { title:'Authorization Required' }); return; } showPopup('Notifications will appear here.', { title:'Notifications' }); }
+        window.showProfile = function(){ if (!getValidToken()) { showPopup('Please sign in to view profile.', { title:'Authorization Required' }); return; } showPopup('Profile Information (demo)', { title:'User Profile' }); }
+        window.signOut = function(){ showConfirm('Are you sure you want to sign out?', (confirmed)=>{ if (confirmed){ try { localStorage.removeItem('token'); } catch {} window.location.replace('login.html'); } }); }
+        document.addEventListener('DOMContentLoaded', function(){ setTheme(localStorage.getItem(THEME_STORAGE_KEY) || 'light'); checkAuthStatus(); });
+    </script>
+</body>
+</html>

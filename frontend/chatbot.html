@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <style id="alertaid-shared-components">
+        :root {
+            --color-bg: #fafbfc;
+            --color-surface: #ffffff;
+            --color-surface-soft: #fef3ef;
+            --color-muted: #666666;
+            --color-text: #1a1a1a;
+            --color-primary: #FF3B30;
+            --color-secondary: #FF6F00;
+            --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            --color-border: rgba(26, 26, 26, 0.08);
+            --color-shadow-soft: 0 20px 45px rgba(17, 24, 39, 0.15);
+            --color-nav-bg: rgba(255, 255, 255, 0.95);
+            --color-sidebar-bg-top: rgba(255, 86, 33, 0.98);
+        }
+        html[data-theme="dark"] {
+            --color-bg: #121212;
+            --color-surface: #1e1e1e;
+            --color-surface-soft: #281c1b;
+            --color-muted: #aaaaaa;
+            --color-text: #ffffff;
+            --color-primary: #FF6F00;
+            --color-secondary: #FF3B30;
+            --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            --color-border: rgba(255, 255, 255, 0.1);
+            --color-shadow-soft: 0 20px 45px rgba(0, 0, 0, 0.5);
+            --color-nav-bg: rgba(30, 30, 30, 0.95);
+            --color-sidebar-bg-top: rgba(255, 111, 0, 0.98);
+        }
+        body {
+            min-height: 100vh;
+            background: var(--color-bg) !important;
+            color: var(--color-text);
+            transition: background 0.4s, color 0.4s;
+            font-family: 'Inter', sans-serif;
+            padding-top: 150px;
+        }
+        select option, select optgroup { color: #111 !important; background: #fff !important; }
+        html[data-theme="dark"] select option,
+        html[data-theme="dark"] select optgroup { color: #fff !important; background: #333 !important; }
+        .main-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 24px;
+            background: var(--color-nav-bg);
+            border-radius: 18px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            margin: 12px;
+            width: calc(100% - 24px);
+            max-width: none;
+            z-index: 1000;
+            box-shadow: var(--color-shadow-soft);
+            border: 1px solid var(--color-border);
+            backdrop-filter: blur(10px);
+        }
+        .nav-left, .nav-right { display: flex; align-items: center; gap: 16px; }
+        .nav-spacer {
+            height: 140px;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .nav-spacer { height: 180px; }
+        }
+
+        .nav-brand { font-size: 1.9rem; font-weight: 800; color: var(--color-primary); text-decoration: none; transition: color 0.4s; }
+        .weather-widget { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 30px; background: linear-gradient(135deg, #4A90E2, #357ABD); color: #fff; cursor: pointer; font-weight: 500; box-shadow: 0 5px 15px rgba(53, 122, 189, 0.3); }
+        .weather-widget i { font-size: 1.1rem; color: #fff; }
+        .weather-info { font-size: 0.85rem; text-align: left; }
+        .nav-signin { display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; text-decoration: none; background: var(--color-gradient); padding: 10px 26px; border-radius: 999px; box-shadow: 0 12px 25px rgba(255, 59, 48, 0.35); border: none; font-size: 1rem; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .nav-signin i {
+            margin-right: 8px;
+        }
+        .nav-signin:hover { transform: translateY(-2px); box-shadow: 0 18px 30px rgba(255, 59, 48, 0.4); }
+
+        .sidebar { height: 100%; width: 0; position: fixed; top: 0; left: 0; background: none !important; color: var(--color-text); overflow-x: hidden; transition: 0.4s; padding-top: 110px; z-index: 1000; box-shadow: var(--color-shadow-soft); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; }
+        .sidebar-content { width: 100%; height: 100%; display: flex; flex-direction: column; overflow-y: auto; background: var(--color-sidebar-bg-top) !important; padding-top: 20px; }
+        .sidebar a { color: #fff !important; font-weight: 600; padding: 12px 32px; margin-right: 20px; display: flex; align-items: center; gap: 12px; border-radius: 0 20px 20px 0; transition: background 0.2s ease, transform 0.2s ease; text-decoration: none; }
+        .sidebar a:hover { background: rgba(255,255,255,0.15) !important; transform: translateX(4px); }
+        .sidebar a i { width: 22px; text-align: center; color: #fff !important; }
+        .sidebar .closebtn { position: absolute; top: 24px; right: 24px; width: 42px; height: 42px; border-radius: 14px; background: var(--color-surface); color: var(--color-primary) !important; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 15px 28px rgba(0,0,0,0.25); }
+        .sidebar .closebtn:hover { background: var(--color-surface-soft); }
+        .theme-toggle { padding: 10px 18px; border-radius: 16px; cursor: pointer; font-size: 16px; display: flex; align-items: center; gap: 8px; background: var(--color-surface); color: var(--color-primary); border: 1px solid rgba(26,26,26,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        html[data-theme="dark"] .theme-toggle { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); box-shadow: none; }
+        .theme-toggle:hover { transform: translateY(-1px); background: rgba(255,59,48,0.05); }
+        html[data-theme="dark"] .theme-toggle:hover { background: rgba(255,255,255,0.2); }
+        .app-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:2000}
+        .app-modal.show{display:flex}
+        .app-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.55);backdrop-filter: blur(4px);}
+        .app-modal-dialog{position:relative;background:var(--color-surface);color:var(--color-text);min-width:280px;max-width:520px;width:90%;border-radius:18px;box-shadow:var(--color-shadow-soft);overflow:hidden;border: 1px solid var(--color-border);}
+        .app-modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--color-primary);color:#fff}
+        .app-modal-header button{background:none;border:none;color:#fff;font-size:20px;cursor:pointer}
+        .app-modal-body{padding:16px;white-space:pre-wrap}
+        .app-modal-actions{padding:12px 16px;display:flex;justify-content:flex-end;gap:8px;background:var(--color-surface-soft);}
+        .app-btn{background:var(--color-secondary);color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer; transition: all 0.2s;}
+        .app-btn:hover{background: #e66600;}
+        .app-btn-secondary { background: var(--color-surface-soft); color: var(--color-text); border: 1px solid var(--color-border); }
+        .app-btn-secondary:hover { background: rgba(255, 59, 48, 0.05); }
+        .app-btn-critical { background: #FF3B30; color: #fff; }
+    </style>
+    <style id="alertaid-openbtn-override">
+        .openbtn {
+            width: 48px !important;
+            height: 48px !important;
+            border-radius: 16px !important;
+            background: #ffffff !important;
+            border: 1px solid rgba(15, 23, 42, 0.08) !important;
+            box-shadow: 0 15px 30px rgba(15, 23, 42, 0.12) !important;
+            cursor: pointer;
+            position: relative;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .openbtn::before,
+        .openbtn::after,
+        .openbtn .openbtn-line {
+            content: '';
+            position: absolute;
+            left: 50%;
+            width: 26px;
+            height: 2px;
+            border-radius: 999px;
+            background: #FF3B30 !important;
+            transform: translateX(-50%);
+        }
+        .openbtn::before { top: 16px; }
+        .openbtn .openbtn-line { top: 50%; transform: translate(-50%, -50%); }
+        .openbtn::after { bottom: 16px; }
+        .openbtn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 32px rgba(15, 23, 42, 0.18);
+        }
+    </style>
+
+<title>AlertAid AI Assistant Widget</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* ================================================= */
+        /* === 1. Consolidated CSS from chatbot.css/html === */
+        /* ================================================= */
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600&display=swap');
+
+        /* Main Widget Container (Fixed to Bottom-Right) */
+        .widget-container {
+            position: fixed !important;
+            bottom: 24px !important;
+            right: 24px !important;
+            z-index: 2147483647 !important;
+            display: flex;
+            flex-direction: column-reverse; /* Panel above, button below */
+            align-items: flex-end;
+            gap: 14px;
+            font-family: 'Inter', sans-serif;
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
+            margin: 0;
+        }
+
+        /* Toggle Button */
+        .chatbot-toggle {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, #ff512f, #ff6f00);
+            box-shadow: 0 18px 35px rgba(255, 81, 47, 0.35);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            order: 2;
+        }
+        .chatbot-toggle:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 25px 35px rgba(255, 81, 47, 0.45);
+        }
+        .chatbot-icon {
+            font-size: 1.5rem;
+            color: #fff;
+        }
+        
+        /* Chat Panel */
+        .chat-panel {
+            width: clamp(320px, 28vw, 360px);
+            max-height: 520px;
+            background: #ffffff;
+            color: #111827;
+            border-radius: 22px;
+            box-shadow: 0 30px 70px rgba(15, 23, 42, 0.25);
+            overflow: hidden;
+            transform: translateY(20px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            margin: 0 0 14px 0;
+            align-self: flex-end;
+            order: 1;
+        }
+
+        .chat-panel.open {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* Chat Header */
+        .chat-header {
+            background: linear-gradient(120deg, #134E5E, #71B280);
+            color: #fff;
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Messages Area */
+        .chat-messages {
+            padding: 18px;
+            height: 380px; /* Increased height from chatbot.html */
+            overflow-y: auto;
+            background: #f7f8fc;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Message Bubbles */
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 16px;
+            max-width: 85%;
+            font-size: 0.95rem;
+            line-height: 1.45;
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.1);
+            white-space: pre-line;
+            word-wrap: break-word;
+        }
+        .message-bubble.bot {
+            align-self: flex-start;
+            background: #fff;
+        }
+        .message-bubble.user {
+            align-self: flex-end;
+            background: #134E5E;
+            color: #fff;
+        }
+        .source-cite {
+            font-size: 0.7rem;
+            color: #999;
+            margin-top: 5px;
+            border-top: 1px dashed #eee;
+            padding-top: 5px;
+        }
+        .loading-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #134E5E;
+            animation: typing 1.4s infinite;
+        }
+        .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.7; }
+            30% { transform: translateY(-10px); opacity: 1; }
+        }
+
+        /* Chat Input Form */
+        .chat-input {
+            padding: 12px 18px 18px;
+            background: #fff;
+            border-top: 1px solid #edf0f7;
+        }
+        .chat-input form {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .chat-input input {
+            flex: 1;
+            border: 1px solid #dbe3f0;
+            border-radius: 30px;
+            padding: 10px 16px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+        .chat-input input:focus {
+            border-color: #ff512f;
+            box-shadow: 0 0 0 2px rgba(255,81,47,0.15);
+        }
+        .chat-input button {
+            border: none;
+            background: linear-gradient(135deg, #ff512f, #ff6f00);
+            color: #fff;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 12px 24px rgba(255,81,47,0.35);
+            transition: transform 0.2s ease;
+        }
+        .chat-input button:hover {
+            transform: scale(1.05);
+        }
+        
+    </style>
+  <script src="role-router.js"></script>
+  <script src="nav-auth.js"></script>
+</head>
+<body>    <nav class="main-nav">
+        <div class="nav-left">
+            <button class="openbtn" onclick="openNav()" aria-label="Open navigation menu">
+                <span class="openbtn-line"></span>
+            </button>
+            <a href="citizen_dashboard.html" class="nav-brand" data-route="dashboard">AlertAid</a>
+        </div>
+
+        <div class="nav-right">
+            <a class="weather-widget" href="https://www.msn.com/en-in/weather/forecast/in-Indore,MP" target="_blank" rel="noopener">
+                <i id="weather-icon" class="fas fa-cloud-sun"></i>
+                <div class="weather-info">
+                    <div id="weather-details">-- | --°C | --</div>
+                    <div id="weather-time">--:-- | --</div>
+                </div>
+            </a>
+
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light and dark mode">
+                <i id="theme-icon" class="fas fa-sun"></i><span id="theme-text">Light Theme</span>
+            </button>
+
+            <a href="login.html" class="nav-signin" id="navAuthLink">Sign In</a>
+        </div>
+    </nav>
+    <div class="nav-spacer"></div>
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="sidebar-content">
+            <a href="citizen_dashboard.html" data-route="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="alerts.html"><i class="fas fa-exclamation-triangle"></i> Active Alerts</a>
+            <a href="helpforpeople.html"><i class="fas fa-hands-helping"></i> Seek Help</a>
+            <a href="report.html"><i class="fas fa-flag"></i> Report Disaster</a>
+            <a href="donatemoney.html"><i class="fas fa-heart"></i> Make Donation</a>
+            <a href="#" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i> My Location</a>
+            <a href="#" onclick="showNotifications()"><i class="fas fa-bell"></i> Notifications</a>
+                        <div id="userOnlyOptions" style="display: none; flex-direction: column">
+                <a href="profile.html" data-route="profile"><i class="fas fa-user"></i> Profile</a>
+                <a href="change_password.html" data-route="change_password"><i class="fas fa-cog"></i> Settings</a>
+                <a href="javascript:void(0)" onclick="signOut()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+            </div>
+            <div id="guestOnlyOptions">
+                <a href="login.html"><i class="fas fa-sign-in-alt"></i> Sign In</a>
+            </div>
+        </div>
+    </div>
+    
+    <div id="app-modal" class="app-modal" role="dialog" aria-modal="true" aria-labelledby="app-modal-title">
+        <div class="app-modal-backdrop"></div>
+        <div class="app-modal-dialog">
+            <div class="app-modal-header">
+                <div id="app-modal-title">Notice</div>
+                <button id="app-modal-close" aria-label="Close">×</button>
+            </div>
+            <div id="app-modal-body" class="app-modal-body"></div>
+            <div class="app-modal-actions">
+                <button id="app-modal-cancel" class="app-btn app-btn-secondary" style="display:none;">Cancel</button>
+                <button id="app-modal-ok" class="app-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+<div class="widget-container">
+        <div class="chat-panel" id="chatPanel">
+            <div class="chat-header">
+                <div class="text-xl font-bold">
+                    <i class="fas fa-robot mr-2"></i> AlertAid AI
+                </div>
+                <button id="closeChat" class="text-white text-lg opacity-80 hover:opacity-100" aria-label="Close Chat">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                </div>
+
+            <div class="chat-input">
+                <form id="chatForm">
+                    <input type="text" id="chatInput" placeholder="Ask about disasters, resources, or safety...">
+                    <button type="submit" id="sendButton">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <button class="chatbot-toggle" id="toggleChat" aria-label="Open AlertAid AI Chatbot">
+            <i class="fas fa-comments chatbot-icon"></i>
+        </button>
+    </div>
+
+    <script>
+        // ===============================================
+        // === 2. Consolidated JavaScript from chatbot.js/html ===
+        // ===============================================
+        
+        const chatPanel = document.getElementById('chatPanel');
+        const toggleButton = document.getElementById('toggleChat');
+        const closeButton = document.getElementById('closeChat');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatForm = document.getElementById('chatForm');
+        const chatInput = document.getElementById('chatInput');
+        const sendButton = document.getElementById('sendButton');
+        
+        // --- Chatbot State and API Setup ---
+        // NOTE: Replace this with your actual Gemini API key if running locally or on a server.
+        // For security, an API key should ideally be handled on the server side (backend).
+        // Using a placeholder here as the environment is unknown.
+        const API_KEY = ""; 
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${API_KEY}`;
+        let chatHistory = [];
+        let isChatOpen = false;
+
+        // --- Utility Functions ---
+
+        function appendMessage(text, type, sources = []) {
+            const bubble = document.createElement('div');
+            bubble.className = `message-bubble ${type}`;
+            
+            // Convert markdown style bold/italics to HTML (since this is not a markdown renderer)
+            let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            bubble.innerHTML = formattedText;
+            
+            if (sources.length > 0) {
+                const sourceDiv = document.createElement('div');
+                sourceDiv.className = 'source-cite';
+                sourceDiv.innerHTML = '<strong>Sources:</strong> ' + sources.map(s => `<a href="${s.uri}" target="_blank" style="color: #10b981; text-decoration: underline;">${s.title}</a>`).join(', ');
+                bubble.appendChild(sourceDiv);
+            }
+
+            chatMessages.appendChild(bubble);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showLoading() {
+            const loadingBubble = document.createElement('div');
+            loadingBubble.className = 'message-bubble bot loading-indicator';
+            loadingBubble.innerHTML = 'Analyzing<span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span>';
+            chatMessages.appendChild(loadingBubble);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideLoading() {
+            const loadingIndicator = chatMessages.querySelector('.loading-indicator');
+            if (loadingIndicator) {
+                loadingIndicator.remove();
+            }
+        }
+        
+        function toggleChat() {
+            isChatOpen = !isChatOpen;
+            chatPanel.classList.toggle('open', isChatOpen);
+            toggleButton.setAttribute('aria-expanded', isChatOpen ? 'true' : 'false');
+            if (isChatOpen) {
+                chatInput.focus();
+            }
+        }
+
+        // --- API & Core Chat Logic ---
+        
+        async function exponentialBackoffFetch(url, options = {}, maxRetries = 3) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.status !== 429) { 
+                        return response;
+                    }
+                    const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                } catch (error) {
+                    if (i === maxRetries - 1) throw error;
+                }
+            }
+            throw new Error('API request failed after multiple retries.');
+        }
+
+        async function generateContent(userQuery) {
+            if (!API_KEY) {
+                return { text: "API Key is missing. Please configure the API_KEY in the script.", sources: [] };
+            }
+            
+            // Use only the last 5 exchanges to keep history small and relevant
+            const recentHistory = chatHistory.slice(-10);
+            recentHistory.push({ role: "user", parts: [{ text: userQuery }] });
+
+            const systemPrompt = "You are the AlertAid disaster and emergency information assistant. Provide helpful, concise advice and facts about disaster safety, preparedness, resources, and reporting processes. Use real-time web search (Google Search grounding) to ensure information is current. Respond professionally, using markdown for formatting where appropriate.";
+
+            const payload = {
+                contents: recentHistory,
+                tools: [{ "google_search": {} }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                }
+            };
+
+            try {
+                const response = await exponentialBackoffFetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                const candidate = result.candidates?.[0];
+
+                if (candidate && candidate.content?.parts?.[0]?.text) {
+                    const text = candidate.content.parts[0].text;
+                    
+                    let sources = [];
+                    const groundingMetadata = candidate.groundingMetadata;
+                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                        sources = groundingMetadata.groundingAttributions
+                            .map(attribution => ({
+                                uri: attribution.web?.uri,
+                                title: attribution.web?.title,
+                            }))
+                            .filter(source => source.uri && source.title);
+                    }
+
+                    return { text, sources };
+
+                } else {
+                    console.error("Gemini API returned empty response:", result);
+                    return { text: "I'm sorry, I couldn't generate a response. Please try rephrasing your question.", sources: [] };
+                }
+
+            } catch (e) {
+                console.error("Chat API Error:", e);
+                return { text: "I'm experiencing connectivity issues or the API is unavailable right now. Please check the console for details.", sources: [] };
+            }
+        }
+
+        async function handleChatSubmission(event) {
+            event.preventDefault();
+            const userQuery = chatInput.value.trim();
+
+            if (!userQuery) return;
+
+            appendMessage(userQuery, 'user');
+            chatInput.value = '';
+            sendButton.disabled = true;
+
+            showLoading();
+
+            const { text, sources } = await generateContent(userQuery);
+
+            hideLoading();
+            appendMessage(text, 'bot', sources);
+
+            // Update history only if the API call was successful
+            if (!text.includes("API Key is missing") && !text.includes("connectivity issues")) {
+                chatHistory.push({ role: "user", parts: [{ text: userQuery }] });
+                chatHistory.push({ role: "model", parts: [{ text: text }] });
+            }
+            
+            sendButton.disabled = false;
+        }
+
+
+        // --- Initialization ---
+
+        function initChat() {
+            const welcomeMessage = `
+            Welcome to the **AlertAid AI Assistant!**
+            
+            AlertAid is a **comprehensive disaster-response platform** designed to improve communication and coordination during emergencies like floods, earthquakes, and industrial accidents.
+            
+            *Ask me about:*
+            1.  How to submit a report?
+            2.  How the system verifies incidents?
+            3.  Volunteer or donation processes.
+            `;
+
+            appendMessage(welcomeMessage, 'bot');
+            
+            // Event Listeners
+            toggleButton.addEventListener('click', toggleChat);
+            closeButton.addEventListener('click', toggleChat);
+            chatForm.addEventListener('submit', handleChatSubmission);
+        }
+
+        // Run Initialization immediately upon script execution
+        initChat();
+
+    </script>
+    <script id="alertaid-shared-components">
+        const THEME_STORAGE_KEY = 'theme';
+        const HTML_ELEMENT = document.documentElement;
+        function applyTheme(theme) {
+            HTML_ELEMENT.setAttribute('data-theme', theme);
+            document.body.setAttribute('data-theme', theme);
+        }
+        function setTheme(theme) {
+            applyTheme(theme);
+            try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch(e){}
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            const display = document.getElementById('currentThemeDisplay');
+            if (theme === 'dark') {
+                if (icon) icon.className = 'fas fa-sun';
+                if (text) text.textContent = 'Light Theme';
+                if (display) display.textContent = 'Dark';
+            } else {
+                if (icon) icon.className = 'fas fa-moon';
+                if (text) text.textContent = 'Dark Theme';
+                if (display) display.textContent = 'Light';
+            }
+        }
+        window.toggleTheme = function() {
+            const next = HTML_ELEMENT.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            setTheme(next);
+        }
+        window.openNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '260px'; }
+        window.closeNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '0'; }
+        function showPopup(message, opts){
+            const modal = document.getElementById('app-modal');
+            const body = document.getElementById('app-modal-body');
+            const titleEl = document.getElementById('app-modal-title');
+            const closeBtn = document.getElementById('app-modal-close');
+            const okBtn = document.getElementById('app-modal-ok');
+            const cancelBtn = document.getElementById('app-modal-cancel');
+            if (!modal || !body) return console.error('Modal elements missing', message);
+            const options = opts || {};
+            const isConfirm = options.type === 'confirm';
+            titleEl.textContent = options.title || (isConfirm ? 'Confirmation' : 'Notice');
+            body.textContent = (message == null ? '' : String(message));
+            okBtn.textContent = options.okText || (isConfirm ? 'Confirm' : 'OK');
+            okBtn.className = `app-btn ${options.okClass || (isConfirm ? 'app-btn-critical' : '')}`;
+            cancelBtn.style.display = isConfirm ? 'block' : 'none';
+            function hide(result = false){ modal.classList.remove('show'); cleanup(); if(isConfirm && typeof options.callback === 'function'){ options.callback(result); } }
+            function cleanup(){ closeBtn.removeEventListener('click', onClose); okBtn.removeEventListener('click', onOk); cancelBtn.removeEventListener('click', onCancel); modal.removeEventListener('click', onBackdrop); document.removeEventListener('keydown', onEsc); }
+            function onClose(){ hide(false); }
+            function onOk(){ hide(true); }
+            function onCancel(){ hide(false); }
+            function onBackdrop(e){ if(e.target === modal) hide(false); }
+            function onEsc(e){ if(e.key === 'Escape') hide(false); }
+            closeBtn.addEventListener('click', onClose);
+            okBtn.addEventListener('click', onOk);
+            cancelBtn.addEventListener('click', onCancel);
+            modal.addEventListener('click', onBackdrop);
+            document.addEventListener('keydown', onEsc);
+            modal.classList.add('show');
+        }
+        function showConfirm(message, callback){ showPopup(message, { type:'confirm', title:'Action Required', okText:'Yes', okClass:'app-btn-critical', cancelText:'Cancel', callback }); }
+        window.alert = function(msg){ try { showPopup(msg); } catch { console.error('Modal failed', msg); } };
+        window.showPopup = showPopup;
+        window.showConfirm = showConfirm;
+        function getValidToken(){ const token = localStorage.getItem('token'); return token && token !== 'null' ? token : null; }
+        window.checkAuthStatus = function(){
+            const token = getValidToken();
+            const userOptions = document.getElementById('userOnlyOptions');
+            const guestOptions = document.getElementById('guestOnlyOptions');
+            const navAuthLink = document.getElementById('navAuthLink');
+            if (token){
+                if (userOptions) userOptions.style.display = 'flex';
+                if (guestOptions) guestOptions.style.display = 'none';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-tachometer-alt\"></i> Dashboard'; navAuthLink.href = resolveDashboardHref(); }
+            } else {
+                if (userOptions) userOptions.style.display = 'none';
+                if (guestOptions) guestOptions.style.display = 'block';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-sign-in-alt\"></i> Sign In'; navAuthLink.href = 'login.html'; }
+            }
+        }
+        window.getLocation = function(){
+            if (navigator.geolocation){
+                navigator.geolocation.getCurrentPosition((p)=>{
+                    showPopup(`Your Location:
+Latitude: ${p.coords.latitude.toFixed(6)}
+Longitude: ${p.coords.longitude.toFixed(6)}`, { title:'Current Location' });
+                },()=>showPopup('Unable to retrieve your location.', { title:'Location Error' }));
+            } else {
+                showPopup('Geolocation is not supported by this browser.', { title:'Location Error' });
+            }
+        }
+        window.showNotifications = function(){ if (!getValidToken()) { showPopup('Please sign in to view notifications.', { title:'Authorization Required' }); return; } showPopup('Notifications will appear here.', { title:'Notifications' }); }
+        window.showProfile = function(){ if (!getValidToken()) { showPopup('Please sign in to view profile.', { title:'Authorization Required' }); return; } showPopup('Profile Information (demo)', { title:'User Profile' }); }
+        window.signOut = function(){ showConfirm('Are you sure you want to sign out?', (confirmed)=>{ if (confirmed){ try { localStorage.removeItem('token'); } catch {} window.location.replace('login.html'); } }); }
+        document.addEventListener('DOMContentLoaded', function(){ setTheme(localStorage.getItem(THEME_STORAGE_KEY) || 'light'); checkAuthStatus(); });
+    </script>
+</body>
+</html>

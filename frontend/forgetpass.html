@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <style id="alertaid-shared-components">
+        :root {
+            --color-bg: #fafbfc;
+            --color-surface: #ffffff;
+            --color-surface-soft: #fef3ef;
+            --color-muted: #666666;
+            --color-text: #1a1a1a;
+            --color-primary: #FF3B30;
+            --color-secondary: #FF6F00;
+            --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            --color-border: rgba(26, 26, 26, 0.08);
+            --color-shadow-soft: 0 20px 45px rgba(17, 24, 39, 0.15);
+            --color-nav-bg: rgba(255, 255, 255, 0.95);
+            --color-sidebar-bg-top: rgba(255, 86, 33, 0.98);
+        }
+        html[data-theme="dark"] {
+            --color-bg: #121212;
+            --color-surface: #1e1e1e;
+            --color-surface-soft: #281c1b;
+            --color-muted: #aaaaaa;
+            --color-text: #ffffff;
+            --color-primary: #FF6F00;
+            --color-secondary: #FF3B30;
+            --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            --color-border: rgba(255, 255, 255, 0.1);
+            --color-shadow-soft: 0 20px 45px rgba(0, 0, 0, 0.5);
+            --color-nav-bg: rgba(30, 30, 30, 0.95);
+            --color-sidebar-bg-top: rgba(255, 111, 0, 0.98);
+        }
+        body {
+            min-height: 100vh;
+            background: var(--color-bg) !important;
+            color: var(--color-text);
+            transition: background 0.4s, color 0.4s;
+            font-family: 'Inter', sans-serif;
+            padding-top: 150px;
+        }
+        select option, select optgroup { color: #111 !important; background: #fff !important; }
+        html[data-theme="dark"] select option,
+        html[data-theme="dark"] select optgroup { color: #fff !important; background: #333 !important; }
+        .main-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 24px;
+            background: var(--color-nav-bg);
+            border-radius: 18px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            margin: 12px;
+            width: calc(100% - 24px);
+            max-width: none;
+            z-index: 1000;
+            box-shadow: var(--color-shadow-soft);
+            border: 1px solid var(--color-border);
+            backdrop-filter: blur(10px);
+        }
+        .nav-left, .nav-right { display: flex; align-items: center; gap: 16px; }
+        .nav-spacer {
+            height: 140px;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .nav-spacer { height: 180px; }
+        }
+
+        .nav-brand { font-size: 1.9rem; font-weight: 800; color: var(--color-primary); text-decoration: none; transition: color 0.4s; }
+        .weather-widget { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 30px; background: linear-gradient(135deg, #4A90E2, #357ABD); color: #fff; cursor: pointer; font-weight: 500; box-shadow: 0 5px 15px rgba(53, 122, 189, 0.3); }
+        .weather-widget i { font-size: 1.1rem; color: #fff; }
+        .weather-info { font-size: 0.85rem; text-align: left; }
+        .nav-signin { display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; text-decoration: none; background: var(--color-gradient); padding: 10px 26px; border-radius: 999px; box-shadow: 0 12px 25px rgba(255, 59, 48, 0.35); border: none; font-size: 1rem; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .nav-signin i {
+            margin-right: 8px;
+        }
+        .nav-signin:hover { transform: translateY(-2px); box-shadow: 0 18px 30px rgba(255, 59, 48, 0.4); }
+
+        .sidebar { height: 100%; width: 0; position: fixed; top: 0; left: 0; background: none !important; color: var(--color-text); overflow-x: hidden; transition: 0.4s; padding-top: 110px; z-index: 1000; box-shadow: var(--color-shadow-soft); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; }
+        .sidebar-content { width: 100%; height: 100%; display: flex; flex-direction: column; overflow-y: auto; background: var(--color-sidebar-bg-top) !important; padding-top: 20px; }
+        .sidebar a { color: #fff !important; font-weight: 600; padding: 12px 32px; margin-right: 20px; display: flex; align-items: center; gap: 12px; border-radius: 0 20px 20px 0; transition: background 0.2s ease, transform 0.2s ease; text-decoration: none; }
+        .sidebar a:hover { background: rgba(255,255,255,0.15) !important; transform: translateX(4px); }
+        .sidebar a i { width: 22px; text-align: center; color: #fff !important; }
+        .sidebar .closebtn { position: absolute; top: 24px; right: 24px; width: 42px; height: 42px; border-radius: 14px; background: var(--color-surface); color: var(--color-primary) !important; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 15px 28px rgba(0,0,0,0.25); }
+        .sidebar .closebtn:hover { background: var(--color-surface-soft); }
+        .theme-toggle { padding: 10px 18px; border-radius: 16px; cursor: pointer; font-size: 16px; display: flex; align-items: center; gap: 8px; background: var(--color-surface); color: var(--color-primary); border: 1px solid rgba(26,26,26,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        html[data-theme="dark"] .theme-toggle { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); box-shadow: none; }
+        .theme-toggle:hover { transform: translateY(-1px); background: rgba(255,59,48,0.05); }
+        html[data-theme="dark"] .theme-toggle:hover { background: rgba(255,255,255,0.2); }
+        .app-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:2000}
+        .app-modal.show{display:flex}
+        .app-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.55);backdrop-filter: blur(4px);}
+        .app-modal-dialog{position:relative;background:var(--color-surface);color:var(--color-text);min-width:280px;max-width:520px;width:90%;border-radius:18px;box-shadow:var(--color-shadow-soft);overflow:hidden;border: 1px solid var(--color-border);}
+        .app-modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--color-primary);color:#fff}
+        .app-modal-header button{background:none;border:none;color:#fff;font-size:20px;cursor:pointer}
+        .app-modal-body{padding:16px;white-space:pre-wrap}
+        .app-modal-actions{padding:12px 16px;display:flex;justify-content:flex-end;gap:8px;background:var(--color-surface-soft);}
+        .app-btn{background:var(--color-secondary);color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer; transition: all 0.2s;}
+        .app-btn:hover{background: #e66600;}
+        .app-btn-secondary { background: var(--color-surface-soft); color: var(--color-text); border: 1px solid var(--color-border); }
+        .app-btn-secondary:hover { background: rgba(255, 59, 48, 0.05); }
+        .app-btn-critical { background: #FF3B30; color: #fff; }
+    </style>
+    <style id="alertaid-openbtn-override">
+        .openbtn {
+            width: 48px !important;
+            height: 48px !important;
+            border-radius: 16px !important;
+            background: #ffffff !important;
+            border: 1px solid rgba(15, 23, 42, 0.08) !important;
+            box-shadow: 0 15px 30px rgba(15, 23, 42, 0.12) !important;
+            cursor: pointer;
+            position: relative;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .openbtn::before,
+        .openbtn::after,
+        .openbtn .openbtn-line {
+            content: '';
+            position: absolute;
+            left: 50%;
+            width: 26px;
+            height: 2px;
+            border-radius: 999px;
+            background: #FF3B30 !important;
+            transform: translateX(-50%);
+        }
+        .openbtn::before { top: 16px; }
+        .openbtn .openbtn-line { top: 50%; transform: translate(-50%, -50%); }
+        .openbtn::after { bottom: 16px; }
+        .openbtn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 32px rgba(15, 23, 42, 0.18);
+        }
+    </style>
+
+<title>AlertAid</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="chatbot.css">
+
+  <style>
+    /* === Base === */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #134E5E, #71B280);
+      color: #fff;
+      overflow-x: hidden;
+      transition: margin-left .4s ease;
+      padding: 20px;
+    }
+
+    /* === Navbar === */
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 22px 32px;
+      background: #ffffff;
+      border-radius: 32px;
+      margin: 18px auto 35px;
+      position: relative;
+      z-index: 1000;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+      width: calc(100% - 40px);
+    }
+
+    .nav-brand {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: #FF3B30;
+      text-decoration: none;
+    }
+
+    .weather-widget {
+      margin-left: auto;
+      margin-right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      cursor: pointer;
+    }
+
+    .weather-widget i { font-size: 1.2rem; color: #FFD700; }
+    .weather-info { font-size: 0.8rem; }
+    .nav-signin {
+      margin-left: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 600;
+      text-decoration: none;
+      background: #FF3B30;
+      padding: 10px 24px;
+      border-radius: 999px;
+      box-shadow: 0 14px 26px rgba(255, 59, 48, 0.3);
+      border: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .nav-signin:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 32px rgba(255, 59, 48, 0.35);
+    }
+
+
+    /* === Sidebar === */
+    .sidebar {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      top: 0; left: 0;
+      background: rgba(0,0,0,0.9);
+      overflow-x: hidden;
+      transition: 0.4s;
+      padding-top: 60px;
+      z-index: 1000;
+    }
+    .sidebar a {
+      padding: 12px 25px;
+      text-decoration: none;
+      font-size: 18px;
+      color: #FFD700;
+      display: block;
+      transition: 0.3s;
+    }
+    .sidebar a:hover { background: rgba(255,255,255,0.1); }
+    .sidebar .closebtn {
+      position: absolute;
+      top: 20px;
+      right: 25px;
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: #fff;
+      color: #FF3B30;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 18px 30px rgba(0,0,0,0.25);
+    }
+
+
+
+
+    /* === Reset Password Form === */
+    .reset-container {
+      max-width: 500px;
+      margin: 50px auto;
+      background: rgba(255,255,255,0.1);
+      padding: 40px;
+      border-radius: 15px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .reset-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .reset-header i {
+      font-size: 3rem;
+      color: #FF4500;
+      margin-bottom: 15px;
+    }
+
+    .reset-header h2 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+      color: #FFD700;
+    }
+
+    .reset-header p {
+      color: #ddd;
+      font-size: 0.9rem;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #FFD700;
+      font-weight: 500;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 1rem;
+      transition: 0.3s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #FFD700;
+      background: rgba(255,255,255,0.15);
+    }
+
+    .form-group input::placeholder {
+      color: #bbb;
+    }
+
+    .password-strength {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: #ddd;
+    }
+
+    .strength-bar {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+      margin-top: 5px;
+      overflow: hidden;
+    }
+
+    .strength-fill {
+      height: 100%;
+      width: 0%;
+      background: #FF4500;
+      transition: 0.3s;
+      border-radius: 2px;
+    }
+
+    .btn-reset {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(45deg, #FF4500, #FF6B35);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 10px;
+    }
+
+    .btn-reset:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255,69,0,0.4);
+    }
+
+    .btn-reset:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #FFD700;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: 0.3s;
+    }
+
+    .back-link:hover {
+      color: #fff;
+    }
+
+    /* === Success Popup === */
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .popup {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(15px);
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+      animation: slideIn 0.4s ease;
+    }
+
+    .popup i {
+      font-size: 4rem;
+      color: #4CAF50;
+      margin-bottom: 20px;
+      animation: checkmark 0.6s ease;
+    }
+
+    .popup h3 {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      color: #FFD700;
+    }
+
+    .popup p {
+      color: #ddd;
+      margin-bottom: 25px;
+      line-height: 1.5;
+    }
+
+    .popup-btn {
+      padding: 12px 30px;
+      background: linear-gradient(45deg, #4CAF50, #45a049);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .popup-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(76,175,80,0.4);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes checkmark {
+      0% { transform: scale(0); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    /* === Footer === */
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 14px;
+      color: #bbb;
+    }
+
+    /* === Responsive === */
+    @media (max-width: 768px) {
+      .reset-container {
+        margin: 20px auto;
+        padding: 30px 20px;
+      }
+      
+      .nav-brand {
+        font-size: 1.5rem;
+      }
+      
+      .weather-widget {
+        display: none;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="landing-theme.css">
+  
+
+
+  <script src="role-router.js"></script>
+  <script src="nav-auth.js"></script>
+</head>
+<body class="landing-palette">    <nav class="main-nav">
+        <div class="nav-left">
+            <button class="openbtn" onclick="openNav()" aria-label="Open navigation menu">
+                <span class="openbtn-line"></span>
+            </button>
+            <a href="citizen_dashboard.html" class="nav-brand" data-route="dashboard">AlertAid</a>
+        </div>
+
+        <div class="nav-right">
+            <a class="weather-widget" href="https://www.msn.com/en-in/weather/forecast/in-Indore,MP" target="_blank" rel="noopener">
+                <i id="weather-icon" class="fas fa-cloud-sun"></i>
+                <div class="weather-info">
+                    <div id="weather-details">-- | --°C | --</div>
+                    <div id="weather-time">--:-- | --</div>
+                </div>
+            </a>
+
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light and dark mode">
+                <i id="theme-icon" class="fas fa-sun"></i><span id="theme-text">Light Theme</span>
+            </button>
+
+            <a href="login.html" class="nav-signin" id="navAuthLink">Sign In</a>
+        </div>
+    </nav>
+    <div class="nav-spacer"></div>
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="sidebar-content">
+            <a href="citizen_dashboard.html" data-route="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="alerts.html"><i class="fas fa-exclamation-triangle"></i> Active Alerts</a>
+            <a href="helpforpeople.html"><i class="fas fa-hands-helping"></i> Seek Help</a>
+            <a href="report.html"><i class="fas fa-flag"></i> Report Disaster</a>
+            <a href="donatemoney.html"><i class="fas fa-heart"></i> Make Donation</a>
+            <a href="#" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i> My Location</a>
+            <a href="#" onclick="showNotifications()"><i class="fas fa-bell"></i> Notifications</a>
+                        <div id="userOnlyOptions" style="display: none; flex-direction: column">
+                <a href="profile.html" data-route="profile"><i class="fas fa-user"></i> Profile</a>
+                <a href="change_password.html" data-route="change_password"><i class="fas fa-cog"></i> Settings</a>
+                <a href="javascript:void(0)" onclick="signOut()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+            </div>
+            <div id="guestOnlyOptions">
+                <a href="login.html"><i class="fas fa-sign-in-alt"></i> Sign In</a>
+            </div>
+        </div>
+    </div>
+    
+    <div id="app-modal" class="app-modal" role="dialog" aria-modal="true" aria-labelledby="app-modal-title">
+        <div class="app-modal-backdrop"></div>
+        <div class="app-modal-dialog">
+            <div class="app-modal-header">
+                <div id="app-modal-title">Notice</div>
+                <button id="app-modal-close" aria-label="Close">×</button>
+            </div>
+            <div id="app-modal-body" class="app-modal-body"></div>
+            <div class="app-modal-actions">
+                <button id="app-modal-cancel" class="app-btn app-btn-secondary" style="display:none;">Cancel</button>
+                <button id="app-modal-ok" class="app-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+<!-- Navbar -->
+  
+
+
+  <!-- Reset Password Form -->
+  <div class="reset-container">
+    <div class="reset-header">
+      <i class="fas fa-lock-open"></i>
+      <h2>Forgot Password?</h2>
+      <p>Enter your email to receive a password reset link</p>
+    </div>
+
+    <form id="resetForm">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" placeholder="Enter your email" required>
+      </div>
+
+      <button type="submit" class="btn-reset" id="resetBtn">
+        <i class="fas fa-paper-plane"></i> Send Reset Link
+      </button>
+    </form>
+
+    <a href="login.html" class="back-link">
+      <i class="fas fa-arrow-left"></i> Back to Sign In
+    </a>
+  </div>
+
+  <!-- Success Popup -->
+  <div class="popup-overlay" id="successPopup">
+    <div class="popup">
+      <i class="fas fa-check-circle"></i>
+      <h3>Email Sent!</h3>
+      <p>A password reset link has been sent to your email. Please check your inbox.</p>
+      <button class="popup-btn" onclick="closePopup()">OK</button>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2024 AlertAid. Keeping communities safe and informed.</p>
+  </footer>
+
+  <script>
+    
+
+    // Form validation and submission
+    document.getElementById('resetForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const resetBtn = document.getElementById('resetBtn');
+
+      // Validate email format
+      if (!/^\S+@\S+\.\S+$/.test(email)) {
+        alert('Please enter a valid email address.');
+        return;
+      }
+
+      // Simulate sending email process
+      resetBtn.disabled = true;
+      resetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+      setTimeout(() => {
+        resetBtn.disabled = false;
+        resetBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reset Link';
+        
+        // Show success popup
+        document.getElementById('successPopup').style.display = 'flex';
+      }, 2000);
+    });
+
+    // Close popup function
+    function closePopup() {
+      document.getElementById('successPopup').style.display = 'none';
+      // Optionally redirect to sign in page
+      // window.location.href = 'signin.html';
+    }
+
+    // Close popup when clicking outside
+    document.getElementById('successPopup').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closePopup();
+      }
+    });
+  </script>
+
+  <script src="chatbot.js"></script>
+    <script id="alertaid-shared-components">
+        const THEME_STORAGE_KEY = 'theme';
+        const HTML_ELEMENT = document.documentElement;
+        function applyTheme(theme) {
+            HTML_ELEMENT.setAttribute('data-theme', theme);
+            document.body.setAttribute('data-theme', theme);
+        }
+        function setTheme(theme) {
+            applyTheme(theme);
+            try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch(e){}
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            const display = document.getElementById('currentThemeDisplay');
+            if (theme === 'dark') {
+                if (icon) icon.className = 'fas fa-sun';
+                if (text) text.textContent = 'Light Theme';
+                if (display) display.textContent = 'Dark';
+            } else {
+                if (icon) icon.className = 'fas fa-moon';
+                if (text) text.textContent = 'Dark Theme';
+                if (display) display.textContent = 'Light';
+            }
+        }
+        window.toggleTheme = function() {
+            const next = HTML_ELEMENT.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            setTheme(next);
+        }
+        window.openNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '260px'; }
+        window.closeNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '0'; }
+        function showPopup(message, opts){
+            const modal = document.getElementById('app-modal');
+            const body = document.getElementById('app-modal-body');
+            const titleEl = document.getElementById('app-modal-title');
+            const closeBtn = document.getElementById('app-modal-close');
+            const okBtn = document.getElementById('app-modal-ok');
+            const cancelBtn = document.getElementById('app-modal-cancel');
+            if (!modal || !body) return console.error('Modal elements missing', message);
+            const options = opts || {};
+            const isConfirm = options.type === 'confirm';
+            titleEl.textContent = options.title || (isConfirm ? 'Confirmation' : 'Notice');
+            body.textContent = (message == null ? '' : String(message));
+            okBtn.textContent = options.okText || (isConfirm ? 'Confirm' : 'OK');
+            okBtn.className = `app-btn ${options.okClass || (isConfirm ? 'app-btn-critical' : '')}`;
+            cancelBtn.style.display = isConfirm ? 'block' : 'none';
+            function hide(result = false){ modal.classList.remove('show'); cleanup(); if(isConfirm && typeof options.callback === 'function'){ options.callback(result); } }
+            function cleanup(){ closeBtn.removeEventListener('click', onClose); okBtn.removeEventListener('click', onOk); cancelBtn.removeEventListener('click', onCancel); modal.removeEventListener('click', onBackdrop); document.removeEventListener('keydown', onEsc); }
+            function onClose(){ hide(false); }
+            function onOk(){ hide(true); }
+            function onCancel(){ hide(false); }
+            function onBackdrop(e){ if(e.target === modal) hide(false); }
+            function onEsc(e){ if(e.key === 'Escape') hide(false); }
+            closeBtn.addEventListener('click', onClose);
+            okBtn.addEventListener('click', onOk);
+            cancelBtn.addEventListener('click', onCancel);
+            modal.addEventListener('click', onBackdrop);
+            document.addEventListener('keydown', onEsc);
+            modal.classList.add('show');
+        }
+        function showConfirm(message, callback){ showPopup(message, { type:'confirm', title:'Action Required', okText:'Yes', okClass:'app-btn-critical', cancelText:'Cancel', callback }); }
+        window.alert = function(msg){ try { showPopup(msg); } catch { console.error('Modal failed', msg); } };
+        window.showPopup = showPopup;
+        window.showConfirm = showConfirm;
+        function getValidToken(){ const token = localStorage.getItem('token'); return token && token !== 'null' ? token : null; }
+        window.checkAuthStatus = function(){
+            const token = getValidToken();
+            const userOptions = document.getElementById('userOnlyOptions');
+            const guestOptions = document.getElementById('guestOnlyOptions');
+            const navAuthLink = document.getElementById('navAuthLink');
+            if (token){
+                if (userOptions) userOptions.style.display = 'flex';
+                if (guestOptions) guestOptions.style.display = 'none';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-tachometer-alt\"></i> Dashboard'; navAuthLink.href = resolveDashboardHref(); }
+            } else {
+                if (userOptions) userOptions.style.display = 'none';
+                if (guestOptions) guestOptions.style.display = 'block';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-sign-in-alt\"></i> Sign In'; navAuthLink.href = 'login.html'; }
+            }
+        }
+        window.getLocation = function(){
+            if (navigator.geolocation){
+                navigator.geolocation.getCurrentPosition((p)=>{
+                    showPopup(`Your Location:
+Latitude: ${p.coords.latitude.toFixed(6)}
+Longitude: ${p.coords.longitude.toFixed(6)}`, { title:'Current Location' });
+                },()=>showPopup('Unable to retrieve your location.', { title:'Location Error' }));
+            } else {
+                showPopup('Geolocation is not supported by this browser.', { title:'Location Error' });
+            }
+        }
+        window.showNotifications = function(){ if (!getValidToken()) { showPopup('Please sign in to view notifications.', { title:'Authorization Required' }); return; } showPopup('Notifications will appear here.', { title:'Notifications' }); }
+        window.showProfile = function(){ if (!getValidToken()) { showPopup('Please sign in to view profile.', { title:'Authorization Required' }); return; } showPopup('Profile Information (demo)', { title:'User Profile' }); }
+        window.signOut = function(){ showConfirm('Are you sure you want to sign out?', (confirmed)=>{ if (confirmed){ try { localStorage.removeItem('token'); } catch {} window.location.replace('login.html'); } }); }
+        document.addEventListener('DOMContentLoaded', function(){ setTheme(localStorage.getItem(THEME_STORAGE_KEY) || 'light'); checkAuthStatus(); });
+    </script>
+</body>
+</html>

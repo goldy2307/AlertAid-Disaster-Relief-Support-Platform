@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>AlertAid</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="chatbot.css">
+  <link rel="stylesheet" href="landing-theme.css">
+  <link rel="stylesheet" href="premium-theme.css">
+  <style>
+    /* === Base === */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+    body {
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh;
+      /* Default dark theme background - Overridden by landing-palette class */
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); /* dark fallback before theme CSS loads */
+      color: #fff;
+      padding: 20px;
+      transition: background-color 0.4s ease; /* Added for smooth theme transition */
+    }
+
+    /* === Top Bar (Minimal Header) === */
+    .top-bar {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 95%;
+      max-width: 1200px; /* Adjust as needed */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 25px;
+      z-index: 500;
+      background: rgba(26, 26, 46, 0.9); /* Default dark theme background */
+      backdrop-filter: blur(10px);
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      color: #fff;
+      transition: all 0.4s ease;
+    }
+    .landing-palette .top-bar {
+      /* Overridden by landing-palette CSS below, but keeping this for clarity */
+    }
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-brand {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #FF3B30; /* Primary color */
+    }
+    
+    .theme-toggle-btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .landing-palette .theme-toggle-btn {
+      background: var(--landing-surface);
+      color: var(--landing-primary);
+      border: 1px solid rgba(26, 26, 26, 0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .theme-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .landing-palette .theme-toggle-btn:hover {
+      background: rgba(255, 59, 48, 0.05);
+    }
+
+
+    /* === Access Box === */
+    .access-box {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(15px);
+      padding: 35px 30px;
+      border-radius: 20px;
+      width: 450px;
+      max-width: 90vw;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+      border: 1px solid rgba(220, 53, 69, 0.3);
+      animation: fadeIn 0.8s ease;
+      text-align: center;
+      margin-top: 100px; /* Adjusted margin to accommodate new header */
+      max-height: calc(90vh - 80px); /* Adjusted max-height */
+      overflow-y: auto;
+      transition: all 0.4s ease;
+    }
+    /* Light Theme Adjustments for Access Box */
+    .landing-palette .access-box {
+      background: var(--landing-surface);
+      border: 1px solid rgba(26, 26, 26, 0.08);
+      box-shadow: 0 15px 40px rgba(15, 23, 42, 0.12);
+      color: var(--landing-text);
+    }
+
+    .access-box h2 {
+      font-size: 1.9rem;
+      margin-bottom: 20px;
+      display: flex; justify-content: center; align-items: center; gap: 10px;
+      color: #FF3B30;
+    }
+    .access-box h2 i { color: #FF3B30; justify-content: center; }
+
+    
+    /* === Mode Toggle === */
+    .mode-toggle {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 25px;
+      gap: 10px;
+    }
+    .mode-toggle button {
+      padding: 10px 18px;
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(220, 53, 69, 0.4);
+      border-radius: 10px;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .landing-palette .mode-toggle button {
+      background: rgba(255, 59, 48, 0.05);
+      border-color: rgba(255, 59, 48, 0.2);
+      color: var(--landing-text);
+    }
+    .mode-toggle button.active {
+      background: #FF3B30;
+      color: #fff;
+      border-color: #FF3B30;
+      box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+    }
+    /* Light Theme Active Button */
+    .landing-palette .mode-toggle button.active {
+      background: var(--landing-primary);
+      color: #fff;
+      border-color: var(--landing-primary);
+    }
+
+    /* === Role Toggle (hidden; replaced by popup) === */
+    .role-toggle { display: none; }
+
+/* Make Organization span across both columns and center */
+.role-toggle .org1 {
+  grid-column: span 2;
+  justify-self: center;
+  width: 100%; /* Optional: make button smaller */
+}
+
+    .role-toggle button {
+      background: transparent;
+      border: none;
+      padding: 12px 8px;
+      color: #fff;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 13px;
+    }
+    .landing-palette .role-toggle button {
+        color: var(--landing-text);
+    }
+    .role-toggle button.active {
+      background: #FF3B30;
+      color: #fff;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .role-toggle button:hover:not(.active) {
+      background: rgba(220, 53, 69, 0.2);
+    }
+    .landing-palette .role-toggle button:hover:not(.active) {
+        background: rgba(255, 59, 48, 0.1);
+    }
+
+    
+
+    /* === Inputs === */
+    .input-group { margin-bottom: 16px; text-align: left; }
+    .input-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: #e0e0e0;
+      font-weight: 500;
+    }
+    .landing-palette .input-group label {
+      color: var(--landing-muted);
+    }
+    .input-group input, .input-group select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid rgba(220, 53, 69, 0.3);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+    /* Light theme inputs */
+    .landing-palette .input-group input, .landing-palette .input-group select {
+      background: rgba(255, 59, 48, 0.03); /* Very light red tint */
+      border-color: rgba(26, 26, 26, 0.1);
+      color: var(--landing-text);
+    }
+    .input-group input:focus, .input-group select:focus {
+      border-color: #FF3B30;
+      box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+    }
+    .input-group input::placeholder { color: #bbb; }
+    .landing-palette .input-group input::placeholder { color: #aaa; }
+    .input-group select option { background: var(--landing-surface,#1a1a2e); color: var(--landing-text,#fff); }
+    .landing-palette .input-group select option { background: var(--landing-surface); color: var(--landing-text); }
+
+
+    /* === Two Column Layout === */
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+ 
+.input-group2 {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 40px; /* space for the eye */
+  box-sizing: border-box;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  user-select: none;
+  font-size: 18px;
+}
+
+
+    /* === Buttons === */
+    .access-box button.submit {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #FF3B30, #c82333);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 15px;
+      box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+    }
+    /* Light Theme Buttons */
+    .landing-palette .access-box button.submit {
+        background: var(--landing-gradient) !important;
+        box-shadow: 0 12px 25px rgba(255, 59, 48, 0.35);
+    }
+    .access-box button.submit:hover { 
+      background: linear-gradient(135deg, #c82333, #a71e2a);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(220, 53, 69, 0.5);
+    }
+
+    /* === Links === */
+    .links {
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    .links a {
+      color: #FF3B30;
+      text-decoration: none;
+      transition: 0.3s;
+      margin: 0 10px;
+      font-weight: 500;
+    }
+    .links a:hover { 
+      text-decoration: underline;
+      color: #ff6b7a;
+    }
+    .links2 {
+  margin-top: 20px;
+  font-size: 14px;
+  display: flex;
+  justify-content: center;
+}
+
+    .links2 a {
+      color: #FF3B30;
+      text-decoration: none;
+      transition: 0.3s;
+      margin: 0 10px;
+      font-weight: 500;
+      justify-content: center;
+    }
+    .links2 a:hover { 
+      text-decoration: underline;
+      color: #ff6b7a;
+    }
+
+
+    /* === Success Message === */
+    .success-message {
+      display: none;
+      background: rgba(40, 167, 69, 0.2);
+      border: 2px solid #28a745;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 15px;
+      color: #28a745;
+      font-weight: 600;
+    }
+
+    /* === Form Sections === */
+    .form-section {
+      display: none;
+      width: 100%;
+    }
+    .form-section.active {
+      display: block;
+    }
+    
+    /* Strict form visibility control */
+    .access-box[data-mode="signin"] #registerForm,
+    .access-box[data-mode="signin"] #registerForm * {
+      display: none !important;
+      visibility: hidden !important;
+    }
+    .access-box[data-mode="register"] #signinForm,
+    .access-box[data-mode="register"] #signinForm * {
+      display: none !important;
+      visibility: hidden !important;
+    }
+    
+    /* Override for active form */
+    .access-box[data-mode="signin"] #signinForm.active {
+      display: block !important;
+      visibility: visible !important;
+    }
+    .access-box[data-mode="register"] #registerForm.active {
+      display: block !important;
+      visibility: visible !important;
+    }
+    .access-box[data-mode="signin"] #signinForm.active * {
+      visibility: visible !important;
+    }
+    .access-box[data-mode="register"] #registerForm.active * {
+      visibility: visible !important;
+    }
+    
+    /* Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Scrollbar */
+    .access-box::-webkit-scrollbar {
+      width: 6px;
+    }
+    .access-box::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+    }
+    .access-box::-webkit-scrollbar-thumb {
+      background: #FF3B30;
+      border-radius: 3px;
+      opacity: 0.5;
+    }
+  </style>
+  <link rel="stylesheet" href="landing-theme.css">
+  
+
+</head>
+<body class="landing-palette premium-bg">
+ 
+  <div class="top-bar">
+    <div class="brand-group">
+        <div class="nav-brand">AlertAid</div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        
+        <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeToggleButton">
+            <i class="fas fa-moon"></i> 
+        </button>
+    </div>
+  </div>
+  <div id="rolePicker" style="position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:1000; display:flex; align-items:center; justify-content:center;">
+    <div style="background:var(--landing-surface,#fff); border:1px solid var(--landing-border,rgba(0,0,0,.1)); border-radius:14px; padding:22px; width:92%; max-width:520px; color:var(--landing-text,#1a1a1a); box-shadow:var(--landing-shadow-lg,0 18px 40px rgba(0,0,0,.25))">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+        <h3 style="margin:0; font-size:20px; display:flex; gap:8px; align-items:center;"><i class="fas fa-user-shield" style="color:#FF3B30"></i> Choose your role</h3>
+      </div>
+      <p style="opacity:.85; margin:0 0 14px 0;">Select how you want to continue on AlertAid.</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+        <button class="rp-btn" onclick="onRolePicked('CITIZEN')" style="padding:12px;border:2px solid rgba(220,53,69,.35);background:var(--landing-surface-soft,#fef3ef);color:var(--landing-text,#1a1a1a);border-radius:10px;cursor:pointer"><i class="fas fa-user"></i> Citizen</button>
+        <button class="rp-btn" onclick="onRolePicked('VOLUNTEER')" style="padding:12px;border:2px solid rgba(220,53,69,.35);background:var(--landing-surface-soft,#fef3ef);color:var(--landing-text,#1a1a1a);border-radius:10px;cursor:pointer"><i class="fas fa-hands-helping"></i> Volunteer</button>
+        <button class="rp-btn" onclick="onRolePicked('ORG')" style="padding:12px;border:2px solid rgba(220,53,69,.35);background:var(--landing-surface-soft,#fef3ef);color:var(--landing-text,#1a1a1a);border-radius:10px;cursor:pointer"><i class="fas fa-building"></i> Organization</button>
+        <button class="rp-btn" onclick="onRolePicked('ADMIN')" style="padding:12px;border:2px solid rgba(220,53,69,.35);background:var(--landing-surface-soft,#fef3ef);color:var(--landing-text,#1a1a1a);border-radius:10px;cursor:pointer"><i class="fas fa-shield-alt"></i> Admin</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="access-box glass-card" data-mode="signin">
+    <h2>AlertAid</h2>
+
+    <div class="mode-toggle">
+      <button type="button" class="active" onclick="setMode('signin')">Sign In</button>
+      <button type="button" onclick="setMode('register')">Register</button>
+    </div>
+
+    <div class="form-section active" id="signinForm">
+      <form onsubmit="handleSubmit(event)">
+        <div class="input-group">
+            <label for="signin-username"> <i class="fa-solid fa-envelope" style="color: #FF3B30;"></i>  Enter Mail </label>
+          <input type="email" id="signin-username" placeholder="Enter your username" required>
+        </div>
+        <div class="input-group">
+             <label for="signin-accesscode"><i class="fas fa-key" style="color: #FF3B30;"></i> Access Code</label>
+               <div class="password-wrapper">
+                 <input type="password" id="signin-accesscode" placeholder="Enter your access code" required>
+                      <span class="eye-icon" onclick="myFunction()"><i class="fa-etch fa-solid fa-eye" style="color: #FF3B30;"></i></span>
+              </div>
+          <script>
+           function myFunction() {
+            const x = document.getElementById("signin-accesscode");
+             if (x.type === "password") {
+              x.type = "text";
+              } else {
+             x.type = "password";
+               }
+             }
+           </script>
+           <div class="links2">
+          <a href="forgetpass.html" onclick="href.location='forgetpass.html'">
+        <i class="fas fa-key"></i> Forgot Password
+      </a></div>
+          </div>
+        <button type="submit" class="submit">Sign In to AlertAid</button>
+        <button type="button" class="submit" onclick="startGoogleOAuth('signin')"><i class="fab fa-google"></i>  Sign In Using Google</button>
+     <div class="links">
+      <a href="javascript:void(0)" onclick="goHome()">
+        <i class="fas fa-home"></i> Back to Website
+      </a>
+      <a href="#" onclick="showHelp()">
+        <i class="fas fa-question-circle"></i> Emergency Help
+      </a>
+      <a href="javascript:void(0)" onclick="onRolePicked('ADMIN')">
+        <i class="fas fa-shield-alt" ></i> Admin
+        </a>
+         
+    </div>
+      </form>
+    </div>
+
+    <div class="form-section" id="registerForm">
+      <form onsubmit="handleSubmit(event)">
+        <div class="input-row">
+          <div class="input-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" placeholder="First name" required>
+          </div>
+          <div class="input-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" placeholder="Last name" required>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="email">Mail</label>
+          <input type="text" id="email" placeholder="abcd12@gmail.com" required>
+        </div>
+
+        <div class="input-group">
+          <label for="phone">Phone Number</label>
+          <div class="phone-wrapper">
+            <input 
+              type="text" 
+              id="phone" 
+              name="phone" 
+              maxlength="10" 
+              placeholder="10-digit Mobile No." 
+              required
+              inputmode="numeric" 
+              oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+            />
+          </div>
+        </div>
+
+          <div class="input-group">
+            <label for="address">Address</label>
+            <input type="text" id="address" placeholder="Your residential address">
+          </div>
+          <div class="input-row">
+          <div class="input-group">
+  <label for="state">State</label>
+  <select id="state" name="state" required>
+    <option value="">-- Select State --</option>
+  </select>
+</div>
+
+<div class="input-group">
+  <label for="city">City</label>
+  <select id="city" name="city" required>
+    <option value="">-- Select City --</option>
+  </select>
+</div>
+      
+               <div class="input-group">
+              <label for="pincode">Pin Code</label>
+              <input  type="text"  id="pincode" name="pincode" maxlength="6" placeholder="6-digit PIN" required 
+                      pattern="\d{6}" inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '')" /> 
+            </div>
+          </div>
+
+        <div id="userFields">
+           <div class="input-group">
+             <label for="Gender">Gender</label>
+              <select id="Gender" name="Gender">
+               <option value="" disabled selected>-- Select Gender --</option>
+               <option value="Male">Male</option>
+               <option value="Female">Female</option>
+               <option value="Other">Other</option>
+               <option value="Prefer not to say">Prefer not to say</option>
+              </select>
+           </div>
+        </div>
+
+        <div id="volunteerFields" class="role-fields" style="display: none;">
+          <div class="input-group">
+            <label for="Expertise">Expertise</label>
+            <input type="text" id="Expertise" placeholder="First Aid, CPR, Medical, etc.">
+          </div>
+          <div class="input-row">
+            <div class="input-group">
+              <label for="availability">Availability</label>
+              <select id="availability">
+                <option value="">Select availability</option>
+                <option value="weekdays">Weekdays</option>
+                <option value="weekends">Weekends</option>
+                <option value="evenings">Evenings</option>
+                <option value="anytime">Anytime</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label for="experience">Experience Level</label>
+              <select id="experience">
+                <option value="">Select experience</option>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="experienced">Experienced</option>
+                <option value="professional">Professional</option>
+              </select>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="Supportmode">Support Mode</label>
+            <select id="Supportmode">
+                 <option value="">Select Mode</option>
+                <option value="Offline">In Person (Offline)</option>
+                <option value="Online">Remote (Online)</option>
+                <option value="Both">Both</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="organizationFields" class="role-fields" style="display: none;">
+          <div class="input-group">
+            <label for="orgName">Organization Name</label>
+            <input type="text" id="orgName" placeholder="Official organization name">
+          </div>
+          <div class="input-row">
+            <div class="input-group">
+              <label for="orgType">Organization Type</label>
+              <select id="orgType">
+                <option value="">Select type</option>
+                <option value="ngo">NGO/Non-Profit</option>
+                <option value="government">Government Agency</option>
+                <option value="medical">Medical/Healthcare</option>
+                <option value="fire">Fire Department</option>
+                <option value="police">Police Department</option>
+                <option value="corporate">Corporate</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label for="licenseNumber">License/Reg. Number</label>
+              <input type="text" id="licenseNumber" placeholder="Official License/Reg. number">
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="services">Services Provided</label>
+            <input type="text" id="services" placeholder="Emergency services, shelter, medical aid, etc.">
+          </div>
+            <div class="input-group">
+               <label for="Supportmode">Support Mode</label>
+            <select id="Supportmode">
+                 <option value="">Select Mode</option>
+                <option value="Offline">In Person (Offline)</option>
+                <option value="Online">Remote (Online)</option>
+                <option value="Both">Both</option>
+            </select>            </div>
+        </div>
+
+        <button type="submit" class="submit" id="registerBtn">Register for AlertAid</button>
+        <button type="button" class="submit" onclick="startGoogleOAuth('signup')"><i class="fab fa-google"></i>  Sign Up Using Google</button>
+      </form>
+    </div>
+
+    <div class="success-message" id="successMessage">
+      <i class="fas fa-check-circle"></i> <span id="successText">Access granted! Redirecting to dashboard...</span>
+    </div>
+  </div>
+
+  <div id="rolePicker" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:1000; align-items:center; justify-content:center;">
+    <div style="background:var(--landing-surface,#fff); border:1px solid var(--landing-border,rgba(0,0,0,.1)); border-radius:14px; padding:22px; width:92%; max-width:520px; color:var(--landing-text,#1a1a1a); box-shadow:var(--landing-shadow-lg,0 18px 40px rgba(0,0,0,.25))">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+        <h3 style="margin:0; font-size:20px; display:flex; gap:8px; align-items:center;"><i class="fas fa-user-shield" style="color:#FF3B30"></i> Choose your role</h3>
+        <button onclick="hideRolePicker()" aria-label="Close" style="background:none;border:none;color:var(--landing-text,#fff);font-size:20px;cursor:pointer">×</button>
+      </div>
+      <p style="opacity:.85; margin:0 0 14px 0;">Select how you want to continue on AlertAid.</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+        <button class="rp-btn" onclick="onRolePicked('CITIZEN')" style="padding:12px;border:2px solid rgba(220,53,69,.35);background:var(--landing-surface-soft,#fef3ef);color:var(--landing-text,#1a1a1a);border-radius:10px;cursor:pointer"><i class="fas fa-user"></i> Citizen</button>
+        <button class="rp-btn" onclick="onRolePicked('VOLUNTEER')" style="padding:12px;border:2px solid rgba(220,53,69,.35);background:var(--landing-surface-soft,#fef3ef);color:var(--landing-text,#1a1a1a);border-radius:10px;cursor:pointer"><i class="fas fa-hands-helping"></i> Volunteer</button>
+        <button class="rp-btn" onclick="onRolePicked('ORG')" style="padding:12px;border:2px solid rgba(220,53,69,.35);background:var(--landing-surface-soft,#fef3ef);color:var(--landing-text,#1a1a1a);border-radius:10px;cursor:pointer"><i class="fas fa-building"></i> Organization</button>
+        <button class="rp-btn" onclick="onRolePicked('ADMIN')" style="padding:12px;border:2px solid rgba(220,53,69,.35);background:var(--landing-surface-soft,#fef3ef);color:var(--landing-text,#1a1a1a);border-radius:10px;cursor:pointer"><i class="fas fa-shield-alt"></i> Admin</button>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:8px;">
+        <button onclick="hideRolePicker()" style="padding:10px 14px;border:none;border-radius:10px;background:var(--landing-surface-soft,rgba(255,255,255,.12));color:var(--landing-text,#fff);cursor:pointer">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ===== Theme Management Logic (Added) =====
+  const LIGHT_THEME_CLASS = 'landing-palette';
+  const THEME_STORAGE_KEY = 'alertaid_theme';
+
+  function setTheme(theme) {
+    const body = document.body;
+    const button = document.getElementById('themeToggleButton');
+    
+    if (theme === 'dark') {
+      body.classList.remove(LIGHT_THEME_CLASS);
+      try { localStorage.setItem(THEME_STORAGE_KEY, 'dark'); } catch(e){}
+      if (button) {
+        button.innerHTML = '<i class="fas fa-sun"></i> ';
+      }
+    } else {
+      body.classList.add(LIGHT_THEME_CLASS);
+      try { localStorage.setItem(THEME_STORAGE_KEY, 'light'); } catch(e){}
+      if (button) {
+        button.innerHTML = '<i class="fas fa-moon"></i> ';
+      }
+    }
+  }
+
+  function toggleTheme() {
+    const currentTheme = document.body.classList.contains(LIGHT_THEME_CLASS) ? 'light' : 'dark';
+    setTheme(currentTheme === 'light' ? 'dark' : 'light');
+  }
+
+  // Initial theme load
+  (function initTheme() {
+    // Check local storage for preference, default to 'light' (as per existing body class)
+    const storedTheme = (localStorage.getItem(THEME_STORAGE_KEY) || 'light');
+    setTheme(storedTheme);
+  })();
+  // ===== End Theme Management Logic =====
+
+
+  // ===== State & role globals =====
+  let currentMode = 'signin';
+  let currentRole = 'user';
+
+  const ENUM_TO_UI_ROLE = {
+    CITIZEN: 'user',
+    VOLUNTEER: 'volunteer',
+    ORG: 'organization',
+    ADMIN: 'admin'
+  };
+  const UI_ROLE_TO_ENUM = {
+    user: 'CITIZEN',
+    volunteer: 'VOLUNTEER',
+    organization: 'ORG',
+    admin: 'ADMIN'
+  };
+
+  // Keep a single copy of the state-city map and listeners
+  let stateCityMap = {};
+  let statesPopulated = false;
+  let stateChangeBound = false;
+
+  // For moving Org Name field up & back safely
+  let orgNameGroup, orgNameOriginalParent, orgNameNextSibling;
+
+  // Remove the green "Access granted" label if present
+  (function removeLegacySuccessBanner() {
+    const successMessage = document.getElementById('successMessage');
+    if (successMessage) successMessage.remove();
+  })();
+
+  // ===== Mode handling =====
+  function setMode(mode) {
+    currentMode = mode;
+
+    const signin = document.getElementById('signinForm');
+    const register = document.getElementById('registerForm');
+    const container = document.querySelector('.access-box');
+
+    // Toggle button states
+    document.querySelectorAll('.mode-toggle button').forEach(btn => btn.classList.remove('active'));
+    const targetButton = document.querySelector(`.mode-toggle button[onclick="setMode('${mode}')"]`);
+    if (targetButton) targetButton.classList.add('active');
+
+    // Set data-mode attribute for CSS control
+    if (container) {
+      container.setAttribute('data-mode', mode);
+    }
+
+    // Update form visibility using classes and inline styles as fallback
+    if (signin && register) {
+      if (mode === 'signin') {
+        signin.classList.add('active');
+        register.classList.remove('active');
+        signin.style.display = 'block';
+        signin.style.visibility = 'visible';
+        register.style.display = 'none';
+        register.style.visibility = 'hidden';
+      } else {
+        // Register mode - show register form and restore all fields
+        register.classList.add('active');
+        signin.classList.remove('active');
+        register.style.display = 'block';
+        register.style.visibility = 'visible';
+        signin.style.display = 'none';
+        signin.style.visibility = 'hidden';
+        
+        // Show all common register fields first (they'll be adjusted by updateRoleFields based on role)
+        const commonFields = register.querySelectorAll('.input-row, #firstName, #lastName, #email, #phone, #address, #state, #city, #pincode');
+        commonFields.forEach(field => {
+          if (field.closest('#registerForm')) {
+            field.style.removeProperty('display');
+            field.style.removeProperty('visibility');
+            // Ensure parent containers are visible
+            const parent = field.closest('.input-group, .input-row');
+            if (parent) {
+              parent.style.removeProperty('display');
+              parent.style.removeProperty('visibility');
+            }
+          }
+        });
+        
+        // Show submit buttons
+        const submitButtons = register.querySelectorAll('button.submit');
+        submitButtons.forEach(btn => {
+          btn.style.removeProperty('display');
+          btn.style.removeProperty('visibility');
+        });
+        
+        // Initialize register form fields when switching to register (will handle role-specific visibility)
+        updateRoleFields();
+      }
+    }
+  }
+
+  // ===== Role handling =====
+  function setRole(role) {
+    // role is UI role: 'user', 'volunteer', 'organization', or 'admin'
+    const enumRole = UI_ROLE_TO_ENUM[role] || 'CITIZEN';
+    selectRole(enumRole);
+  }
+
+  function selectRole(enumRole) {
+    const upper = (enumRole || 'CITIZEN').toUpperCase();
+    const uiRole = ENUM_TO_UI_ROLE[upper] || 'user';
+    currentRole = uiRole;
+
+    // Persist backend enum role for login and guards
+    try { localStorage.setItem('role', upper); } catch(e){}
+
+    // Toggle active on legacy role-toggle buttons
+    const roleButtons = document.querySelectorAll('.role-toggle button');
+    roleButtons.forEach(btn => btn.classList.remove('active'));
+    const roleDisplayMap = { user: 'Citizen', volunteer: 'Volunteer', organization: 'Organization' };
+    const btnToActivate = document.querySelector(`.role-toggle button[data-role="${roleDisplayMap[uiRole]}"]`);
+    if (btnToActivate) btnToActivate.classList.add('active');
+
+    // Update signin placeholders
+    const usernameInput = document.getElementById('signin-username');
+    const accessInput = document.getElementById('signin-accesscode');
+    if (usernameInput && accessInput) {
+      switch (uiRole) {
+        case 'user':
+          usernameInput.placeholder = 'Citizen ID or username';
+          accessInput.placeholder = 'Personal access code';
+          break;
+        case 'volunteer':
+          usernameInput.placeholder = 'Volunteer ID';
+          accessInput.placeholder = 'Volunteer access code';
+          break;
+        case 'organization':
+          usernameInput.placeholder = 'Organization ID';
+          accessInput.placeholder = 'Organization access key';
+          break;
+        case 'admin':
+          usernameInput.placeholder = 'Admin username';
+          accessInput.placeholder = 'Admin security code';
+          break;
+      }
+    }
+
+    if (currentMode === 'register') {
+      updateRoleFields();
+    }
+
+    // Also update any enum-based placeholders
+    updateFormForRole(upper);
+  }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const storedEnumRole = (localStorage.getItem('role') || 'CITIZEN').toUpperCase();
+  setMode('signin');
+  selectRole(storedEnumRole);
+});
+
+  // ===== One-time setup for state/city selects =====
+  function initStateCity() {
+    const stateSelect = document.getElementById("state");
+    const citySelect = document.getElementById("city");
+    if (!stateSelect || !citySelect) return;
+
+    // If already populated, skip
+    if (statesPopulated) return;
+
+    fetch("india_states_cities1.json")
+      .then(r => r.json())
+      .then(data => {
+        stateCityMap = data || {};
+        // Populate states once
+        const states = Object.keys(stateCityMap).sort((a,b)=>a.localeCompare(b));
+        stateSelect.innerHTML = '<option value="">-- Select State --</option>';
+        states.forEach(st => {
+          const opt = document.createElement("option");
+          opt.value = st;
+          opt.textContent = st;
+          stateSelect.appendChild(opt);
+        });
+        statesPopulated = true;
+
+        // Bind city change only once
+        if (!stateChangeBound) {
+          stateSelect.addEventListener("change", function () {
+            citySelect.innerHTML = '<option value="">-- Select City --</option>';
+            const selectedState = this.value;
+            if (stateCityMap[selectedState]) {
+              const cities = [...stateCityMap[selectedState]].sort((a,b)=>a.localeCompare(b));
+              cities.forEach(city => {
+                const opt = document.createElement("option");
+                opt.value = city;
+                opt.textContent = city;
+                citySelect.appendChild(opt);
+              });
+            }
+          });
+          stateChangeBound = true;
+        }
+      })
+      .catch(() => {
+        // Fail-silent on JSON issues
+      });
+  }
+
+  // ===== Register form role-specific fields =====
+  function updateRoleFields() {
+    // Only run if we're in register mode
+    if (currentMode !== 'register') return;
+
+    // First, ensure all common fields are visible (these should always be visible in register mode)
+    const commonFieldIds = ['email', 'phone', 'address', 'state', 'city', 'pincode'];
+    commonFieldIds.forEach(id => {
+      const field = document.getElementById(id);
+      if (field) {
+        const container = field.closest('.input-group');
+        if (container) {
+          container.style.display = 'block';
+          container.style.visibility = 'visible';
+        }
+        field.style.display = '';
+        field.style.visibility = '';
+      }
+    });
+
+    // Hide all role-specific blocks first
+    const allRoleFields = document.querySelectorAll('.role-fields');
+    allRoleFields.forEach(el => {
+      el.style.display = 'none';
+      el.style.visibility = 'hidden';
+    });
+
+    // Get userFields (contains Gender) - should be visible for user/volunteer roles
+    const userFields = document.getElementById('userFields');
+    
+    // Get role-specific field blocks
+    const volunteerFields = document.getElementById('volunteerFields');
+    const organizationFields = document.getElementById('organizationFields');
+
+    // Cache pointers for Org Name movement (only once)
+    if (!orgNameGroup) {
+      orgNameGroup = document.getElementById("orgName")?.closest(".input-group") || null;
+      if (orgNameGroup) {
+        orgNameOriginalParent = orgNameGroup.parentElement;
+        orgNameNextSibling = orgNameGroup.nextElementSibling;
+      }
+    }
+
+    // Common inputs in first name row + gender group
+    const firstRow = document.querySelector('#registerForm .input-row'); // first row has First/Last Name
+    const genderGroup = document.getElementById("Gender")?.closest(".input-group");
+    const genderParent = document.getElementById("Gender")?.closest("#userFields");
+    const registerForm = document.querySelector("#registerForm form");
+
+    // Show/hide fields based on role
+    if (currentRole === "organization") {
+      // Hide first/last name and gender for organizations
+      if (firstRow) {
+        firstRow.style.display = "none";
+        firstRow.style.visibility = "hidden";
+      }
+      if (genderGroup) {
+        genderGroup.style.display = "none";
+        genderGroup.style.visibility = "hidden";
+      }
+      if (userFields) {
+        userFields.style.display = "none";
+        userFields.style.visibility = "hidden";
+      }
+
+      // Show organization fields
+      if (organizationFields) {
+        organizationFields.style.display = "block";
+        organizationFields.style.visibility = "visible";
+      }
+      if (volunteerFields) {
+        volunteerFields.style.display = "none";
+        volunteerFields.style.visibility = "hidden";
+      }
+
+      // Move Org Name group to very top of register form
+      if (orgNameGroup && registerForm) {
+        orgNameGroup.style.display = "block";
+        orgNameGroup.style.visibility = "visible";
+        if (registerForm.firstElementChild !== orgNameGroup.parentElement) {
+          const orgNameContainer = orgNameGroup.parentElement;
+          registerForm.insertBefore(orgNameContainer, registerForm.firstElementChild);
+        }
+      }
+    } else if (currentRole === "volunteer") {
+      // Show first/last name, hide gender (volunteers don't need gender)
+      if (firstRow) {
+        firstRow.style.display = "grid";
+        firstRow.style.visibility = "visible";
+      }
+      if (genderGroup) {
+        genderGroup.style.display = "none";
+        genderGroup.style.visibility = "hidden";
+      }
+      if (userFields) {
+        userFields.style.display = "none";
+        userFields.style.visibility = "hidden";
+      }
+
+      // Show volunteer fields
+      if (volunteerFields) {
+        volunteerFields.style.display = "block";
+        volunteerFields.style.visibility = "visible";
+      }
+      if (organizationFields) {
+        organizationFields.style.display = "none";
+        organizationFields.style.visibility = "hidden";
+      }
+
+      // Move Org Name back to its original container & hide it
+      if (orgNameGroup && orgNameOriginalParent) {
+        orgNameOriginalParent.insertBefore(orgNameGroup, orgNameNextSibling);
+        orgNameGroup.style.display = "none";
+        orgNameGroup.style.visibility = "hidden";
+      }
+    } else {
+      // User/Citizen role - show first/last name and gender
+      if (firstRow) {
+        firstRow.style.display = "grid";
+        firstRow.style.visibility = "visible";
+      }
+      if (genderGroup) {
+        genderGroup.style.display = "block";
+        genderGroup.style.visibility = "visible";
+      }
+      if (userFields) {
+        userFields.style.display = "block";
+        userFields.style.visibility = "visible";
+      }
+
+      // Hide role-specific fields for citizens
+      if (volunteerFields) {
+        volunteerFields.style.display = "none";
+        volunteerFields.style.visibility = "hidden";
+      }
+      if (organizationFields) {
+        organizationFields.style.display = "none";
+        organizationFields.style.visibility = 'hidden';
+      }
+
+      // Move Org Name back to its original container & hide it
+      if (orgNameGroup && orgNameOriginalParent) {
+        orgNameOriginalParent.insertBefore(orgNameGroup, orgNameNextSibling);
+        orgNameGroup.style.display = "none";
+        orgNameGroup.style.visibility = "hidden";
+      }
+    }
+    
+    // Ensure state/city row is always visible in register mode
+    const stateSelect = document.getElementById('state');
+    if (stateSelect) {
+      const stateCityRow = stateSelect.closest('.input-row');
+      if (stateCityRow) {
+        stateCityRow.style.display = 'grid';
+        stateCityRow.style.visibility = 'visible';
+      }
+    }
+
+    // Update register button text
+    const registerBtn = document.getElementById('registerBtn');
+    const roleNames = { user: 'Citizen', volunteer: 'Volunteer', organization: 'Organization' };
+    if (registerBtn) {
+      registerBtn.textContent = `Register as ${roleNames[currentRole] || currentRole}`;
+    }
+
+    // Ensure state/city are initialized
+    initStateCity();
+  }
+
+  // ===== Submit handling for both forms =====
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    if (currentMode === 'signin') {
+      const emailEl = document.getElementById('signin-username');
+      const passEl = document.getElementById('signin-accesscode');
+      const email = emailEl?.value?.trim();
+      const password = passEl?.value;
+      if (!email || !password) return;
+      try {
+        const selectedRole = (localStorage.getItem('role') || 'CITIZEN').toUpperCase();
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, role: selectedRole })
+        });
+        if (!res.ok) {
+          if (res.status === 403) {
+            showLoginResult('error', 'Role mismatch', 'The selected role does not match your account role.');
+          } else if (res.status === 401) {
+            showLoginResult('error', 'Invalid credentials', 'Email or access code is incorrect.');
+          } else {
+            const selRole = (localStorage.getItem('role') || 'CITIZEN').toUpperCase();
+            showLoginResult('error', `Login failed for ${roleNameOf(selRole)}.`, `Error code: ${res.status}`);
+          }
+          return;
+        }
+const data = await res.json();
+        try { localStorage.setItem('token', data.token); } catch(e){}
+        try { localStorage.setItem('email', data.email || ''); } catch(e){}
+        const backendRole = (data.role || '').toUpperCase();
+
+        // If backend returns a role, enforce it matches the chosen role
+        if (backendRole && backendRole !== selectedRole) {
+          showLoginResult('error', 'Role mismatch', `You selected ${roleNameOf(selectedRole)} but this account is ${roleNameOf(backendRole)}.`);
+          return;
+        }
+
+        // Persist the effective role and show success then redirect
+        const effectiveRole = backendRole || selectedRole;
+        try { localStorage.setItem('role', effectiveRole); } catch(e){}
+        showLoginResult('success', 'Login successful', `Welcome back, ${roleNameOf(effectiveRole)}! Redirecting...`);
+        setTimeout(()=>{ redirectByRole(effectiveRole); }, 1200);
+      } catch (e) {
+        const selRole = (localStorage.getItem('role') || 'CITIZEN').toUpperCase();
+        showLoginResult('error', 'Network error', `Unable to sign in as ${roleNameOf(selRole)}. Please try again.`);
+      }
+      return;
+    }
+
+    // Registration flow: call backend
+    try {
+      const firstName = document.getElementById('firstName')?.value?.trim() || '';
+      const lastName = document.getElementById('lastName')?.value?.trim() || '';
+      const email = document.getElementById('email')?.value?.trim();
+      const phone = document.getElementById('phone')?.value?.trim();
+      const password = document.getElementById('pincode')?.value?.trim(); // using PIN as password
+      const address = document.getElementById('address')?.value?.trim() || '';
+      const state = document.getElementById('state')?.value?.trim() || '';
+      const city = document.getElementById('city')?.value?.trim() || '';
+      const pincode = document.getElementById('pincode')?.value?.trim() || '';
+      const gender = document.getElementById('Gender')?.value || '';
+
+      // Org fields
+      const orgName = document.getElementById('orgName')?.value?.trim() || '';
+      const orgType = document.getElementById('orgType')?.value || '';
+      const licenseNumber = document.getElementById('licenseNumber')?.value?.trim() || '';
+      const services = document.getElementById('services')?.value?.trim() || '';
+      const supportMode = document.getElementById('Supportmode')?.value || '';
+
+      // Volunteer fields
+      const expertise = document.getElementById('Expertise')?.value?.trim() || '';
+      const availability = document.getElementById('availability')?.value || '';
+      const experienceLevel = document.getElementById('experience')?.value || '';
+
+      if (!email || !password) { alert('Please fill required fields.'); return; }
+      const enumRole = (localStorage.getItem('role') || UI_ROLE_TO_ENUM[currentRole] || 'CITIZEN').toUpperCase();
+
+      const payload = {
+        name: `${firstName} ${lastName}`.trim(), email, phone, password, role: enumRole,
+        address, state, city, pincode, gender,
+        orgName, orgType, licenseNumber, services, supportMode,
+        expertise, availability, experienceLevel
+      };
+      const res = await fetch('/api/auth/register', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+      if (!res.ok) { alert('Registration failed'); return; }
+      showRegistrationSuccessModal(currentRole);
+    } catch (e) { alert('Registration error'); }
+  }
+
+  function showRegistrationSuccessModal(role) {
+    // Remove any existing modal first (avoid duplicates)
+    const existing = document.getElementById('registrationSuccessModal');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement("div");
+    overlay.id = "registrationSuccessModal";
+    overlay.style.position = "fixed";
+    overlay.style.inset = "0";
+    overlay.style.background = "rgba(0,0,0,0.7)";
+    overlay.style.display = "flex";
+    overlay.style.justifyContent = "center";
+    overlay.style.alignItems = "center";
+    overlay.style.zIndex = "1000";
+
+    overlay.innerHTML = `
+      <div style="background:var(--landing-surface,#fff); padding:28px; border-radius:14px; text-align:center; color:var(--landing-text,#1a1a1a); max-width:420px; width:90%; border:1px solid var(--landing-border,rgba(0,0,0,.1)); box-shadow:var(--landing-shadow-lg,0 15px 35px rgba(0,0,0,0.2))">
+        <h3 style="margin-bottom:10px; font-size:20px;">✅ Registration Successful</h3>
+        <p style="opacity:0.95; margin-bottom:10px;">You have registered as <b style="color:#ffcc00; text-transform:capitalize;">${role}</b>.</p>
+        <p style="opacity:0.85;">Please return to the login page to access your account.</p>
+        <button id="goToLogin"
+                style="margin-top:18px; padding:12px 22px; border:none; border-radius:10px; background:#FF3B30; color:white; cursor:pointer; font-weight:700; box-shadow:0 6px 20px rgba(220,53,69,0.35);">
+          Back to Sign In
+        </button>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    // Redirect to login.html when user clicks the button
+    document.getElementById("goToLogin").addEventListener("click", () => {
+      window.location.href = "login.html";
+    });
+  }
+
+  // ===== Role Picker Popup logic =====
+  function showRolePicker(){
+    const rp = document.getElementById('rolePicker');
+    if (rp) rp.style.display = 'flex';
+  }
+  function hideRolePicker(){
+    const rp = document.getElementById('rolePicker');
+    if (rp) rp.style.display = 'none';
+  }
+  function onRolePicked(role){
+    // role is backend enum: CITIZEN | VOLUNTEER | ORG | ADMIN
+    selectRole(role);
+    hideRolePicker();
+  }
+  
+  function updateFormForRole(role) {
+    const usernameInput = document.getElementById('signin-username');
+    const accessInput = document.getElementById('signin-accesscode');
+    if (usernameInput && accessInput) {
+      switch (role) {
+        case 'CITIZEN':
+          usernameInput.placeholder = 'Citizen ID or username';
+          accessInput.placeholder = 'Personal access code';
+          break;
+        case 'VOLUNTEER':
+          usernameInput.placeholder = 'Volunteer ID';
+          accessInput.placeholder = 'Volunteer access code';
+          break;
+        case 'ORG':
+          usernameInput.placeholder = 'Organization ID';
+          accessInput.placeholder = 'Organization access key';
+          break;
+        case 'ADMIN':
+          usernameInput.placeholder = 'Admin username';
+          accessInput.placeholder = 'Admin security code';
+          break;
+      }
+    }
+  }
+  function redirectByRole(role){
+    switch ((role||'').toUpperCase()){
+      case 'ADMIN': window.location.href='admin_dashboard.html'; break;
+      case 'VOLUNTEER': window.location.href='volunteer_dashboard.html'; break;
+      case 'ORG': window.location.href='organization_dashboard.html'; break;
+      default: window.location.href='citizen_dashboard.html';
+    }
+  }
+
+  // ===== Helpers wired to your existing links/buttons =====
+  function goHome() {
+    window.location.href = "http://localhost:8080";
+  }
+
+  function showHelp() {
+    showEmergencyHelp();
+  }
+
+  // ===== Emergency Help modal logic =====
+  function showEmergencyHelp(){
+    let modal = document.getElementById('emergencyHelpModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'emergencyHelpModal';
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1000;display:flex;align-items:center;justify-content:center;';
+      modal.innerHTML = `
+        <div style="background:var(--landing-surface,#fff); border:1px solid var(--landing-border,rgba(0,0,0,.1)); border-radius:14px; padding:22px; width:92%; max-width:520px; color:var(--landing-text,#1a1a1a); box-shadow:var(--landing-shadow-lg,0 18px 40px rgba(0,0,0,.25))">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+            <h3 style="margin:0; font-size:20px; display:flex; gap:8px; align-items:center;"><i class=\"fas fa-question-circle\" style=\"color:#FF3B30\"></i> Emergency Help</h3>
+            <button onclick=\"hideEmergencyHelp()\" aria-label=\"Close\" style=\"background:none;border:none;color:var(--landing-text,#1a1a1a);font-size:20px;cursor:pointer\">×</button>
+          </div>
+          <p style="opacity:.9; margin:0 0 14px 0;">Choose an option for immediate assistance.</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <button onclick=\"callEmergency112()\" style=\"padding:12px;border:2px solid rgba(220,53,69,.35);background:#b91c1c;color:#fff;border-radius:10px;cursor:pointer\"><i class=\"fas fa-phone\"></i> Call 112</button>
+            <button onclick=\"window.location.href='helpforpeople.html'\" style=\"padding:12px;border:2px solid rgba(220,53,69,.35);background:var(--landing-surface-soft,#fef3ef);color:var(--landing-text,#1a1a1a);border-radius:10px;cursor:pointer\"><i class=\"fas fa-hands-helping\"></i> Seek Help</button>
+            <button onclick=\"window.location.href='alerts.html'\" style=\"padding:12px;border:2px solid rgba(220,53,69,.35);background:var(--landing-surface-soft,#fef3ef);color:var(--landing-text,#1a1a1a);border-radius:10px;cursor:pointer\"><i class=\"fas fa-exclamation-triangle\"></i> View Alerts</button>
+            <button onclick=\"hideEmergencyHelp()\" style=\"padding:12px;border:none;background:var(--landing-surface-soft,#fef3ef);color:var(--landing-text,#1a1a1a);border-radius:10px;cursor:pointer\">Cancel</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+    modal.style.display = 'flex';
+  }
+  function hideEmergencyHelp(){
+    const modal = document.getElementById('emergencyHelpModal');
+    if (modal) modal.style.display = 'none';
+  }
+  function callEmergency112(){
+    if (confirm('Call emergency services (112)?')) {
+      alert('Dialing 112...');
+    }
+  }
+
+  // ===== Initialize defaults =====
+  // Ensure proper form visibility on page load
+  function initializeForms() {
+    const container = document.querySelector('.access-box');
+    const signin = document.getElementById('signinForm');
+    const register = document.getElementById('registerForm');
+    
+    if (container) {
+      container.setAttribute('data-mode', 'signin');
+    }
+    
+    if (signin) {
+      signin.classList.add('active');
+      signin.style.display = 'block';
+      signin.style.visibility = 'visible';
+    }
+    
+    if (register) {
+      register.classList.remove('active');
+      register.style.display = 'none';
+      register.style.visibility = 'hidden';
+    }
+    
+    // The CSS will handle hiding register form when signin is active
+  }
+  
+  // Initialize immediately if DOM is ready, otherwise wait for DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeForms();
+      setMode('signin');
+      showRolePicker();
+    });
+  } else {
+    initializeForms();
+    setMode('signin');
+    showRolePicker();
+  }
+
+  // ===== UI helpers: login result popup =====
+  function roleNameOf(r){
+    const map = { 'ADMIN':'Admin', 'VOLUNTEER':'Volunteer', 'ORG':'Organization', 'CITIZEN':'Citizen' };
+    return map[(r||'').toUpperCase()] || 'User';
+  }
+  function showLoginResult(type, title, message){
+    let modal = document.getElementById('loginResultModal');
+    if (!modal){
+      modal = document.createElement('div');
+      modal.id = 'loginResultModal';
+      modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1200;display:flex;align-items:center;justify-content:center;';
+      modal.innerHTML = '<div style="background:var(--landing-surface,#fff);border:1px solid var(--landing-border,rgba(0,0,0,.1));border-radius:14px;padding:22px;min-width:280px;max-width:520px;width:92%;color:var(--landing-text,#1a1a1a);box-shadow:var(--landing-shadow-lg,0 18px 40px rgba(0,0,0,.25))">\
+        <div id="lr-title" style="font-weight:700;margin-bottom:8px;font-size:18px"></div>\
+        <div id="lr-body" style="opacity:.95"></div>\
+        <div style="margin-top:14px;display:flex;justify-content:flex-end"><button id="lr-ok" style="padding:8px 14px;border:none;border-radius:10px;background:#FF3B30;color:#fff;cursor:pointer">OK</button></div>\
+      </div>';
+      document.body.appendChild(modal);
+      modal.querySelector('#lr-ok').addEventListener('click', ()=>{ modal.style.display='none'; });
+    }
+    const titleEl = modal.querySelector('#lr-title');
+    const bodyEl = modal.querySelector('#lr-body');
+    titleEl.textContent = title || (type==='success'?'Success':'Notice');
+    bodyEl.textContent = message || '';
+    // color accent
+    titleEl.style.color = (type==='success') ? '#22c55e' : (type==='error' ? '#f43f5e' : '#FFD700');
+    modal.style.display = 'flex';
+  }
+
+  // ===== OAUTH (Google) =====
+  function buildRedirectUri(){
+    try { return window.location.origin + '/login.html'; } catch(e){ return '/login.html'; }
+  }
+  function startGoogleOAuth(mode){
+    const role = (localStorage.getItem('role') || 'CITIZEN').toUpperCase();
+    const state = btoa(JSON.stringify({ ts: Date.now(), role, mode, redirect_uri: buildRedirectUri() }));
+    const redirectUri = encodeURIComponent(buildRedirectUri());
+    // Backend endpoint handles redirect and returns to login.html
+    const url = `/api/auth/oauth/google?redirect_uri=${redirectUri}&state=${encodeURIComponent(state)}&role=${encodeURIComponent(role)}`;
+    const w = 520, h = 640;
+    const y = window.top.outerHeight/2 + window.top.screenY - ( h/2);
+    const x = window.top.outerWidth/2 + window.top.screenX - ( w/2);
+    const win = window.open(url, 'oauth_google', `width=${w},height=${h},left=${x},top=${y},resizable=yes,scrollbars=yes`);
+    if (!win) { showLoginResult('error','Popup blocked','Please allow popups to continue with Google sign-in.'); return; }
+    
+    // Poll for popup closure (fallback if postMessage doesn't work)
+    const pollTimer = setInterval(() => {
+      if (win.closed) {
+        clearInterval(pollTimer);
+        // Check localStorage for OAuth completion (set by redirect handler)
+        const oauthToken = localStorage.getItem('oauth_token');
+        const oauthEmail = localStorage.getItem('oauth_email');
+        const oauthRole = localStorage.getItem('oauth_role');
+        if (oauthToken) {
+          localStorage.setItem('token', oauthToken);
+          if (oauthEmail) localStorage.setItem('email', oauthEmail);
+          if (oauthRole) localStorage.setItem('role', oauthRole);
+          localStorage.removeItem('oauth_token');
+          localStorage.removeItem('oauth_email');
+          localStorage.removeItem('oauth_role');
+          showLoginResult('success','Login successful','Redirecting...');
+          setTimeout(()=>{ redirectByRole(localStorage.getItem('role')||'CITIZEN'); }, 900);
+        }
+      }
+    }, 500);
+    
+    // Cleanup after 5 minutes
+    setTimeout(() => clearInterval(pollTimer), 300000);
+  }
+
+  // Receive oauth completion via postMessage (from popup window)
+  window.addEventListener('message', function(ev){
+    try {
+      const data = typeof ev.data === 'string' ? JSON.parse(ev.data) : ev.data;
+      if (!data || data.type !== 'oauth-complete') return;
+      if (data.token) { try { localStorage.setItem('token', data.token); } catch(e){} }
+      if (data.email) { try { localStorage.setItem('email', data.email); } catch(e){} }
+      if (data.role)  { try { localStorage.setItem('role',  data.role); } catch(e){} }
+      showLoginResult('success','Login successful','Redirecting...');
+      setTimeout(()=>{ redirectByRole(localStorage.getItem('role')||'CITIZEN'); }, 900);
+    } catch(e) {}
+  });
+
+  // If this window is the oauth redirect target, parse params and notify opener
+  (function handleOAuthRedirect(){
+    try {
+      const params = new URLSearchParams(window.location.search || '');
+      const oauthStatus = params.get('oauth');
+      const token = params.get('token');
+      const email = params.get('email');
+      const role = params.get('role');
+      
+      if (oauthStatus === 'success' && token) {
+        // If this is a popup window, send message to opener
+        if (window.opener && !window.opener.closed) {
+          const payload = { type:'oauth-complete', token, email, role };
+          window.opener.postMessage(payload, window.location.origin);
+          // Also store in localStorage as fallback
+          try {
+            localStorage.setItem('oauth_token', token);
+            if (email) localStorage.setItem('oauth_email', email);
+            if (role) localStorage.setItem('oauth_role', role);
+          } catch(e) {}
+          window.close();
+          return;
+        }
+        
+        // If not a popup (direct navigation), handle directly
+        if (token) {
+          try { localStorage.setItem('token', token); } catch(e){}
+          if (email) { try { localStorage.setItem('email', email); } catch(e){} }
+          if (role)  { try { localStorage.setItem('role', role); } catch(e){} }
+          showLoginResult('success','Login successful','Redirecting...');
+          setTimeout(()=>{ redirectByRole(role||localStorage.getItem('role')||'CITIZEN'); }, 900);
+        }
+        
+        // Clean URL by removing OAuth params
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      } else if (oauthStatus === 'error') {
+        const reason = params.get('reason') || 'Unknown error';
+        showLoginResult('error','OAuth Error','Google sign-in failed: ' + reason);
+        // Clean URL
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      } else if (oauthStatus === 'missing_config') {
+        showLoginResult('error','OAuth Not Configured','Google OAuth is not configured on the server. Please contact administrator.');
+        // Clean URL
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+    } catch(e){
+      console.error('OAuth redirect handler error:', e);
+    }
+  })();
+</script>
+  <script src="chatbot.js"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'972bf2ee52356efe',t:'MTc1NTc5ODM3Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+  <script src="tilt.js"></script>
+  </body>
+  </html>

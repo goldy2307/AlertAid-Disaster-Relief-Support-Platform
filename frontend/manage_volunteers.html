@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <style id="alertaid-shared-components">
+        :root {
+            --color-bg: #fafbfc;
+            --color-surface: #ffffff;
+            --color-surface-soft: #fef3ef;
+            --color-muted: #666666;
+            --color-text: #1a1a1a;
+            --color-primary: #FF3B30;
+            --color-secondary: #FF6F00;
+            --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            --color-border: rgba(26, 26, 26, 0.08);
+            --color-shadow-soft: 0 20px 45px rgba(17, 24, 39, 0.15);
+            --color-nav-bg: rgba(255, 255, 255, 0.95);
+            --color-sidebar-bg-top: rgba(255, 86, 33, 0.98);
+        }
+        html[data-theme="dark"] {
+            --color-bg: #121212;
+            --color-surface: #1e1e1e;
+            --color-surface-soft: #281c1b;
+            --color-muted: #aaaaaa;
+            --color-text: #ffffff;
+            --color-primary: #FF6F00;
+            --color-secondary: #FF3B30;
+            --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            --color-border: rgba(255, 255, 255, 0.1);
+            --color-shadow-soft: 0 20px 45px rgba(0, 0, 0, 0.5);
+            --color-nav-bg: rgba(30, 30, 30, 0.95);
+            --color-sidebar-bg-top: rgba(255, 111, 0, 0.98);
+        }
+        body {
+            min-height: 100vh;
+            background: var(--color-bg) !important;
+            color: var(--color-text);
+            transition: background 0.4s, color 0.4s;
+            font-family: 'Inter', sans-serif;
+            padding-top: 150px;
+        }
+        select option, select optgroup { color: #111 !important; background: #fff !important; }
+        html[data-theme="dark"] select option,
+        html[data-theme="dark"] select optgroup { color: #fff !important; background: #333 !important; }
+        .main-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 24px;
+            background: var(--color-nav-bg);
+            border-radius: 18px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            margin: 12px;
+            width: calc(100% - 24px);
+            max-width: none;
+            z-index: 1000;
+            box-shadow: var(--color-shadow-soft);
+            border: 1px solid var(--color-border);
+            backdrop-filter: blur(10px);
+        }
+        .nav-left, .nav-right { display: flex; align-items: center; gap: 16px; }
+        .nav-spacer {
+            height: 140px;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .nav-spacer { height: 180px; }
+        }
+
+        .nav-brand { font-size: 1.9rem; font-weight: 800; color: var(--color-primary); text-decoration: none; transition: color 0.4s; }
+        .weather-widget { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 30px; background: linear-gradient(135deg, #4A90E2, #357ABD); color: #fff; cursor: pointer; font-weight: 500; box-shadow: 0 5px 15px rgba(53, 122, 189, 0.3); }
+        .weather-widget i { font-size: 1.1rem; color: #fff; }
+        .weather-info { font-size: 0.85rem; text-align: left; }
+        .nav-signin { display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; text-decoration: none; background: var(--color-gradient); padding: 10px 26px; border-radius: 999px; box-shadow: 0 12px 25px rgba(255, 59, 48, 0.35); border: none; font-size: 1rem; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .nav-signin i {
+            margin-right: 8px;
+        }
+        .nav-signin:hover { transform: translateY(-2px); box-shadow: 0 18px 30px rgba(255, 59, 48, 0.4); }
+
+        .sidebar { height: 100%; width: 0; position: fixed; top: 0; left: 0; background: none !important; color: var(--color-text); overflow-x: hidden; transition: 0.4s; padding-top: 110px; z-index: 1000; box-shadow: var(--color-shadow-soft); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; }
+        .sidebar-content { width: 100%; height: 100%; display: flex; flex-direction: column; overflow-y: auto; background: var(--color-sidebar-bg-top) !important; padding-top: 20px; }
+        .sidebar a { color: #fff !important; font-weight: 600; padding: 12px 32px; margin-right: 20px; display: flex; align-items: center; gap: 12px; border-radius: 0 20px 20px 0; transition: background 0.2s ease, transform 0.2s ease; text-decoration: none; }
+        .sidebar a:hover { background: rgba(255,255,255,0.15) !important; transform: translateX(4px); }
+        .sidebar a i { width: 22px; text-align: center; color: #fff !important; }
+        .sidebar .closebtn { position: absolute; top: 24px; right: 24px; width: 42px; height: 42px; border-radius: 14px; background: var(--color-surface); color: var(--color-primary) !important; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 15px 28px rgba(0,0,0,0.25); }
+        .sidebar .closebtn:hover { background: var(--color-surface-soft); }
+        .theme-toggle { padding: 10px 18px; border-radius: 16px; cursor: pointer; font-size: 16px; display: flex; align-items: center; gap: 8px; background: var(--color-surface); color: var(--color-primary); border: 1px solid rgba(26,26,26,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        html[data-theme="dark"] .theme-toggle { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); box-shadow: none; }
+        .theme-toggle:hover { transform: translateY(-1px); background: rgba(255,59,48,0.05); }
+        html[data-theme="dark"] .theme-toggle:hover { background: rgba(255,255,255,0.2); }
+        .app-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:2000}
+        .app-modal.show{display:flex}
+        .app-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.55);backdrop-filter: blur(4px);}
+        .app-modal-dialog{position:relative;background:var(--color-surface);color:var(--color-text);min-width:280px;max-width:520px;width:90%;border-radius:18px;box-shadow:var(--color-shadow-soft);overflow:hidden;border: 1px solid var(--color-border);}
+        .app-modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--color-primary);color:#fff}
+        .app-modal-header button{background:none;border:none;color:#fff;font-size:20px;cursor:pointer}
+        .app-modal-body{padding:16px;white-space:pre-wrap}
+        .app-modal-actions{padding:12px 16px;display:flex;justify-content:flex-end;gap:8px;background:var(--color-surface-soft);}
+        .app-btn{background:var(--color-secondary);color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer; transition: all 0.2s;}
+        .app-btn:hover{background: #e66600;}
+        .app-btn-secondary { background: var(--color-surface-soft); color: var(--color-text); border: 1px solid var(--color-border); }
+        .app-btn-secondary:hover { background: rgba(255, 59, 48, 0.05); }
+        .app-btn-critical { background: #FF3B30; color: #fff; }
+    </style>
+    <style id="alertaid-openbtn-override">
+        .openbtn {
+            width: 48px !important;
+            height: 48px !important;
+            border-radius: 16px !important;
+            background: #ffffff !important;
+            border: 1px solid rgba(15, 23, 42, 0.08) !important;
+            box-shadow: 0 15px 30px rgba(15, 23, 42, 0.12) !important;
+            cursor: pointer;
+            position: relative;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .openbtn::before,
+        .openbtn::after,
+        .openbtn .openbtn-line {
+            content: '';
+            position: absolute;
+            left: 50%;
+            width: 26px;
+            height: 2px;
+            border-radius: 999px;
+            background: #FF3B30 !important;
+            transform: translateX(-50%);
+        }
+        .openbtn::before { top: 16px; }
+        .openbtn .openbtn-line { top: 50%; transform: translate(-50%, -50%); }
+        .openbtn::after { bottom: 16px; }
+        .openbtn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 32px rgba(15, 23, 42, 0.18);
+        }
+    </style>
+
+<title>AlertAid</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <script src="role-router.js"></script>
+  <script src="nav-auth.js"></script>
+  <script type="module" src="./dashboard-guard.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #134E5E, #71B280);
+      color: #fff;
+      padding: 20px;
+    }
+
+        /* === Navbar === */
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 22px 32px;
+      background: #ffffff;
+      border-radius: 32px;
+      margin: 18px auto 35px;
+      position: relative;
+      z-index: 1000;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+      width: calc(100% - 40px);
+    }
+
+    .nav-brand {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: #FF3B30;
+      text-decoration: none;
+    }
+
+    .weather-widget {
+      margin-left: auto;
+      margin-right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      cursor: pointer;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .volunteer-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-left: 5px solid #10b981;
+      transition: all 0.3s ease;
+    }
+
+    .volunteer-card:hover {
+      background: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+    }
+
+    .volunteer-card.active { border-left-color: #10b981; }
+    .volunteer-card.inactive { border-left-color: #6b7280; opacity: 0.7; }
+    .volunteer-card.new { border-left-color: #3b82f6; }
+    .volunteer-card.veteran { border-left-color: #FFD700; }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 15px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .badge-active { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+    .badge-inactive { background: rgba(107, 114, 128, 0.2); color: #6b7280; border: 1px solid #6b7280; }
+    .badge-new { background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid #3b82f6; }
+    .badge-veteran { background: rgba(255, 215, 0, 0.2); color: #FFD700; border: 1px solid #FFD700; }
+
+    .skill-tag {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      border: 1px solid rgba(255,255,255,0.3);
+      margin: 2px;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .filter-tab {
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .filter-tab.active {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary { background: #10b981; color: white; }
+    .btn-secondary { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); }
+    .btn-warning { background: #f59e0b; color: white; }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #FFD700;
+      background: rgba(255,255,255,0.15);
+    }
+
+    .search-input::placeholder {
+      color: rgba(255,255,255,0.6);
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+  <link rel="stylesheet" href="landing-theme.css">
+  
+
+
+</head>
+<body class="landing-palette">    <nav class="main-nav">
+        <div class="nav-left">
+            <button class="openbtn" onclick="openNav()" aria-label="Open navigation menu">
+                <span class="openbtn-line"></span>
+            </button>
+            <a href="citizen_dashboard.html" class="nav-brand" data-route="dashboard">AlertAid</a>
+        </div>
+
+        <div class="nav-right">
+            <a class="weather-widget" href="https://www.msn.com/en-in/weather/forecast/in-Indore,MP" target="_blank" rel="noopener">
+                <i id="weather-icon" class="fas fa-cloud-sun"></i>
+                <div class="weather-info">
+                    <div id="weather-details">-- | --°C | --</div>
+                    <div id="weather-time">--:-- | --</div>
+                </div>
+            </a>
+
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light and dark mode">
+                <i id="theme-icon" class="fas fa-sun"></i><span id="theme-text">Light Theme</span>
+            </button>
+
+            <a href="login.html" class="nav-signin" id="navAuthLink">Sign In</a>
+        </div>
+    </nav>
+    <div class="nav-spacer"></div>
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="sidebar-content">
+            <a href="citizen_dashboard.html" data-route="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="alerts.html"><i class="fas fa-exclamation-triangle"></i> Active Alerts</a>
+            <a href="helpforpeople.html"><i class="fas fa-hands-helping"></i> Seek Help</a>
+            <a href="report.html"><i class="fas fa-flag"></i> Report Disaster</a>
+            <a href="donatemoney.html"><i class="fas fa-heart"></i> Make Donation</a>
+            <a href="#" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i> My Location</a>
+            <a href="#" onclick="showNotifications()"><i class="fas fa-bell"></i> Notifications</a>
+                        <div id="userOnlyOptions" style="display: none; flex-direction: column">
+                <a href="profile.html" data-route="profile"><i class="fas fa-user"></i> Profile</a>
+                <a href="change_password.html" data-route="change_password"><i class="fas fa-cog"></i> Settings</a>
+                <a href="javascript:void(0)" onclick="signOut()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+            </div>
+            <div id="guestOnlyOptions">
+                <a href="login.html"><i class="fas fa-sign-in-alt"></i> Sign In</a>
+            </div>
+        </div>
+    </div>
+    
+    <div id="app-modal" class="app-modal" role="dialog" aria-modal="true" aria-labelledby="app-modal-title">
+        <div class="app-modal-backdrop"></div>
+        <div class="app-modal-dialog">
+            <div class="app-modal-header">
+                <div id="app-modal-title">Notice</div>
+                <button id="app-modal-close" aria-label="Close">×</button>
+            </div>
+            <div id="app-modal-body" class="app-modal-body"></div>
+            <div class="app-modal-actions">
+                <button id="app-modal-cancel" class="app-btn app-btn-secondary" style="display:none;">Cancel</button>
+                <button id="app-modal-ok" class="app-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+<div class="container mx-auto max-w-6xl">
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold mb-4">
+        <i class="fas fa-users text-blue-500 mr-3"></i>
+        Volunteer Management
+      </h1>
+      <p class="text-lg opacity-80">Manage your volunteer team and track their activities</p>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number text-green-400" id="activeVolunteers">42</div>
+        <div class="stat-label">Active Volunteers</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number text-blue-400" id="newVolunteers">8</div>
+        <div class="stat-label">New This Month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number text-yellow-400" id="totalHours">1,247</div>
+        <div class="stat-label">Hours This Month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number text-purple-400" id="pendingApprovals">5</div>
+        <div class="stat-label">Pending Approval</div>
+      </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="card">
+      <input type="text" class="search-input" id="volunteerSearch" placeholder="Search volunteers by name, skills, or location..." oninput="searchVolunteers()">
+      
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterVolunteers('all')">All Volunteers</button>
+        <button class="filter-tab" onclick="filterVolunteers('active')">Active</button>
+        <button class="filter-tab" onclick="filterVolunteers('new')">New</button>
+        <button class="filter-tab" onclick="filterVolunteers('veteran')">Veterans</button>
+        <button class="filter-tab" onclick="filterVolunteers('inactive')">Inactive</button>
+      </div>
+    </div>
+
+    <!-- Volunteers List -->
+    <div class="card">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold">Volunteer Team</h2>
+        <div class="flex gap-2">
+          <button class="btn btn-secondary" onclick="exportVolunteers()">
+            <i class="fas fa-download"></i>Export
+          </button>
+          <button class="btn btn-warning" onclick="sendBulkMessage()">
+            <i class="fas fa-bullhorn"></i>Send Alert
+          </button>
+          <button class="btn btn-primary" onclick="addVolunteer()">
+            <i class="fas fa-user-plus"></i>Add Volunteer
+          </button>
+        </div>
+      </div>
+      
+      <div id="volunteersList">
+        <!-- Volunteers will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const volunteers = [
+      {
+        id: 1,
+        name: "John Smith",
+        email: "john.smith@email.com",
+        phone: "(555) 123-4567",
+        status: "active",
+        joinDate: "2023-06-15",
+        skills: ["First Aid", "CPR", "Communication"],
+        location: "Downtown Sacramento",
+        hoursThisMonth: 32,
+        totalHours: 245,
+        lastActive: "2 days ago",
+        availability: "Weekends"
+      },
+      {
+        id: 2,
+        name: "Maria Rodriguez",
+        email: "maria.r@email.com",
+        phone: "(555) 234-5678",
+        status: "veteran",
+        joinDate: "2021-03-10",
+        skills: ["Medical Training", "Bilingual", "Leadership", "Training"],
+        location: "North District",
+        hoursThisMonth: 48,
+        totalHours: 892,
+        lastActive: "1 day ago",
+        availability: "Full-time"
+      },
+      {
+        id: 3,
+        name: "David Chen",
+        email: "d.chen@email.com",
+        phone: "(555) 345-6789",
+        status: "new",
+        joinDate: "2024-01-05",
+        skills: ["IT Support", "Data Entry"],
+        location: "Tech District",
+        hoursThisMonth: 12,
+        totalHours: 12,
+        lastActive: "5 hours ago",
+        availability: "Evenings"
+      },
+      {
+        id: 4,
+        name: "Sarah Johnson",
+        email: "sarah.j@email.com",
+        phone: "(555) 456-7890",
+        status: "active",
+        joinDate: "2023-09-20",
+        skills: ["Construction", "Safety", "Heavy Equipment"],
+        location: "Industrial Area",
+        hoursThisMonth: 28,
+        totalHours: 156,
+        lastActive: "3 days ago",
+        availability: "Flexible"
+      },
+      {
+        id: 5,
+        name: "Michael Brown",
+        email: "m.brown@email.com",
+        phone: "(555) 567-8901",
+        status: "inactive",
+        joinDate: "2022-11-12",
+        skills: ["Transportation", "Logistics"],
+        location: "South Side",
+        hoursThisMonth: 0,
+        totalHours: 78,
+        lastActive: "2 months ago",
+        availability: "Unavailable"
+      },
+      {
+        id: 6,
+        name: "Lisa Park",
+        email: "lisa.park@email.com",
+        phone: "(555) 678-9012",
+        status: "active",
+        joinDate: "2023-04-18",
+        skills: ["Counseling", "Child Care", "Communication"],
+        location: "Central District",
+        hoursThisMonth: 24,
+        totalHours: 189,
+        lastActive: "1 day ago",
+        availability: "Weekdays"
+      }
+    ];
+
+    function initializePage() {
+      displayVolunteers(volunteers);
+    }
+
+    function displayVolunteers(volunteersToShow) {
+      const volunteersList = document.getElementById('volunteersList');
+      volunteersList.innerHTML = '';
+
+      volunteersToShow.forEach(volunteer => {
+        const volunteerCard = createVolunteerCard(volunteer);
+        volunteersList.appendChild(volunteerCard);
+      });
+    }
+
+    function createVolunteerCard(volunteer) {
+      const card = document.createElement('div');
+      card.className = `volunteer-card ${volunteer.status}`;
+
+      const statusText = {
+        active: 'ACTIVE',
+        inactive: 'INACTIVE',
+        new: 'NEW VOLUNTEER',
+        veteran: 'VETERAN'
+      };
+
+      card.innerHTML = `
+        <div class="flex justify-between items-start mb-3">
+          <div class="flex-1">
+            <div class="status-badge badge-${volunteer.status}">${statusText[volunteer.status]}</div>
+            <h3 class="text-lg font-bold mb-1">${volunteer.name}</h3>
+            <p class="text-sm opacity-80 mb-2">Joined: ${new Date(volunteer.joinDate).toLocaleDateString()}</p>
+          </div>
+          <div class="text-right">
+            <div class="text-lg font-bold text-green-400">${volunteer.hoursThisMonth}h</div>
+            <div class="text-xs opacity-70">THIS MONTH</div>
+            <div class="text-xs opacity-70">Total: ${volunteer.totalHours}h</div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="flex flex-wrap gap-1">
+            ${volunteer.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 text-sm mb-3">
+          <div>
+            <div><i class="fas fa-map-marker-alt mr-1"></i>${volunteer.location}</div>
+            <div><i class="fas fa-phone mr-1"></i>${volunteer.phone}</div>
+          </div>
+          <div>
+            <div><i class="fas fa-calendar mr-1"></i>${volunteer.availability}</div>
+            <div><i class="fas fa-clock mr-1"></i>Active: ${volunteer.lastActive}</div>
+          </div>
+        </div>
+
+        <div class="flex gap-2 flex-wrap">
+          <button class="btn btn-primary" onclick="viewProfile(${volunteer.id})">
+            <i class="fas fa-user"></i>Profile
+          </button>
+          <button class="btn btn-secondary" onclick="contactVolunteer(${volunteer.id})">
+            <i class="fas fa-envelope"></i>Contact
+          </button>
+          <button class="btn btn-secondary" onclick="assignTask(${volunteer.id})">
+            <i class="fas fa-tasks"></i>Assign
+          </button>
+          <button class="btn btn-secondary" onclick="viewHours(${volunteer.id})">
+            <i class="fas fa-clock"></i>Hours
+          </button>
+        </div>
+      `;
+
+      return card;
+    }
+
+    function filterVolunteers(status) {
+      // Update active tab
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      let filteredVolunteers = volunteers;
+      
+      if (status !== 'all') {
+        filteredVolunteers = volunteers.filter(v => v.status === status);
+      }
+
+      displayVolunteers(filteredVolunteers);
+    }
+
+    function searchVolunteers() {
+      const searchTerm = document.getElementById('volunteerSearch').value.toLowerCase();
+      const filteredVolunteers = volunteers.filter(volunteer => 
+        volunteer.name.toLowerCase().includes(searchTerm) ||
+        volunteer.skills.some(skill => skill.toLowerCase().includes(searchTerm)) ||
+        volunteer.location.toLowerCase().includes(searchTerm) ||
+        volunteer.email.toLowerCase().includes(searchTerm)
+      );
+      
+      displayVolunteers(filteredVolunteers);
+    }
+
+    function viewProfile(volunteerId) {
+      const volunteer = volunteers.find(v => v.id === volunteerId);
+      alert(`Volunteer Profile\n\nName: ${volunteer.name}\nEmail: ${volunteer.email}\nPhone: ${volunteer.phone}\nJoined: ${new Date(volunteer.joinDate).toLocaleDateString()}\nStatus: ${volunteer.status.toUpperCase()}\nLocation: ${volunteer.location}\nSkills: ${volunteer.skills.join(', ')}\nAvailability: ${volunteer.availability}\nHours This Month: ${volunteer.hoursThisMonth}\nTotal Hours: ${volunteer.totalHours}\nLast Active: ${volunteer.lastActive}`);
+    }
+
+    function contactVolunteer(volunteerId) {
+      const volunteer = volunteers.find(v => v.id === volunteerId);
+      const message = prompt(`Send message to ${volunteer.name}:\n\n(This will be sent via email and SMS)`);
+      if (message && message.trim()) {
+        alert(`Message sent to ${volunteer.name}!\n\n"${message}"\n\nDelivered via email and SMS.`);
+      }
+    }
+
+    function assignTask(volunteerId) {
+      const volunteer = volunteers.find(v => v.id === volunteerId);
+      if (volunteer.status === 'inactive') {
+        alert(`${volunteer.name} is currently inactive and cannot be assigned tasks.`);
+        return;
+      }
+      alert(`Task Assignment\n\nVolunteer: ${volunteer.name}\nSkills: ${volunteer.skills.join(', ')}\nAvailability: ${volunteer.availability}\n\nRedirecting to task assignment page...`);
+    }
+
+    function viewHours(volunteerId) {
+      const volunteer = volunteers.find(v => v.id === volunteerId);
+      alert(`Hours Report - ${volunteer.name}\n\nThis Month: ${volunteer.hoursThisMonth} hours\nTotal Hours: ${volunteer.totalHours} hours\nAverage per Month: ${Math.round(volunteer.totalHours / 12)} hours\nLast Activity: ${volunteer.lastActive}\n\nDetailed timesheet available in full report.`);
+    }
+
+    function exportVolunteers() {
+      alert('Volunteer data exported!\n\nThe report includes:\n- Complete volunteer roster\n- Contact information\n- Skills and certifications\n- Hours tracking\n- Performance metrics\n\nFile saved as: volunteers_report_2024.csv');
+    }
+
+    function sendBulkMessage() {
+      const message = prompt('Send alert to all active volunteers:\n\n(This will be sent via email and SMS to all active volunteers)');
+      if (message && message.trim()) {
+        const activeCount = volunteers.filter(v => v.status === 'active' || v.status === 'veteran').length;
+        alert(`Emergency alert sent to ${activeCount} active volunteers!\n\n"${message}"\n\nMessages will be delivered within 5 minutes via email and SMS.`);
+      }
+    }
+
+    function addVolunteer() {
+      alert('Add New Volunteer\n\nThis would open the volunteer registration form where you can:\n- Enter volunteer details\n- Assign skills and certifications\n- Set availability preferences\n- Complete background check process\n- Schedule orientation\n\nRedirecting to registration form...');
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+      initializePage();
+    });
+  </script>
+
+<link rel="stylesheet" href="chatbot.css">
+<script src="chatbot.js"></script>
+    <script id="alertaid-shared-components">
+        const THEME_STORAGE_KEY = 'theme';
+        const HTML_ELEMENT = document.documentElement;
+        function applyTheme(theme) {
+            HTML_ELEMENT.setAttribute('data-theme', theme);
+            document.body.setAttribute('data-theme', theme);
+        }
+        function setTheme(theme) {
+            applyTheme(theme);
+            try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch(e){}
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            const display = document.getElementById('currentThemeDisplay');
+            if (theme === 'dark') {
+                if (icon) icon.className = 'fas fa-sun';
+                if (text) text.textContent = 'Light Theme';
+                if (display) display.textContent = 'Dark';
+            } else {
+                if (icon) icon.className = 'fas fa-moon';
+                if (text) text.textContent = 'Dark Theme';
+                if (display) display.textContent = 'Light';
+            }
+        }
+        window.toggleTheme = function() {
+            const next = HTML_ELEMENT.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            setTheme(next);
+        }
+        window.openNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '260px'; }
+        window.closeNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '0'; }
+        function showPopup(message, opts){
+            const modal = document.getElementById('app-modal');
+            const body = document.getElementById('app-modal-body');
+            const titleEl = document.getElementById('app-modal-title');
+            const closeBtn = document.getElementById('app-modal-close');
+            const okBtn = document.getElementById('app-modal-ok');
+            const cancelBtn = document.getElementById('app-modal-cancel');
+            if (!modal || !body) return console.error('Modal elements missing', message);
+            const options = opts || {};
+            const isConfirm = options.type === 'confirm';
+            titleEl.textContent = options.title || (isConfirm ? 'Confirmation' : 'Notice');
+            body.textContent = (message == null ? '' : String(message));
+            okBtn.textContent = options.okText || (isConfirm ? 'Confirm' : 'OK');
+            okBtn.className = `app-btn ${options.okClass || (isConfirm ? 'app-btn-critical' : '')}`;
+            cancelBtn.style.display = isConfirm ? 'block' : 'none';
+            function hide(result = false){ modal.classList.remove('show'); cleanup(); if(isConfirm && typeof options.callback === 'function'){ options.callback(result); } }
+            function cleanup(){ closeBtn.removeEventListener('click', onClose); okBtn.removeEventListener('click', onOk); cancelBtn.removeEventListener('click', onCancel); modal.removeEventListener('click', onBackdrop); document.removeEventListener('keydown', onEsc); }
+            function onClose(){ hide(false); }
+            function onOk(){ hide(true); }
+            function onCancel(){ hide(false); }
+            function onBackdrop(e){ if(e.target === modal) hide(false); }
+            function onEsc(e){ if(e.key === 'Escape') hide(false); }
+            closeBtn.addEventListener('click', onClose);
+            okBtn.addEventListener('click', onOk);
+            cancelBtn.addEventListener('click', onCancel);
+            modal.addEventListener('click', onBackdrop);
+            document.addEventListener('keydown', onEsc);
+            modal.classList.add('show');
+        }
+        function showConfirm(message, callback){ showPopup(message, { type:'confirm', title:'Action Required', okText:'Yes', okClass:'app-btn-critical', cancelText:'Cancel', callback }); }
+        window.alert = function(msg){ try { showPopup(msg); } catch { console.error('Modal failed', msg); } };
+        window.showPopup = showPopup;
+        window.showConfirm = showConfirm;
+        function getValidToken(){ const token = localStorage.getItem('token'); return token && token !== 'null' ? token : null; }
+        window.checkAuthStatus = function(){
+            const token = getValidToken();
+            const userOptions = document.getElementById('userOnlyOptions');
+            const guestOptions = document.getElementById('guestOnlyOptions');
+            const navAuthLink = document.getElementById('navAuthLink');
+            if (token){
+                if (userOptions) userOptions.style.display = 'flex';
+                if (guestOptions) guestOptions.style.display = 'none';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-tachometer-alt\"></i> Dashboard'; navAuthLink.href = resolveDashboardHref(); }
+            } else {
+                if (userOptions) userOptions.style.display = 'none';
+                if (guestOptions) guestOptions.style.display = 'block';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-sign-in-alt\"></i> Sign In'; navAuthLink.href = 'login.html'; }
+            }
+        }
+        window.getLocation = function(){
+            if (navigator.geolocation){
+                navigator.geolocation.getCurrentPosition((p)=>{
+                    showPopup(`Your Location:
+Latitude: ${p.coords.latitude.toFixed(6)}
+Longitude: ${p.coords.longitude.toFixed(6)}`, { title:'Current Location' });
+                },()=>showPopup('Unable to retrieve your location.', { title:'Location Error' }));
+            } else {
+                showPopup('Geolocation is not supported by this browser.', { title:'Location Error' });
+            }
+        }
+        window.showNotifications = function(){ if (!getValidToken()) { showPopup('Please sign in to view notifications.', { title:'Authorization Required' }); return; } showPopup('Notifications will appear here.', { title:'Notifications' }); }
+        window.showProfile = function(){ if (!getValidToken()) { showPopup('Please sign in to view profile.', { title:'Authorization Required' }); return; } showPopup('Profile Information (demo)', { title:'User Profile' }); }
+        window.signOut = function(){ showConfirm('Are you sure you want to sign out?', (confirmed)=>{ if (confirmed){ try { localStorage.removeItem('token'); } catch {} window.location.replace('login.html'); } }); }
+        document.addEventListener('DOMContentLoaded', function(){ setTheme(localStorage.getItem(THEME_STORAGE_KEY) || 'light'); checkAuthStatus(); });
+    </script>
+</body>
+</html>

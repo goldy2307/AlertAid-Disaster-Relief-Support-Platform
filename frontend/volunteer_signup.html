@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <style id="alertaid-shared-components">
+        :root {
+            --color-bg: #fafbfc;
+            --color-surface: #ffffff;
+            --color-surface-soft: #fef3ef;
+            --color-muted: #666666;
+            --color-text: #1a1a1a;
+            --color-primary: #FF3B30;
+            --color-secondary: #FF6F00;
+            --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            --color-border: rgba(26, 26, 26, 0.08);
+            --color-shadow-soft: 0 20px 45px rgba(17, 24, 39, 0.15);
+            --color-nav-bg: rgba(255, 255, 255, 0.95);
+            --color-sidebar-bg-top: rgba(255, 86, 33, 0.98);
+        }
+        html[data-theme="dark"] {
+            --color-bg: #121212;
+            --color-surface: #1e1e1e;
+            --color-surface-soft: #281c1b;
+            --color-muted: #aaaaaa;
+            --color-text: #ffffff;
+            --color-primary: #FF6F00;
+            --color-secondary: #FF3B30;
+            --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            --color-border: rgba(255, 255, 255, 0.1);
+            --color-shadow-soft: 0 20px 45px rgba(0, 0, 0, 0.5);
+            --color-nav-bg: rgba(30, 30, 30, 0.95);
+            --color-sidebar-bg-top: rgba(255, 111, 0, 0.98);
+        }
+        body {
+            min-height: 100vh;
+            background: var(--color-bg) !important;
+            color: var(--color-text);
+            transition: background 0.4s, color 0.4s;
+            font-family: 'Inter', sans-serif;
+            padding-top: 150px;
+        }
+        select option, select optgroup { color: #111 !important; background: #fff !important; }
+        html[data-theme="dark"] select option,
+        html[data-theme="dark"] select optgroup { color: #fff !important; background: #333 !important; }
+        .main-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 24px;
+            background: var(--color-nav-bg);
+            border-radius: 18px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            margin: 12px;
+            width: calc(100% - 24px);
+            max-width: none;
+            z-index: 1000;
+            box-shadow: var(--color-shadow-soft);
+            border: 1px solid var(--color-border);
+            backdrop-filter: blur(10px);
+        }
+        .nav-left, .nav-right { display: flex; align-items: center; gap: 16px; }
+        .nav-spacer {
+            height: 140px;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .nav-spacer { height: 180px; }
+        }
+
+        .nav-brand { font-size: 1.9rem; font-weight: 800; color: var(--color-primary); text-decoration: none; transition: color 0.4s; }
+        .weather-widget { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 30px; background: linear-gradient(135deg, #4A90E2, #357ABD); color: #fff; cursor: pointer; font-weight: 500; box-shadow: 0 5px 15px rgba(53, 122, 189, 0.3); }
+        .weather-widget i { font-size: 1.1rem; color: #fff; }
+        .weather-info { font-size: 0.85rem; text-align: left; }
+        .nav-signin { display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; text-decoration: none; background: var(--color-gradient); padding: 10px 26px; border-radius: 999px; box-shadow: 0 12px 25px rgba(255, 59, 48, 0.35); border: none; font-size: 1rem; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .nav-signin i {
+            margin-right: 8px;
+        }
+        .nav-signin:hover { transform: translateY(-2px); box-shadow: 0 18px 30px rgba(255, 59, 48, 0.4); }
+
+        .sidebar { height: 100%; width: 0; position: fixed; top: 0; left: 0; background: none !important; color: var(--color-text); overflow-x: hidden; transition: 0.4s; padding-top: 110px; z-index: 1000; box-shadow: var(--color-shadow-soft); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; }
+        .sidebar-content { width: 100%; height: 100%; display: flex; flex-direction: column; overflow-y: auto; background: var(--color-sidebar-bg-top) !important; padding-top: 20px; }
+        .sidebar a { color: #fff !important; font-weight: 600; padding: 12px 32px; margin-right: 20px; display: flex; align-items: center; gap: 12px; border-radius: 0 20px 20px 0; transition: background 0.2s ease, transform 0.2s ease; text-decoration: none; }
+        .sidebar a:hover { background: rgba(255,255,255,0.15) !important; transform: translateX(4px); }
+        .sidebar a i { width: 22px; text-align: center; color: #fff !important; }
+        .sidebar .closebtn { position: absolute; top: 24px; right: 24px; width: 42px; height: 42px; border-radius: 14px; background: var(--color-surface); color: var(--color-primary) !important; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 15px 28px rgba(0,0,0,0.25); }
+        .sidebar .closebtn:hover { background: var(--color-surface-soft); }
+        .theme-toggle { padding: 10px 18px; border-radius: 16px; cursor: pointer; font-size: 16px; display: flex; align-items: center; gap: 8px; background: var(--color-surface); color: var(--color-primary); border: 1px solid rgba(26,26,26,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        html[data-theme="dark"] .theme-toggle { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); box-shadow: none; }
+        .theme-toggle:hover { transform: translateY(-1px); background: rgba(255,59,48,0.05); }
+        html[data-theme="dark"] .theme-toggle:hover { background: rgba(255,255,255,0.2); }
+        .app-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:2000}
+        .app-modal.show{display:flex}
+        .app-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.55);backdrop-filter: blur(4px);}
+        .app-modal-dialog{position:relative;background:var(--color-surface);color:var(--color-text);min-width:280px;max-width:520px;width:90%;border-radius:18px;box-shadow:var(--color-shadow-soft);overflow:hidden;border: 1px solid var(--color-border);}
+        .app-modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--color-primary);color:#fff}
+        .app-modal-header button{background:none;border:none;color:#fff;font-size:20px;cursor:pointer}
+        .app-modal-body{padding:16px;white-space:pre-wrap}
+        .app-modal-actions{padding:12px 16px;display:flex;justify-content:flex-end;gap:8px;background:var(--color-surface-soft);}
+        .app-btn{background:var(--color-secondary);color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer; transition: all 0.2s;}
+        .app-btn:hover{background: #e66600;}
+        .app-btn-secondary { background: var(--color-surface-soft); color: var(--color-text); border: 1px solid var(--color-border); }
+        .app-btn-secondary:hover { background: rgba(255, 59, 48, 0.05); }
+        .app-btn-critical { background: #FF3B30; color: #fff; }
+    </style>
+    <style id="alertaid-openbtn-override">
+        .openbtn {
+            width: 48px !important;
+            height: 48px !important;
+            border-radius: 16px !important;
+            background: #ffffff !important;
+            border: 1px solid rgba(15, 23, 42, 0.08) !important;
+            box-shadow: 0 15px 30px rgba(15, 23, 42, 0.12) !important;
+            cursor: pointer;
+            position: relative;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .openbtn::before,
+        .openbtn::after,
+        .openbtn .openbtn-line {
+            content: '';
+            position: absolute;
+            left: 50%;
+            width: 26px;
+            height: 2px;
+            border-radius: 999px;
+            background: #FF3B30 !important;
+            transform: translateX(-50%);
+        }
+        .openbtn::before { top: 16px; }
+        .openbtn .openbtn-line { top: 50%; transform: translate(-50%, -50%); }
+        .openbtn::after { bottom: 16px; }
+        .openbtn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 32px rgba(15, 23, 42, 0.18);
+        }
+    </style>
+
+<title>AlertAid</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="chatbot.css">
+  <script src="role-router.js"></script>
+  <script src="nav-auth.js"></script>
+  <script type="module" src="./dashboard-guard.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* === Base === */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #134E5E, #71B280);
+      color: #fff;
+      overflow-x: hidden;
+      transition: margin-left .4s ease;
+      padding: 20px;
+    }
+
+    /* === Navbar === */
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 22px 32px;
+      background: #ffffff;
+      border-radius: 32px;
+      margin: 18px auto 35px;
+      position: relative;
+      z-index: 1000;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+      width: calc(100% - 40px);
+    }
+
+    .nav-brand {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: #FF3B30;
+      text-decoration: none;
+    }
+
+    .weather-widget {
+      margin-left: auto;
+      margin-right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      cursor: pointer;
+    }
+    .weather-widget i { font-size: 1.2rem; color: #FFD700; }
+    .weather-info { font-size: 0.8rem; }
+    .nav-signin {
+      margin-left: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 600;
+      text-decoration: none;
+      background: #FF3B30;
+      padding: 10px 24px;
+      border-radius: 999px;
+      box-shadow: 0 14px 26px rgba(255, 59, 48, 0.3);
+      border: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .nav-signin:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 32px rgba(255, 59, 48, 0.35);
+    }
+
+
+    /* === Sidebar === */
+    .sidebar {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      top: 0; left: 0;
+      background: rgba(0,0,0,0.9);
+      overflow-x: hidden;
+      transition: 0.4s;
+      padding-top: 60px;
+      z-index: 1000;
+    }
+    .sidebar a {
+      padding: 12px 25px;
+      text-decoration: none;
+      font-size: 18px;
+      color: #FFD700;
+      display: block;
+      transition: 0.3s;
+    }
+    .sidebar a:hover { background: rgba(255,255,255,0.1); }
+    .sidebar .closebtn {
+      position: absolute;
+      top: 20px;
+      right: 25px;
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: #fff;
+      color: #FF3B30;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 18px 30px rgba(0,0,0,0.25);
+    }
+
+
+
+
+    /* === Volunteer Cards === */
+    .volunteer-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border-left: 6px solid;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+    }
+
+    .volunteer-card:hover {
+      transform: translateY(-3px);
+      background: rgba(255,255,255,0.15);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    .volunteer-card.emergency {
+      border-left-color: #dc2626;
+      background: linear-gradient(135deg, rgba(220, 38, 38, 0.2), rgba(185, 28, 28, 0.1));
+    }
+
+    .volunteer-card.medical {
+      border-left-color: #059669;
+      background: linear-gradient(135deg, rgba(5, 150, 105, 0.2), rgba(4, 120, 87, 0.1));
+    }
+
+    .volunteer-card.logistics {
+      border-left-color: #7c3aed;
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(109, 40, 217, 0.1));
+    }
+
+    .volunteer-card.community {
+      border-left-color: #0891b2;
+      background: linear-gradient(135deg, rgba(8, 145, 178, 0.2), rgba(6, 182, 212, 0.1));
+    }
+
+    .volunteer-card.technical {
+      border-left-color: #ea580c;
+      background: linear-gradient(135deg, rgba(234, 88, 12, 0.2), rgba(194, 65, 12, 0.1));
+    }
+
+    .volunteer-card.education {
+      border-left-color: #0d9488;
+      background: linear-gradient(135deg, rgba(13, 148, 136, 0.2), rgba(15, 118, 110, 0.1));
+    }
+
+    .volunteer-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .badge-urgent {
+      background: rgba(220, 38, 38, 0.2);
+      color: #dc2626;
+      border: 1px solid #dc2626;
+    }
+
+    .badge-ongoing {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+      border: 1px solid #22c55e;
+    }
+
+    .badge-remote {
+      background: rgba(168, 85, 247, 0.2);
+      color: #a855f7;
+      border: 1px solid #a855f7;
+    }
+
+    .badge-flexible {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border: 1px solid #f59e0b;
+    }
+
+    /* === Skills Tags === */
+    .skills-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0;
+    }
+
+    .skill-tag {
+      background: rgba(255,255,255,0.2);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    /* === Filters === */
+    .filter-section {
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 25px;
+      backdrop-filter: blur(8px);
+    }
+
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .filter-btn {
+      padding: 8px 16px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .filter-btn.active {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.2);
+      color: #10b981;
+    }
+
+    .filter-btn:hover {
+      background: rgba(255,255,255,0.15);
+    }
+
+    /* === Search Bar === */
+    .search-container {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 15px 50px 15px 20px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 25px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #10b981;
+      background: rgba(255,255,255,0.15);
+    }
+
+    .search-input::placeholder {
+      color: rgba(255,255,255,0.6);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* === Stats Cards === */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      backdrop-filter: blur(8px);
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    /* === Application Form === */
+    .application-form {
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 25px;
+      backdrop-filter: blur(8px);
+      display: none;
+    }
+
+    .application-form.active {
+      display: block;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #FFD700;
+    }
+
+    .form-input, .form-textarea, .form-select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      outline: none;
+      border-color: #FFD700;
+      background: rgba(255,255,255,0.15);
+    }
+
+    .form-input::placeholder, .form-textarea::placeholder {
+      color: rgba(255,255,255,0.6);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .checkbox-item:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .checkbox-item input {
+      margin-right: 10px;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    /* === Volunteer Actions === */
+    .volunteer-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .action-btn {
+      flex: 1;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .apply-btn {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+
+    .info-btn {
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+
+    .action-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    /* === Emergency Contact === */
+    .emergency-contact {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+      animation: emergencyPulse 2s infinite;
+      z-index: 1000;
+    }
+
+    @keyframes emergencyPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4); }
+      50% { transform: scale(1.1); box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6); }
+    }
+
+    /* === Responsive === */
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .filter-group {
+        justify-content: center;
+      }
+      
+      .volunteer-card {
+        padding: 20px;
+      }
+
+      .checkbox-group {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .commitment-level {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+
+    .commitment-low {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+    }
+
+    .commitment-medium {
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+    }
+
+    .commitment-high {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+    }
+  </style>
+  <link rel="stylesheet" href="landing-theme.css">
+  
+
+
+</head>
+<body class="landing-palette">    <nav class="main-nav">
+        <div class="nav-left">
+            <button class="openbtn" onclick="openNav()" aria-label="Open navigation menu">
+                <span class="openbtn-line"></span>
+            </button>
+            <a href="citizen_dashboard.html" class="nav-brand" data-route="dashboard">AlertAid</a>
+        </div>
+
+        <div class="nav-right">
+            <a class="weather-widget" href="https://www.msn.com/en-in/weather/forecast/in-Indore,MP" target="_blank" rel="noopener">
+                <i id="weather-icon" class="fas fa-cloud-sun"></i>
+                <div class="weather-info">
+                    <div id="weather-details">-- | --°C | --</div>
+                    <div id="weather-time">--:-- | --</div>
+                </div>
+            </a>
+
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light and dark mode">
+                <i id="theme-icon" class="fas fa-sun"></i><span id="theme-text">Light Theme</span>
+            </button>
+
+            <a href="login.html" class="nav-signin" id="navAuthLink">Sign In</a>
+        </div>
+    </nav>
+    <div class="nav-spacer"></div>
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="sidebar-content">
+            <a href="citizen_dashboard.html" data-route="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="alerts.html"><i class="fas fa-exclamation-triangle"></i> Active Alerts</a>
+            <a href="helpforpeople.html"><i class="fas fa-hands-helping"></i> Seek Help</a>
+            <a href="report.html"><i class="fas fa-flag"></i> Report Disaster</a>
+            <a href="donatemoney.html"><i class="fas fa-heart"></i> Make Donation</a>
+            <a href="#" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i> My Location</a>
+            <a href="#" onclick="showNotifications()"><i class="fas fa-bell"></i> Notifications</a>
+                        <div id="userOnlyOptions" style="display: none; flex-direction: column">
+                <a href="profile.html" data-route="profile"><i class="fas fa-user"></i> Profile</a>
+                <a href="change_password.html" data-route="change_password"><i class="fas fa-cog"></i> Settings</a>
+                <a href="javascript:void(0)" onclick="signOut()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+            </div>
+            <div id="guestOnlyOptions">
+                <a href="login.html"><i class="fas fa-sign-in-alt"></i> Sign In</a>
+            </div>
+        </div>
+    </div>
+    
+    <div id="app-modal" class="app-modal" role="dialog" aria-modal="true" aria-labelledby="app-modal-title">
+        <div class="app-modal-backdrop"></div>
+        <div class="app-modal-dialog">
+            <div class="app-modal-header">
+                <div id="app-modal-title">Notice</div>
+                <button id="app-modal-close" aria-label="Close">×</button>
+            </div>
+            <div id="app-modal-body" class="app-modal-body"></div>
+            <div class="app-modal-actions">
+                <button id="app-modal-cancel" class="app-btn app-btn-secondary" style="display:none;">Cancel</button>
+                <button id="app-modal-ok" class="app-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+<!-- Navbar -->
+  
+
+
+  <!-- Sidebar -->
+  
+
+
+  <!-- Main Content -->
+  <div class="container mx-auto max-w-7xl">
+    <!-- Page Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold mb-4">
+        <i class="fas fa-hands-helping text-green-500 mr-3"></i>
+        Volunteer Opportunities
+      </h1>
+      <p class="text-lg opacity-80">Make a difference in your community by volunteering your time and skills</p>
+    </div>
+
+    <!-- Volunteer Statistics -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number text-green-400" id="activeOpportunities">43</div>
+        <div class="stat-label">Active Opportunities</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number text-blue-400" id="activeVolunteers">1,247</div>
+        <div class="stat-label">Active Volunteers</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number text-yellow-400" id="hoursContributed">15,680</div>
+        <div class="stat-label">Hours This Month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number text-purple-400" id="communitiesHelped">28</div>
+        <div class="stat-label">Communities Helped</div>
+      </div>
+    </div>
+
+    <!-- Volunteer Application Form -->
+    <div id="volunteerApplicationForm" class="application-form">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">Volunteer Application</h2>
+        <button onclick="hideApplicationForm()" class="text-2xl text-gray-400 hover:text-white">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form onsubmit="submitApplication(event)">
+        <input type="hidden" id="selectedOpportunityId" value="">
+        
+        <!-- Personal Information -->
+        <div class="mb-6">
+          <h3 class="text-lg font-bold mb-4 text-green-400">Personal Information</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="form-label" for="firstName">First Name</label>
+              <input type="text" id="firstName" class="form-input" placeholder="Your first name..." required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="lastName">Last Name</label>
+              <input type="text" id="lastName" class="form-input" placeholder="Your last name..." required>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="form-label" for="email">Email Address</label>
+              <input type="email" id="email" class="form-input" placeholder="your@email.com..." required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="phone">Phone Number</label>
+              <input type="tel" id="phone" class="form-input" placeholder="(555) 123-4567..." required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="address">Address</label>
+            <input type="text" id="address" class="form-input" placeholder="Street address, City, State, ZIP..." required>
+          </div>
+        </div>
+
+        <!-- Experience & Skills -->
+        <div class="mb-6">
+          <h3 class="text-lg font-bold mb-4 text-green-400">Experience & Skills</h3>
+          
+          <div class="form-group">
+            <label class="form-label" for="previousExperience">Previous Volunteer Experience</label>
+            <textarea id="previousExperience" class="form-textarea" placeholder="Describe any previous volunteer work, disaster response experience, or relevant background..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Skills & Certifications</label>
+            <div class="checkbox-group">
+              <label class="checkbox-item">
+                <input type="checkbox" name="skills" value="first-aid">
+                <span>First Aid/CPR Certified</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="skills" value="medical">
+                <span>Medical Training</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="skills" value="construction">
+                <span>Construction/Repair</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="skills" value="logistics">
+                <span>Logistics/Organization</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="skills" value="communication">
+                <span>Communication/Translation</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="skills" value="technology">
+                <span>Technology/IT</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="skills" value="counseling">
+                <span>Counseling/Mental Health</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="skills" value="childcare">
+                <span>Childcare</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="skills" value="cooking">
+                <span>Cooking/Food Service</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="skills" value="driving">
+                <span>Commercial Driving</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="additionalSkills">Additional Skills</label>
+            <input type="text" id="additionalSkills" class="form-input" placeholder="List any other relevant skills or certifications...">
+          </div>
+        </div>
+
+        <!-- Availability -->
+        <div class="mb-6">
+          <h3 class="text-lg font-bold mb-4 text-green-400">Availability</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="form-label" for="availability">General Availability</label>
+              <select id="availability" class="form-select" required>
+                <option value="">Select availability...</option>
+                <option value="weekdays">Weekdays Only</option>
+                <option value="weekends">Weekends Only</option>
+                <option value="evenings">Evenings</option>
+                <option value="flexible">Flexible Schedule</option>
+                <option value="emergency-only">Emergency Response Only</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="hoursPerWeek">Hours Per Week</label>
+              <select id="hoursPerWeek" class="form-select" required>
+                <option value="">Select commitment...</option>
+                <option value="1-5">1-5 hours</option>
+                <option value="6-10">6-10 hours</option>
+                <option value="11-20">11-20 hours</option>
+                <option value="21+">21+ hours</option>
+                <option value="as-needed">As needed</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Preferred Days</label>
+            <div class="checkbox-group">
+              <label class="checkbox-item">
+                <input type="checkbox" name="days" value="monday">
+                <span>Monday</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="days" value="tuesday">
+                <span>Tuesday</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="days" value="wednesday">
+                <span>Wednesday</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="days" value="thursday">
+                <span>Thursday</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="days" value="friday">
+                <span>Friday</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="days" value="saturday">
+                <span>Saturday</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" name="days" value="sunday">
+                <span>Sunday</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Emergency Contact -->
+        <div class="mb-6">
+          <h3 class="text-lg font-bold mb-4 text-green-400">Emergency Contact</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="form-label" for="emergencyName">Contact Name</label>
+              <input type="text" id="emergencyName" class="form-input" placeholder="Emergency contact name..." required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="emergencyPhone">Contact Phone</label>
+              <input type="tel" id="emergencyPhone" class="form-input" placeholder="Emergency contact phone..." required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="emergencyRelation">Relationship</label>
+            <input type="text" id="emergencyRelation" class="form-input" placeholder="Relationship to emergency contact..." required>
+          </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="mb-6">
+          <h3 class="text-lg font-bold mb-4 text-green-400">Additional Information</h3>
+          
+          <div class="form-group">
+            <label class="form-label" for="motivation">Why do you want to volunteer?</label>
+            <textarea id="motivation" class="form-textarea" placeholder="Tell us about your motivation to volunteer and help others..." required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="specialRequests">Special Accommodations or Requests</label>
+            <textarea id="specialRequests" class="form-textarea" placeholder="Any physical limitations, dietary restrictions, or other considerations we should know about..."></textarea>
+          </div>
+        </div>
+
+        <!-- Agreement -->
+        <div class="form-group">
+          <label class="flex items-center cursor-pointer">
+            <input type="checkbox" id="backgroundCheck" class="mr-3" required>
+            <span>I consent to a background check if required for this volunteer position</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="flex items-center cursor-pointer">
+            <input type="checkbox" id="termsAgreement" class="mr-3" required>
+            <span>I agree to the volunteer terms and conditions and code of conduct</span>
+          </label>
+        </div>
+
+        <button type="submit" class="submit-btn">
+          <i class="fas fa-paper-plane mr-2"></i>
+          Submit Application
+        </button>
+      </form>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="filter-section">
+      <h2 class="text-xl font-bold mb-4">Find Volunteer Opportunities</h2>
+      
+      <!-- Search Bar -->
+      <div class="search-container">
+        <input type="text" class="search-input" placeholder="Search by role, skills, or location..." id="searchInput" oninput="filterOpportunities()">
+        <i class="fas fa-search search-icon"></i>
+      </div>
+
+      <!-- Category Filters -->
+      <div class="mb-4">
+        <h3 class="font-semibold mb-2">Category</h3>
+        <div class="filter-group">
+          <button class="filter-btn active" data-filter="all" onclick="setFilter('category', 'all')">All</button>
+          <button class="filter-btn" data-filter="emergency" onclick="setFilter('category', 'emergency')">Emergency Response</button>
+          <button class="filter-btn" data-filter="medical" onclick="setFilter('category', 'medical')">Medical</button>
+          <button class="filter-btn" data-filter="logistics" onclick="setFilter('category', 'logistics')">Logistics</button>
+          <button class="filter-btn" data-filter="community" onclick="setFilter('category', 'community')">Community</button>
+          <button class="filter-btn" data-filter="technical" onclick="setFilter('category', 'technical')">Technical</button>
+          <button class="filter-btn" data-filter="education" onclick="setFilter('category', 'education')">Education</button>
+        </div>
+      </div>
+
+      <!-- Commitment Level Filters -->
+      <div class="mb-4">
+        <h3 class="font-semibold mb-2">Time Commitment</h3>
+        <div class="filter-group">
+          <button class="filter-btn active" data-filter="all" onclick="setFilter('commitment', 'all')">All</button>
+          <button class="filter-btn" data-filter="low" onclick="setFilter('commitment', 'low')">Low (1-5 hrs/week)</button>
+          <button class="filter-btn" data-filter="medium" onclick="setFilter('commitment', 'medium')">Medium (6-15 hrs/week)</button>
+          <button class="filter-btn" data-filter="high" onclick="setFilter('commitment', 'high')">High (16+ hrs/week)</button>
+        </div>
+      </div>
+
+      <!-- Location Filters -->
+      <div>
+        <h3 class="font-semibold mb-2">Location</h3>
+        <div class="filter-group">
+          <button class="filter-btn active" data-filter="all" onclick="setFilter('location', 'all')">All</button>
+          <button class="filter-btn" data-filter="remote" onclick="setFilter('location', 'remote')">Remote</button>
+          <button class="filter-btn" data-filter="local" onclick="setFilter('location', 'local')">Local</button>
+          <button class="filter-btn" data-filter="travel" onclick="setFilter('location', 'travel')">Travel Required</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Volunteer Opportunities Results -->
+    <div class="mb-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold">Available Opportunities</h2>
+        <div class="text-sm opacity-80">
+          Showing <span id="resultsCount">12</span> of <span id="totalResults">43</span> opportunities
+        </div>
+      </div>
+
+      <!-- Opportunities Grid -->
+      <div id="opportunitiesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Opportunity cards will be populated by JavaScript -->
+      </div>
+
+      <!-- Load More Button -->
+      <div class="text-center mt-8">
+        <button class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-lg font-bold hover:shadow-lg transition-all" onclick="loadMoreOpportunities()">
+          <i class="fas fa-plus mr-2"></i>Load More Opportunities
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emergency Contact Button -->
+  <button class="emergency-contact" onclick="callEmergency()" title="Emergency Services - 911">
+    <i class="fas fa-phone"></i>
+  </button>
+
+  <script>
+    let currentFilters = {
+      category: 'all',
+      commitment: 'all',
+      location: 'all',
+      search: ''
+    };
+
+    let opportunities = [
+      {
+        id: 1,
+        title: "Emergency Response Coordinator",
+        category: "emergency",
+        organization: "Red Cross",
+        location: "California, USA",
+        type: "urgent",
+        commitment: "high",
+        description: "Coordinate emergency response efforts during natural disasters. Help organize volunteers and resources.",
+        skills: ["Leadership", "Communication", "Crisis Management"],
+        timeCommitment: "20+ hours/week",
+        requirements: "Previous emergency response experience preferred",
+        volunteers: 5,
+        needed: 10,
+        deadline: "Ongoing"
+      },
+      {
+        id: 2,
+        title: "Medical Support Volunteer",
+        category: "medical",
+        organization: "Community Health Center",
+        location: "Texas, USA",
+        type: "ongoing",
+        commitment: "medium",
+        description: "Assist medical professionals in providing care to disaster victims and underserved communities.",
+        skills: ["First Aid", "CPR", "Medical Training"],
+        timeCommitment: "10-15 hours/week",
+        requirements: "CPR certification required, medical background preferred",
+        volunteers: 12,
+        needed: 20,
+        deadline: "Open"
+      },
+      {
+        id: 3,
+        title: "Supply Chain Coordinator",
+        category: "logistics",
+        organization: "Disaster Relief Network",
+        location: "Remote",
+        type: "remote",
+        commitment: "medium",
+        description: "Manage inventory and distribution of emergency supplies to affected areas.",
+        skills: ["Organization", "Data Entry", "Logistics"],
+        timeCommitment: "8-12 hours/week",
+        requirements: "Experience with inventory management systems",
+        volunteers: 3,
+        needed: 8,
+        deadline: "2 weeks"
+      },
+      {
+        id: 4,
+        title: "Community Outreach Specialist",
+        category: "community",
+        organization: "Local Community Center",
+        location: "Florida, USA",
+        type: "flexible",
+        commitment: "low",
+        description: "Help connect families with resources and support services after disasters.",
+        skills: ["Communication", "Bilingual", "Social Work"],
+        timeCommitment: "5-8 hours/week",
+        requirements: "Bilingual (Spanish/English) preferred",
+        volunteers: 8,
+        needed: 15,
+        deadline: "1 month"
+      },
+      {
+        id: 5,
+        title: "IT Support Specialist",
+        category: "technical",
+        organization: "Tech for Good",
+        location: "Remote",
+        type: "remote",
+        commitment: "low",
+        description: "Provide technical support for disaster response systems and help maintain communication networks.",
+        skills: ["IT Support", "Network Admin", "Troubleshooting"],
+        timeCommitment: "3-5 hours/week",
+        requirements: "IT certification or equivalent experience",
+        volunteers: 2,
+        needed: 6,
+        deadline: "Ongoing"
+      },
+      {
+        id: 6,
+        title: "Educational Support Coordinator",
+        category: "education",
+        organization: "Schools Recovery Initiative",
+        location: "Oklahoma, USA",
+        type: "ongoing",
+        commitment: "medium",
+        description: "Help displaced students continue their education and provide tutoring support.",
+        skills: ["Teaching", "Tutoring", "Child Care"],
+        timeCommitment: "10-12 hours/week",
+        requirements: "Teaching experience or education background",
+        volunteers: 15,
+        needed: 25,
+        deadline: "3 months"
+      },
+      {
+        id: 7,
+        title: "Mental Health Support Volunteer",
+        category: "medical",
+        organization: "Crisis Counseling Center",
+        location: "New York, USA",
+        type: "urgent",
+        commitment: "high",
+        description: "Provide emotional support and crisis counseling to disaster survivors.",
+        skills: ["Counseling", "Active Listening", "Crisis Intervention"],
+        timeCommitment: "15-20 hours/week",
+        requirements: "Mental health certification or training required",
+        volunteers: 6,
+        needed: 12,
+        deadline: "1 week"
+      },
+      {
+        id: 8,
+        title: "Food Service Coordinator",
+        category: "community",
+        organization: "Meals on Wheels Emergency",
+        location: "Georgia, USA",
+        type: "ongoing",
+        commitment: "medium",
+        description: "Organize and distribute meals to disaster-affected families and emergency workers.",
+        skills: ["Food Service", "Organization", "Cooking"],
+        timeCommitment: "8-10 hours/week",
+        requirements: "Food safety certification preferred",
+        volunteers: 20,
+        needed: 30,
+        deadline: "Open"
+      },
+      {
+        id: 9,
+        title: "Construction & Repair Volunteer",
+        category: "emergency",
+        organization: "Habitat for Humanity",
+        location: "Louisiana, USA",
+        type: "ongoing",
+        commitment: "high",
+        description: "Help rebuild homes and infrastructure damaged by natural disasters.",
+        skills: ["Construction", "Carpentry", "Electrical"],
+        timeCommitment: "20+ hours/week",
+        requirements: "Construction experience preferred, safety training provided",
+        volunteers: 25,
+        needed: 50,
+        deadline: "6 months"
+      },
+      {
+        id: 10,
+        title: "Data Entry Specialist",
+        category: "technical",
+        organization: "Emergency Management Agency",
+        location: "Remote",
+        type: "remote",
+        commitment: "low",
+        description: "Help process and organize disaster response data and victim assistance applications.",
+        skills: ["Data Entry", "Computer Skills", "Attention to Detail"],
+        timeCommitment: "4-6 hours/week",
+        requirements: "Basic computer skills, accuracy essential",
+        volunteers: 10,
+        needed: 20,
+        deadline: "2 months"
+      },
+      {
+        id: 11,
+        title: "Transportation Coordinator",
+        category: "logistics",
+        organization: "Emergency Transport Network",
+        location: "Multi-State",
+        type: "flexible",
+        commitment: "medium",
+        description: "Coordinate transportation for evacuees and emergency supplies.",
+        skills: ["Driving", "Logistics", "Communication"],
+        timeCommitment: "12-15 hours/week",
+        requirements: "Valid commercial driver's license preferred",
+        volunteers: 8,
+        needed: 15,
+        deadline: "Ongoing"
+      },
+      {
+        id: 12,
+        title: "Child Care Specialist",
+        category: "community",
+        organization: "Family Support Services",
+        location: "Virginia, USA",
+        type: "ongoing",
+        commitment: "medium",
+        description: "Provide childcare services for families staying in emergency shelters.",
+        skills: ["Child Care", "Early Education", "Patience"],
+        timeCommitment: "10-12 hours/week",
+        requirements: "Background check required, childcare experience preferred",
+        volunteers: 12,
+        needed: 18,
+        deadline: "Open"
+      }
+    ];
+
+    // Sidebar functionality
+    function openNav() {
+      document.getElementById("mySidebar").style.width = "250px";
+    }
+
+    function closeNav() {
+      document.getElementById("mySidebar").style.width = "0";
+    }
+
+    // Weather widget toggle
+    function toggleWeather() {
+      alert("Weather details: Clear skies, 22°C, Light winds from the west at 8 mph. UV Index: 6 (High)");
+    }
+
+    // Show/hide application form
+    function showApplicationForm(opportunityId = null) {
+      document.getElementById('volunteerApplicationForm').classList.add('active');
+      if (opportunityId) {
+        document.getElementById('selectedOpportunityId').value = opportunityId;
+      }
+      document.getElementById('volunteerApplicationForm').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function hideApplicationForm() {
+      document.getElementById('volunteerApplicationForm').classList.remove('active');
+    }
+
+    // Submit application
+    function submitApplication(event) {
+      event.preventDefault();
+      
+      const formData = {
+        opportunityId: document.getElementById('selectedOpportunityId').value,
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        address: document.getElementById('address').value,
+        experience: document.getElementById('previousExperience').value,
+        skills: Array.from(document.querySelectorAll('input[name="skills"]:checked')).map(cb => cb.value),
+        additionalSkills: document.getElementById('additionalSkills').value,
+        availability: document.getElementById('availability').value,
+        hoursPerWeek: document.getElementById('hoursPerWeek').value,
+        preferredDays: Array.from(document.querySelectorAll('input[name="days"]:checked')).map(cb => cb.value),
+        emergencyContact: {
+          name: document.getElementById('emergencyName').value,
+          phone: document.getElementById('emergencyPhone').value,
+          relation: document.getElementById('emergencyRelation').value
+        },
+        motivation: document.getElementById('motivation').value,
+        specialRequests: document.getElementById('specialRequests').value
+      };
+      
+      // Simulate application submission
+      const submitBtn = event.target.querySelector('.submit-btn');
+      const originalText = submitBtn.innerHTML;
+      
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting Application...';
+      submitBtn.disabled = true;
+      
+      setTimeout(() => {
+        const opportunityTitle = formData.opportunityId ? 
+          opportunities.find(o => o.id == formData.opportunityId)?.title || 'Selected Position' : 
+          'Volunteer Position';
+          
+        alert(`Application submitted successfully!\n\nThank you ${formData.firstName} for applying to volunteer for: ${opportunityTitle}\n\nYour application is being reviewed and you'll receive an email confirmation within 24 hours. If selected, we'll contact you within 3-5 business days to discuss next steps.\n\nThank you for your commitment to helping others!`);
+        
+        // Reset form and hide
+        event.target.reset();
+        hideApplicationForm();
+        
+        // Update stats
+        updateStats('new-application');
+        
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }, 3000);
+    }
+
+    // Set filter
+    function setFilter(type, value) {
+      currentFilters[type] = value;
+      
+      // Update active filter buttons
+      document.querySelectorAll(`[onclick*="${type}"]`).forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      filterOpportunities();
+    }
+
+    // Filter opportunities
+    function filterOpportunities() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      currentFilters.search = searchTerm;
+      
+      let filteredOpportunities = opportunities.filter(opportunity => {
+        // Category filter
+        if (currentFilters.category !== 'all' && opportunity.category !== currentFilters.category) {
+          return false;
+        }
+        
+        // Commitment filter
+        if (currentFilters.commitment !== 'all' && opportunity.commitment !== currentFilters.commitment) {
+          return false;
+        }
+        
+        // Location filter
+        if (currentFilters.location !== 'all') {
+          if (currentFilters.location === 'remote' && !opportunity.location.includes('Remote')) return false;
+          if (currentFilters.location === 'local' && opportunity.location.includes('Remote')) return false;
+          if (currentFilters.location === 'travel' && !opportunity.location.includes('Multi-State')) return false;
+        }
+        
+        // Search filter
+        if (searchTerm && !opportunity.title.toLowerCase().includes(searchTerm) && 
+            !opportunity.location.toLowerCase().includes(searchTerm) && 
+            !opportunity.description.toLowerCase().includes(searchTerm) &&
+            !opportunity.skills.some(skill => skill.toLowerCase().includes(searchTerm))) {
+          return false;
+        }
+        
+        return true;
+      });
+      
+      displayOpportunities(filteredOpportunities);
+      updateResultsCount(filteredOpportunities.length);
+    }
+
+    // Display opportunities
+    function displayOpportunities(opportunitiesToShow) {
+      const grid = document.getElementById('opportunitiesGrid');
+      grid.innerHTML = '';
+      
+      opportunitiesToShow.forEach(opportunity => {
+        const opportunityCard = createOpportunityCard(opportunity);
+        grid.appendChild(opportunityCard);
+      });
+    }
+
+    // Create opportunity card element
+    function createOpportunityCard(opportunity) {
+      const card = document.createElement('div');
+      card.className = `volunteer-card ${opportunity.category}`;
+      
+      const badgeClass = `badge-${opportunity.type}`;
+      const commitmentClass = `commitment-${opportunity.commitment}`;
+      const commitmentText = {
+        low: 'Low',
+        medium: 'Medium', 
+        high: 'High'
+      }[opportunity.commitment];
+      
+      card.innerHTML = `
+        <div class="volunteer-badge ${badgeClass}">${opportunity.type.toUpperCase()}</div>
+        <div class="flex items-start mb-4">
+          <div class="flex-1">
+            <h3 class="text-xl font-bold mb-2">${opportunity.title}</h3>
+            <p class="text-sm opacity-80 mb-2">
+              <i class="fas fa-building mr-1"></i>${opportunity.organization} • 
+              <i class="fas fa-map-marker-alt mr-1"></i>${opportunity.location}
+            </p>
+            <p class="text-sm opacity-90 mb-3">${opportunity.description}</p>
+            
+            <div class="skills-container">
+              ${opportunity.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex justify-between text-sm mb-3">
+          <span><i class="fas fa-clock mr-1"></i>${opportunity.timeCommitment}</span>
+          <span class="commitment-level ${commitmentClass}">${commitmentText} Commitment</span>
+        </div>
+        
+        <div class="flex justify-between text-xs opacity-70 mb-4">
+          <span><i class="fas fa-users mr-1"></i>${opportunity.volunteers}/${opportunity.needed} volunteers</span>
+          <span><i class="fas fa-calendar mr-1"></i>${opportunity.deadline}</span>
+        </div>
+        
+        <div class="text-xs opacity-80 mb-4">
+          <strong>Requirements:</strong> ${opportunity.requirements}
+        </div>
+        
+        <div class="volunteer-actions">
+          <button class="action-btn apply-btn" onclick="applyForOpportunity(${opportunity.id})">
+            <i class="fas fa-hand-paper mr-1"></i>Apply Now
+          </button>
+          <button class="action-btn info-btn" onclick="viewOpportunityDetails(${opportunity.id})">
+            <i class="fas fa-info-circle mr-1"></i>Details
+          </button>
+        </div>
+      `;
+      
+      return card;
+    }
+
+    // Update results count
+    function updateResultsCount(count) {
+      document.getElementById('resultsCount').textContent = count;
+      document.getElementById('totalResults').textContent = opportunities.length;
+    }
+
+    // Load more opportunities
+    function loadMoreOpportunities() {
+      alert('Loading more opportunities...\n\nIn a real application, this would fetch additional volunteer opportunities from the server and add them to the current view.');
+    }
+
+    // Apply for opportunity
+    function applyForOpportunity(opportunityId) {
+      showApplicationForm(opportunityId);
+    }
+
+    // View opportunity details
+    function viewOpportunityDetails(opportunityId) {
+      const opportunity = opportunities.find(o => o.id === opportunityId);
+      if (opportunity) {
+        alert(`${opportunity.title}\n\nOrganization: ${opportunity.organization}\nLocation: ${opportunity.location}\nTime Commitment: ${opportunity.timeCommitment}\n\nDescription:\n${opportunity.description}\n\nRequired Skills: ${opportunity.skills.join(', ')}\n\nRequirements: ${opportunity.requirements}\n\nVolunteers: ${opportunity.volunteers}/${opportunity.needed}\nDeadline: ${opportunity.deadline}\n\nClick "Apply Now" to submit your application!`);
+      }
+    }
+
+    // Update statistics
+    function updateStats(action) {
+      if (action === 'new-application') {
+        const activeVolunteers = document.getElementById('activeVolunteers');
+        const current = parseInt(activeVolunteers.textContent.replace(',', ''));
+        activeVolunteers.textContent = (current + 1).toLocaleString();
+      }
+    }
+
+    // Emergency call function
+    function callEmergency() {
+      if (confirm('Call Emergency Services (911)?\n\nThis will connect you directly to emergency dispatch.')) {
+        alert('In a real emergency, this would dial 911. For demo purposes, emergency services have been notified.');
+      }
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+      // Display initial opportunities
+      filterOpportunities();
+      
+      // Close sidebar when clicking outside
+      document.addEventListener('click', function(event) {
+        const sidebar = document.getElementById('mySidebar');
+        const openBtn = document.querySelector('.openbtn');
+        
+        if (!sidebar.contains(event.target) && !openBtn.contains(event.target)) {
+          closeNav();
+        }
+      });
+    });
+  </script>
+
+  <script src="chatbot.js"></script>
+    <script id="alertaid-shared-components">
+        const THEME_STORAGE_KEY = 'theme';
+        const HTML_ELEMENT = document.documentElement;
+        function applyTheme(theme) {
+            HTML_ELEMENT.setAttribute('data-theme', theme);
+            document.body.setAttribute('data-theme', theme);
+        }
+        function setTheme(theme) {
+            applyTheme(theme);
+            try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch(e){}
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            const display = document.getElementById('currentThemeDisplay');
+            if (theme === 'dark') {
+                if (icon) icon.className = 'fas fa-sun';
+                if (text) text.textContent = 'Light Theme';
+                if (display) display.textContent = 'Dark';
+            } else {
+                if (icon) icon.className = 'fas fa-moon';
+                if (text) text.textContent = 'Dark Theme';
+                if (display) display.textContent = 'Light';
+            }
+        }
+        window.toggleTheme = function() {
+            const next = HTML_ELEMENT.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            setTheme(next);
+        }
+        window.openNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '260px'; }
+        window.closeNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '0'; }
+        function showPopup(message, opts){
+            const modal = document.getElementById('app-modal');
+            const body = document.getElementById('app-modal-body');
+            const titleEl = document.getElementById('app-modal-title');
+            const closeBtn = document.getElementById('app-modal-close');
+            const okBtn = document.getElementById('app-modal-ok');
+            const cancelBtn = document.getElementById('app-modal-cancel');
+            if (!modal || !body) return console.error('Modal elements missing', message);
+            const options = opts || {};
+            const isConfirm = options.type === 'confirm';
+            titleEl.textContent = options.title || (isConfirm ? 'Confirmation' : 'Notice');
+            body.textContent = (message == null ? '' : String(message));
+            okBtn.textContent = options.okText || (isConfirm ? 'Confirm' : 'OK');
+            okBtn.className = `app-btn ${options.okClass || (isConfirm ? 'app-btn-critical' : '')}`;
+            cancelBtn.style.display = isConfirm ? 'block' : 'none';
+            function hide(result = false){ modal.classList.remove('show'); cleanup(); if(isConfirm && typeof options.callback === 'function'){ options.callback(result); } }
+            function cleanup(){ closeBtn.removeEventListener('click', onClose); okBtn.removeEventListener('click', onOk); cancelBtn.removeEventListener('click', onCancel); modal.removeEventListener('click', onBackdrop); document.removeEventListener('keydown', onEsc); }
+            function onClose(){ hide(false); }
+            function onOk(){ hide(true); }
+            function onCancel(){ hide(false); }
+            function onBackdrop(e){ if(e.target === modal) hide(false); }
+            function onEsc(e){ if(e.key === 'Escape') hide(false); }
+            closeBtn.addEventListener('click', onClose);
+            okBtn.addEventListener('click', onOk);
+            cancelBtn.addEventListener('click', onCancel);
+            modal.addEventListener('click', onBackdrop);
+            document.addEventListener('keydown', onEsc);
+            modal.classList.add('show');
+        }
+        function showConfirm(message, callback){ showPopup(message, { type:'confirm', title:'Action Required', okText:'Yes', okClass:'app-btn-critical', cancelText:'Cancel', callback }); }
+        window.alert = function(msg){ try { showPopup(msg); } catch { console.error('Modal failed', msg); } };
+        window.showPopup = showPopup;
+        window.showConfirm = showConfirm;
+        function getValidToken(){ const token = localStorage.getItem('token'); return token && token !== 'null' ? token : null; }
+        window.checkAuthStatus = function(){
+            const token = getValidToken();
+            const userOptions = document.getElementById('userOnlyOptions');
+            const guestOptions = document.getElementById('guestOnlyOptions');
+            const navAuthLink = document.getElementById('navAuthLink');
+            if (token){
+                if (userOptions) userOptions.style.display = 'flex';
+                if (guestOptions) guestOptions.style.display = 'none';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-tachometer-alt\"></i> Dashboard'; navAuthLink.href = resolveDashboardHref(); }
+            } else {
+                if (userOptions) userOptions.style.display = 'none';
+                if (guestOptions) guestOptions.style.display = 'block';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-sign-in-alt\"></i> Sign In'; navAuthLink.href = 'login.html'; }
+            }
+        }
+        window.getLocation = function(){
+            if (navigator.geolocation){
+                navigator.geolocation.getCurrentPosition((p)=>{
+                    showPopup(`Your Location:
+Latitude: ${p.coords.latitude.toFixed(6)}
+Longitude: ${p.coords.longitude.toFixed(6)}`, { title:'Current Location' });
+                },()=>showPopup('Unable to retrieve your location.', { title:'Location Error' }));
+            } else {
+                showPopup('Geolocation is not supported by this browser.', { title:'Location Error' });
+            }
+        }
+        window.showNotifications = function(){ if (!getValidToken()) { showPopup('Please sign in to view notifications.', { title:'Authorization Required' }); return; } showPopup('Notifications will appear here.', { title:'Notifications' }); }
+        window.showProfile = function(){ if (!getValidToken()) { showPopup('Please sign in to view profile.', { title:'Authorization Required' }); return; } showPopup('Profile Information (demo)', { title:'User Profile' }); }
+        window.signOut = function(){ showConfirm('Are you sure you want to sign out?', (confirmed)=>{ if (confirmed){ try { localStorage.removeItem('token'); } catch {} window.location.replace('login.html'); } }); }
+        document.addEventListener('DOMContentLoaded', function(){ setTheme(localStorage.getItem(THEME_STORAGE_KEY) || 'light'); checkAuthStatus(); });
+    </script>
+</body>
+</html>
+

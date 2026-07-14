@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <style id="alertaid-shared-components">
+        :root {
+            --color-bg: #fafbfc;
+            --color-surface: #ffffff;
+            --color-surface-soft: #fef3ef;
+            --color-muted: #666666;
+            --color-text: #1a1a1a;
+            --color-primary: #FF3B30;
+            --color-secondary: #FF6F00;
+            --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            --color-border: rgba(26, 26, 26, 0.08);
+            --color-shadow-soft: 0 20px 45px rgba(17, 24, 39, 0.15);
+            --color-nav-bg: rgba(255, 255, 255, 0.95);
+            --color-sidebar-bg-top: rgba(255, 86, 33, 0.98);
+        }
+        html[data-theme="dark"] {
+            --color-bg: #121212;
+            --color-surface: #1e1e1e;
+            --color-surface-soft: #281c1b;
+            --color-muted: #aaaaaa;
+            --color-text: #ffffff;
+            --color-primary: #FF6F00;
+            --color-secondary: #FF3B30;
+            --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            --color-border: rgba(255, 255, 255, 0.1);
+            --color-shadow-soft: 0 20px 45px rgba(0, 0, 0, 0.5);
+            --color-nav-bg: rgba(30, 30, 30, 0.95);
+            --color-sidebar-bg-top: rgba(255, 111, 0, 0.98);
+        }
+        body {
+            min-height: 100vh;
+            background: var(--color-bg) !important;
+            color: var(--color-text);
+            transition: background 0.4s, color 0.4s;
+            font-family: 'Inter', sans-serif;
+            padding-top: 150px;
+        }
+        select option, select optgroup { color: #111 !important; background: #fff !important; }
+        html[data-theme="dark"] select option,
+        html[data-theme="dark"] select optgroup { color: #fff !important; background: #333 !important; }
+        .main-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 24px;
+            background: var(--color-nav-bg);
+            border-radius: 18px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            margin: 12px;
+            width: calc(100% - 24px);
+            max-width: none;
+            z-index: 1000;
+            box-shadow: var(--color-shadow-soft);
+            border: 1px solid var(--color-border);
+            backdrop-filter: blur(10px);
+        }
+        .nav-left, .nav-right { display: flex; align-items: center; gap: 16px; }
+        .nav-spacer {
+            height: 140px;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .nav-spacer { height: 180px; }
+        }
+
+        .nav-brand { font-size: 1.9rem; font-weight: 800; color: var(--color-primary); text-decoration: none; transition: color 0.4s; }
+        .weather-widget { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 30px; background: linear-gradient(135deg, #4A90E2, #357ABD); color: #fff; cursor: pointer; font-weight: 500; box-shadow: 0 5px 15px rgba(53, 122, 189, 0.3); }
+        .weather-widget i { font-size: 1.1rem; color: #fff; }
+        .weather-info { font-size: 0.85rem; text-align: left; }
+        .nav-signin { display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; text-decoration: none; background: var(--color-gradient); padding: 10px 26px; border-radius: 999px; box-shadow: 0 12px 25px rgba(255, 59, 48, 0.35); border: none; font-size: 1rem; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .nav-signin i {
+            margin-right: 8px;
+        }
+        .nav-signin:hover { transform: translateY(-2px); box-shadow: 0 18px 30px rgba(255, 59, 48, 0.4); }
+
+        .sidebar { height: 100%; width: 0; position: fixed; top: 0; left: 0; background: none !important; color: var(--color-text); overflow-x: hidden; transition: 0.4s; padding-top: 110px; z-index: 1000; box-shadow: var(--color-shadow-soft); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; }
+        .sidebar-content { width: 100%; height: 100%; display: flex; flex-direction: column; overflow-y: auto; background: var(--color-sidebar-bg-top) !important; padding-top: 20px; }
+        .sidebar a { color: #fff !important; font-weight: 600; padding: 12px 32px; margin-right: 20px; display: flex; align-items: center; gap: 12px; border-radius: 0 20px 20px 0; transition: background 0.2s ease, transform 0.2s ease; text-decoration: none; }
+        .sidebar a:hover { background: rgba(255,255,255,0.15) !important; transform: translateX(4px); }
+        .sidebar a i { width: 22px; text-align: center; color: #fff !important; }
+        .sidebar .closebtn { position: absolute; top: 24px; right: 24px; width: 42px; height: 42px; border-radius: 14px; background: var(--color-surface); color: var(--color-primary) !important; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 15px 28px rgba(0,0,0,0.25); }
+        .sidebar .closebtn:hover { background: var(--color-surface-soft); }
+        .theme-toggle { padding: 10px 18px; border-radius: 16px; cursor: pointer; font-size: 16px; display: flex; align-items: center; gap: 8px; background: var(--color-surface); color: var(--color-primary); border: 1px solid rgba(26,26,26,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        html[data-theme="dark"] .theme-toggle { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); box-shadow: none; }
+        .theme-toggle:hover { transform: translateY(-1px); background: rgba(255,59,48,0.05); }
+        html[data-theme="dark"] .theme-toggle:hover { background: rgba(255,255,255,0.2); }
+        .app-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:2000}
+        .app-modal.show{display:flex}
+        .app-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.55);backdrop-filter: blur(4px);}
+        .app-modal-dialog{position:relative;background:var(--color-surface);color:var(--color-text);min-width:280px;max-width:520px;width:90%;border-radius:18px;box-shadow:var(--color-shadow-soft);overflow:hidden;border: 1px solid var(--color-border);}
+        .app-modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--color-primary);color:#fff}
+        .app-modal-header button{background:none;border:none;color:#fff;font-size:20px;cursor:pointer}
+        .app-modal-body{padding:16px;white-space:pre-wrap}
+        .app-modal-actions{padding:12px 16px;display:flex;justify-content:flex-end;gap:8px;background:var(--color-surface-soft);}
+        .app-btn{background:var(--color-secondary);color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer; transition: all 0.2s;}
+        .app-btn:hover{background: #e66600;}
+        .app-btn-secondary { background: var(--color-surface-soft); color: var(--color-text); border: 1px solid var(--color-border); }
+        .app-btn-secondary:hover { background: rgba(255, 59, 48, 0.05); }
+        .app-btn-critical { background: #FF3B30; color: #fff; }
+    </style>
+    <style id="alertaid-openbtn-override">
+        .openbtn {
+            width: 48px !important;
+            height: 48px !important;
+            border-radius: 16px !important;
+            background: #ffffff !important;
+            border: 1px solid rgba(15, 23, 42, 0.08) !important;
+            box-shadow: 0 15px 30px rgba(15, 23, 42, 0.12) !important;
+            cursor: pointer;
+            position: relative;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .openbtn::before,
+        .openbtn::after,
+        .openbtn .openbtn-line {
+            content: '';
+            position: absolute;
+            left: 50%;
+            width: 26px;
+            height: 2px;
+            border-radius: 999px;
+            background: #FF3B30 !important;
+            transform: translateX(-50%);
+        }
+        .openbtn::before { top: 16px; }
+        .openbtn .openbtn-line { top: 50%; transform: translate(-50%, -50%); }
+        .openbtn::after { bottom: 16px; }
+        .openbtn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 32px rgba(15, 23, 42, 0.18);
+        }
+    </style>
+
+<title>AlertAid</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="chatbot.css">
+  <script src="role-router.js"></script>
+  <script src="nav-auth.js"></script>
+  <script type="module" src="./dashboard-guard.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* === Base === */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #134E5E, #71B280);
+      color: #fff;
+      overflow-x: hidden;
+      transition: margin-left .4s ease;
+      padding: 20px;
+    }
+
+    /* === Navbar === */
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 22px 32px;
+      background: #ffffff;
+      border-radius: 32px;
+      margin: 18px auto 35px;
+      position: relative;
+      z-index: 1000;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+      width: calc(100% - 40px);
+    }
+
+    .nav-brand {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: #FF3B30;
+      text-decoration: none;
+    }
+
+    .weather-widget {
+      margin-left: auto;
+      margin-right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      cursor: pointer;
+    }
+    .weather-widget i { font-size: 1.2rem; color: #FFD700; }
+    .weather-info { font-size: 0.8rem; }
+    .nav-signin {
+      margin-left: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 600;
+      text-decoration: none;
+      background: #FF3B30;
+      padding: 10px 24px;
+      border-radius: 999px;
+      box-shadow: 0 14px 26px rgba(255, 59, 48, 0.3);
+      border: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .nav-signin:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 32px rgba(255, 59, 48, 0.35);
+    }
+
+
+    /* === Sidebar === */
+    .sidebar {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      top: 0; left: 0;
+      background: rgba(0,0,0,0.9);
+      overflow-x: hidden;
+      transition: 0.4s;
+      padding-top: 60px;
+      z-index: 1000;
+    }
+    .sidebar a {
+      padding: 12px 25px;
+      text-decoration: none;
+      font-size: 18px;
+      color: #FFD700;
+      display: block;
+      transition: 0.3s;
+    }
+    .sidebar a:hover { background: rgba(255,255,255,0.1); }
+    .sidebar .closebtn {
+      position: absolute;
+      top: 20px;
+      right: 25px;
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: #fff;
+      color: #FF3B30;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 18px 30px rgba(0,0,0,0.25);
+    }
+
+
+
+
+    /* === Help Request Cards === */
+    .help-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border-left: 6px solid;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .help-card:hover {
+      transform: translateY(-3px);
+      background: rgba(255,255,255,0.15);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    .help-card.emergency {
+      border-left-color: #dc2626;
+      background: linear-gradient(135deg, rgba(220, 38, 38, 0.2), rgba(185, 28, 28, 0.1));
+    }
+
+    .help-card.urgent {
+      border-left-color: #ea580c;
+      background: linear-gradient(135deg, rgba(234, 88, 12, 0.2), rgba(194, 65, 12, 0.1));
+    }
+
+    .help-card.standard {
+      border-left-color: #3b82f6;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.1));
+    }
+
+    .priority-badge {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .badge-emergency {
+      background: #dc2626;
+      color: white;
+      animation: pulse 2s infinite;
+    }
+
+    .badge-urgent {
+      background: #ea580c;
+      color: white;
+    }
+
+    .badge-standard {
+      background: #3b82f6;
+      color: white;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* === Form Styles === */
+    .help-form {
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 25px;
+      backdrop-filter: blur(8px);
+      display: none;
+    }
+
+    .help-form.active {
+      display: block;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #FFD700;
+    }
+
+    .form-input, .form-textarea, .form-select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      outline: none;
+      border-color: #FFD700;
+      background: rgba(255,255,255,0.15);
+    }
+
+    .form-input::placeholder, .form-textarea::placeholder {
+      color: rgba(255,255,255,0.6);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4);
+    }
+
+    /* === Status Tracking === */
+    .status-container {
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 25px;
+      backdrop-filter: blur(8px);
+    }
+
+    .status-item {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+      border-left: 4px solid;
+    }
+
+    .status-pending {
+      border-left-color: #f59e0b;
+    }
+
+    .status-assigned {
+      border-left-color: #3b82f6;
+    }
+
+    .status-completed {
+      border-left-color: #10b981;
+    }
+
+    .status-icon {
+      font-size: 1.5rem;
+      margin-right: 15px;
+      width: 30px;
+      text-align: center;
+    }
+
+    /* === Emergency Contact === */
+    .emergency-contact {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+      animation: emergencyPulse 2s infinite;
+      z-index: 1000;
+    }
+
+    @keyframes emergencyPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4); }
+      50% { transform: scale(1.1); box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6); }
+    }
+
+    .location-btn {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .location-btn:hover {
+      background: #059669;
+      transform: translateY(-2px);
+    }
+
+    .priority-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .priority-option {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .priority-option.selected {
+      border-color: #FFD700;
+      background: rgba(255, 215, 0, 0.2);
+    }
+
+    .priority-option:hover {
+      background: rgba(255,255,255,0.15);
+    }
+  </style>
+  <link rel="stylesheet" href="landing-theme.css">
+  
+
+
+</head>
+<body class="landing-palette">    <nav class="main-nav">
+        <div class="nav-left">
+            <button class="openbtn" onclick="openNav()" aria-label="Open navigation menu">
+                <span class="openbtn-line"></span>
+            </button>
+            <a href="citizen_dashboard.html" class="nav-brand" data-route="dashboard">AlertAid</a>
+        </div>
+
+        <div class="nav-right">
+            <a class="weather-widget" href="https://www.msn.com/en-in/weather/forecast/in-Indore,MP" target="_blank" rel="noopener">
+                <i id="weather-icon" class="fas fa-cloud-sun"></i>
+                <div class="weather-info">
+                    <div id="weather-details">-- | --°C | --</div>
+                    <div id="weather-time">--:-- | --</div>
+                </div>
+            </a>
+
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light and dark mode">
+                <i id="theme-icon" class="fas fa-sun"></i><span id="theme-text">Light Theme</span>
+            </button>
+
+            <a href="login.html" class="nav-signin" id="navAuthLink">Sign In</a>
+        </div>
+    </nav>
+    <div class="nav-spacer"></div>
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="sidebar-content">
+            <a href="citizen_dashboard.html" data-route="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="alerts.html"><i class="fas fa-exclamation-triangle"></i> Active Alerts</a>
+            <a href="helpforpeople.html"><i class="fas fa-hands-helping"></i> Seek Help</a>
+            <a href="report.html"><i class="fas fa-flag"></i> Report Disaster</a>
+            <a href="donatemoney.html"><i class="fas fa-heart"></i> Make Donation</a>
+            <a href="#" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i> My Location</a>
+            <a href="#" onclick="showNotifications()"><i class="fas fa-bell"></i> Notifications</a>
+                        <div id="userOnlyOptions" style="display: none; flex-direction: column">
+                <a href="profile.html" data-route="profile"><i class="fas fa-user"></i> Profile</a>
+                <a href="change_password.html" data-route="change_password"><i class="fas fa-cog"></i> Settings</a>
+                <a href="javascript:void(0)" onclick="signOut()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+            </div>
+            <div id="guestOnlyOptions">
+                <a href="login.html"><i class="fas fa-sign-in-alt"></i> Sign In</a>
+            </div>
+        </div>
+    </div>
+    
+    <div id="app-modal" class="app-modal" role="dialog" aria-modal="true" aria-labelledby="app-modal-title">
+        <div class="app-modal-backdrop"></div>
+        <div class="app-modal-dialog">
+            <div class="app-modal-header">
+                <div id="app-modal-title">Notice</div>
+                <button id="app-modal-close" aria-label="Close">×</button>
+            </div>
+            <div id="app-modal-body" class="app-modal-body"></div>
+            <div class="app-modal-actions">
+                <button id="app-modal-cancel" class="app-btn app-btn-secondary" style="display:none;">Cancel</button>
+                <button id="app-modal-ok" class="app-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+<!--Navbar -->
+  
+
+
+  <!-- Sidebar -->
+  
+
+
+  <!-- Main Content -->
+  <div class="container mx-auto max-w-6xl">
+    <!-- Page Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold mb-4">
+        <i class="fas fa-hands-helping text-blue-400 mr-3"></i>
+        Request Emergency Assistance
+      </h1>
+      <p class="text-lg opacity-80">Get help quickly during disasters and emergencies</p>
+    </div>
+
+    <!-- Quick Help Categories -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <!-- Medical Emergency -->
+      <div class="help-card emergency" onclick="showHelpForm('medical')">
+        <div class="priority-badge badge-emergency">EMERGENCY</div>
+        <div class="flex items-center mb-4">
+          <i class="fas fa-ambulance text-4xl text-red-400 mr-4"></i>
+          <div>
+            <h3 class="text-xl font-bold">Medical Emergency</h3>
+            <p class="text-sm opacity-80">Life-threatening situations</p>
+          </div>
+        </div>
+        <p class="mb-3">Immediate medical assistance needed for injuries, illness, or life-threatening conditions.</p>
+        <div class="text-sm opacity-90">
+          <i class="fas fa-clock mr-2"></i>Response Time: &lt; 5 minutes
+        </div>
+      </div>
+
+      <!-- Rescue & Evacuation -->
+      <div class="help-card emergency" onclick="showHelpForm('rescue')">
+        <div class="priority-badge badge-emergency">EMERGENCY</div>
+        <div class="flex items-center mb-4">
+          <i class="fas fa-helicopter text-4xl text-red-400 mr-4"></i>
+          <div>
+            <h3 class="text-xl font-bold">Rescue & Evacuation</h3>
+            <p class="text-sm opacity-80">Trapped or stranded</p>
+          </div>
+        </div>
+        <p class="mb-3">Need immediate rescue from dangerous situations or evacuation assistance.</p>
+        <div class="text-sm opacity-90">
+          <i class="fas fa-clock mr-2"></i>Response Time: &lt; 10 minutes
+        </div>
+      </div>
+
+      <!-- Shelter & Housing -->
+      <div class="help-card urgent" onclick="showHelpForm('shelter')">
+        <div class="priority-badge badge-urgent">URGENT</div>
+        <div class="flex items-center mb-4">
+          <i class="fas fa-home text-4xl text-orange-400 mr-4"></i>
+          <div>
+            <h3 class="text-xl font-bold">Shelter & Housing</h3>
+            <p class="text-sm opacity-80">Temporary accommodation</p>
+          </div>
+        </div>
+        <p class="mb-3">Need temporary shelter, housing assistance, or safe place to stay.</p>
+        <div class="text-sm opacity-90">
+          <i class="fas fa-clock mr-2"></i>Response Time: &lt; 30 minutes
+        </div>
+      </div>
+
+      <!-- Food & Water -->
+      <div class="help-card urgent" onclick="showHelpForm('supplies')">
+        <div class="priority-badge badge-urgent">URGENT</div>
+        <div class="flex items-center mb-4">
+          <i class="fas fa-utensils text-4xl text-orange-400 mr-4"></i>
+          <div>
+            <h3 class="text-xl font-bold">Food & Water</h3>
+            <p class="text-sm opacity-80">Essential supplies</p>
+          </div>
+        </div>
+        <p class="mb-3">Need food, clean water, or other essential supplies for survival.</p>
+        <div class="text-sm opacity-90">
+          <i class="fas fa-clock mr-2"></i>Response Time: &lt; 1 hour
+        </div>
+      </div>
+
+      <!-- Transportation -->
+      <div class="help-card standard" onclick="showHelpForm('transport')">
+        <div class="priority-badge badge-standard">STANDARD</div>
+        <div class="flex items-center mb-4">
+          <i class="fas fa-car text-4xl text-blue-400 mr-4"></i>
+          <div>
+            <h3 class="text-xl font-bold">Transportation</h3>
+            <p class="text-sm opacity-80">Vehicle assistance</p>
+          </div>
+        </div>
+        <p class="mb-3">Need transportation, vehicle repair, or fuel assistance.</p>
+        <div class="text-sm opacity-90">
+          <i class="fas fa-clock mr-2"></i>Response Time: &lt; 2 hours
+        </div>
+      </div>
+
+      <!-- Communication -->
+      <div class="help-card standard" onclick="showHelpForm('communication')">
+        <div class="priority-badge badge-standard">STANDARD</div>
+        <div class="flex items-center mb-4">
+          <i class="fas fa-phone text-4xl text-blue-400 mr-4"></i>
+          <div>
+            <h3 class="text-xl font-bold">Communication</h3>
+            <p class="text-sm opacity-80">Contact family/friends</p>
+          </div>
+        </div>
+        <p class="mb-3">Need help contacting family, friends, or accessing communication services.</p>
+        <div class="text-sm opacity-90">
+          <i class="fas fa-clock mr-2"></i>Response Time: &lt; 4 hours
+        </div>
+      </div>
+    </div>
+
+    <!-- Help Request Form -->
+    <div id="helpForm" class="help-form">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">Request Assistance</h2>
+        <button onclick="closeHelpForm()" class="text-2xl text-gray-400 hover:text-white">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form id="assistanceForm" onsubmit="submitHelpRequest(event)">
+        <!-- Priority Selection -->
+        <div class="form-group">
+          <label class="form-label">Priority Level</label>
+          <div class="priority-selector">
+            <div class="priority-option" data-priority="emergency" onclick="selectPriority('emergency')">
+              <i class="fas fa-exclamation-triangle text-red-400 mb-2"></i>
+              <div class="font-bold">Emergency</div>
+              <div class="text-xs">Life threatening</div>
+            </div>
+            <div class="priority-option" data-priority="urgent" onclick="selectPriority('urgent')">
+              <i class="fas fa-clock text-orange-400 mb-2"></i>
+              <div class="font-bold">Urgent</div>
+              <div class="text-xs">Time sensitive</div>
+            </div>
+            <div class="priority-option" data-priority="standard" onclick="selectPriority('standard')">
+              <i class="fas fa-info-circle text-blue-400 mb-2"></i>
+              <div class="font-bold">Standard</div>
+              <div class="text-xs">Non-urgent</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Help Type -->
+        <div class="form-group">
+          <label class="form-label" for="helpType">Type of Assistance Needed</label>
+          <select id="helpType" class="form-select" required>
+            <option value="">Select assistance type...</option>
+            <option value="medical">Medical Emergency</option>
+            <option value="rescue">Rescue & Evacuation</option>
+            <option value="shelter">Shelter & Housing</option>
+            <option value="supplies">Food & Water</option>
+            <option value="transport">Transportation</option>
+            <option value="communication">Communication</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label class="form-label" for="description">Describe Your Situation</label>
+          <textarea id="description" class="form-textarea" placeholder="Please provide details about your emergency and what help you need..." required></textarea>
+        </div>
+
+        <!-- Location -->
+        <div class="form-group">
+          <label class="form-label" for="location">Your Location</label>
+          <div class="flex gap-3">
+            <input type="text" id="location" class="form-input" placeholder="Enter your address or describe your location..." required>
+            <button type="button" class="location-btn" onclick="getCurrentLocation()">
+              <i class="fas fa-map-marker-alt mr-2"></i>Use GPS
+            </button>
+          </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label" for="contactName">Your Name</label>
+            <input type="text" id="contactName" class="form-input" placeholder="Full name..." required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="contactPhone">Phone Number</label>
+            <input type="tel" id="contactPhone" class="form-input" placeholder="Phone number..." required>
+          </div>
+        </div>
+
+        <!-- Number of People -->
+        <div class="form-group">
+          <label class="form-label" for="peopleCount">Number of People Affected</label>
+          <select id="peopleCount" class="form-select" required>
+            <option value="">Select...</option>
+            <option value="1">Just me</option>
+            <option value="2-5">2-5 people</option>
+            <option value="6-10">6-10 people</option>
+            <option value="11+">More than 10 people</option>
+          </select>
+        </div>
+
+        <!-- Special Needs -->
+        <div class="form-group">
+          <label class="form-label" for="specialNeeds">Special Needs or Medical Conditions</label>
+          <textarea id="specialNeeds" class="form-textarea" placeholder="Any disabilities, medical conditions, or special requirements..."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">
+          <i class="fas fa-paper-plane mr-2"></i>
+          Send Help Request
+        </button>
+      </form>
+    </div>
+
+    <!-- My Help Requests Status -->
+    <div class="status-container">
+      <h2 class="text-2xl font-bold mb-6">
+        <i class="fas fa-list-alt mr-3"></i>
+        My Help Requests
+      </h2>
+
+      <div id="helpRequests">
+        <!-- Active Request -->
+        <div class="status-item status-assigned">
+          <div class="status-icon">
+            <i class="fas fa-user-md text-blue-400"></i>
+          </div>
+          <div class="flex-1">
+            <div class="flex justify-between items-start mb-2">
+              <h4 class="font-bold">Medical Emergency - Chest Pain</h4>
+              <span class="text-sm bg-blue-600 px-2 py-1 rounded">ASSIGNED</span>
+            </div>
+            <p class="text-sm opacity-80 mb-2">Paramedic team dispatched to your location</p>
+            <div class="text-xs opacity-70">
+              <i class="fas fa-clock mr-1"></i>Submitted: 15 minutes ago |
+              <i class="fas fa-map-marker-alt ml-2 mr-1"></i>123 Oak Street |
+              <i class="fas fa-phone ml-2 mr-1"></i>Contact: Dr. Sarah Johnson
+            </div>
+          </div>
+        </div>
+
+        <!-- Pending Request -->
+        <div class="status-item status-pending">
+          <div class="status-icon">
+            <i class="fas fa-home text-yellow-400"></i>
+          </div>
+          <div class="flex-1">
+            <div class="flex justify-between items-start mb-2">
+              <h4 class="font-bold">Temporary Shelter Request</h4>
+              <span class="text-sm bg-yellow-600 px-2 py-1 rounded">PENDING</span>
+            </div>
+            <p class="text-sm opacity-80 mb-2">Looking for available shelter coordinator</p>
+            <div class="text-xs opacity-70">
+              <i class="fas fa-clock mr-1"></i>Submitted: 2 hours ago |
+              <i class="fas fa-users ml-2 mr-1"></i>Family of 4 |
+              <i class="fas fa-exclamation-triangle ml-2 mr-1"></i>House damaged by storm
+            </div>
+          </div>
+        </div>
+
+        <!-- Completed Request -->
+        <div class="status-item status-completed">
+          <div class="status-icon">
+            <i class="fas fa-check-circle text-green-400"></i>
+          </div>
+          <div class="flex-1">
+            <div class="flex justify-between items-start mb-2">
+              <h4 class="font-bold">Food & Water Supply</h4>
+              <span class="text-sm bg-green-600 px-2 py-1 rounded">COMPLETED</span>
+            </div>
+            <p class="text-sm opacity-80 mb-2">Emergency supplies delivered successfully</p>
+            <div class="text-xs opacity-70">
+              <i class="fas fa-clock mr-1"></i>Completed: Yesterday |
+              <i class="fas fa-truck ml-2 mr-1"></i>Delivered by: Red Cross Team Alpha |
+              <i class="fas fa-star ml-2 mr-1"></i>Rate this help
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="noRequests" class="text-center py-8" style="display: none;">
+        <i class="fas fa-clipboard-list text-4xl text-gray-400 mb-4"></i>
+        <h3 class="text-xl font-semibold mb-2">No Help Requests</h3>
+        <p class="opacity-80">You haven't submitted any help requests yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emergency Contact Button -->
+  <button class="emergency-contact" onclick="callEmergency()" title="Emergency Services - 911">
+    <i class="fas fa-phone"></i>
+  </button>
+
+  <script>
+    let selectedPriority = '';
+    let selectedHelpType = '';
+
+    // Sidebar functionality
+    function openNav() {
+      document.getElementById("mySidebar").style.width = "250px";
+    }
+
+    function closeNav() {
+      document.getElementById("mySidebar").style.width = "0";
+    }
+
+    // Weather widget toggle
+    function toggleWeather() {
+      alert("Weather details: Clear skies, 22°C, Light winds from the west at 8 mph. UV Index: 6 (High)");
+    }
+
+    // Show help form for specific category
+    function showHelpForm(type) {
+      selectedHelpType = type;
+      const form = document.getElementById('helpForm');
+      const helpTypeSelect = document.getElementById('helpType');
+      
+      // Set the help type in the form
+      helpTypeSelect.value = type;
+      
+      // Set appropriate priority based on help type
+      if (type === 'medical' || type === 'rescue') {
+        selectPriority('emergency');
+      } else if (type === 'shelter' || type === 'supplies') {
+        selectPriority('urgent');
+      } else {
+        selectPriority('standard');
+      }
+      
+      form.classList.add('active');
+      form.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Close help form
+    function closeHelpForm() {
+      document.getElementById('helpForm').classList.remove('active');
+    }
+
+    // Select priority level
+    function selectPriority(priority) {
+      selectedPriority = priority;
+      
+      // Update visual selection
+      document.querySelectorAll('.priority-option').forEach(option => {
+        option.classList.remove('selected');
+      });
+      document.querySelector(`[data-priority="${priority}"]`).classList.add('selected');
+    }
+
+    // Get current location using GPS
+    function getCurrentLocation() {
+      const locationInput = document.getElementById('location');
+      
+      if (navigator.geolocation) {
+        locationInput.value = "Getting your location...";
+        
+        navigator.geolocation.getCurrentPosition(
+          function(position) {
+            const lat = position.coords.latitude.toFixed(6);
+            const lng = position.coords.longitude.toFixed(6);
+            locationInput.value = `GPS Location: ${lat}, ${lng} (Approximate address: 123 Emergency Lane, Crisis City)`;
+          },
+          function(error) {
+            locationInput.value = "";
+            alert("Unable to get your location. Please enter your address manually.");
+          }
+        );
+      } else {
+        alert("Geolocation is not supported by this browser. Please enter your address manually.");
+      }
+    }
+
+    // Submit help request
+    function submitHelpRequest(event) {
+      event.preventDefault();
+      
+      if (!selectedPriority) {
+        alert("Please select a priority level for your request.");
+        return;
+      }
+      
+      // Get form data
+      const formData = {
+        priority: selectedPriority,
+        helpType: document.getElementById('helpType').value,
+        description: document.getElementById('description').value,
+        location: document.getElementById('location').value,
+        contactName: document.getElementById('contactName').value,
+        contactPhone: document.getElementById('contactPhone').value,
+        peopleCount: document.getElementById('peopleCount').value,
+        specialNeeds: document.getElementById('specialNeeds').value
+      };
+      
+      // Simulate submission
+      const submitBtn = event.target.querySelector('.submit-btn');
+      const originalText = submitBtn.innerHTML;
+      
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending Request...';
+      submitBtn.disabled = true;
+      
+      setTimeout(() => {
+        alert(`Help request submitted successfully!\n\nRequest ID: HR-${Date.now()}\nPriority: ${selectedPriority.toUpperCase()}\nEstimated response time: ${getResponseTime(selectedPriority)}\n\nYou will receive updates via SMS and in your dashboard.`);
+        
+        // Reset form
+        document.getElementById('assistanceForm').reset();
+        document.querySelectorAll('.priority-option').forEach(option => {
+          option.classList.remove('selected');
+        });
+        selectedPriority = '';
+        
+        // Close form
+        closeHelpForm();
+        
+        // Add to status list
+        addNewRequest(formData);
+        
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }, 2000);
+    }
+
+    // Get response time based on priority
+    function getResponseTime(priority) {
+      switch(priority) {
+        case 'emergency': return '< 5 minutes';
+        case 'urgent': return '< 30 minutes';
+        case 'standard': return '< 2 hours';
+        default: return '< 1 hour';
+      }
+    }
+
+    // Add new request to status list
+    function addNewRequest(formData) {
+      const requestsContainer = document.getElementById('helpRequests');
+      const noRequestsMsg = document.getElementById('noRequests');
+      
+      const newRequest = document.createElement('div');
+      newRequest.className = 'status-item status-pending';
+      newRequest.innerHTML = `
+        <div class="status-icon">
+          <i class="fas fa-clock text-yellow-400"></i>
+        </div>
+        <div class="flex-1">
+          <div class="flex justify-between items-start mb-2">
+            <h4 class="font-bold">${getHelpTypeLabel(formData.helpType)}</h4>
+            <span class="text-sm bg-yellow-600 px-2 py-1 rounded">PENDING</span>
+          </div>
+          <p class="text-sm opacity-80 mb-2">${formData.description.substring(0, 60)}...</p>
+          <div class="text-xs opacity-70">
+            <i class="fas fa-clock mr-1"></i>Submitted: Just now |
+            <i class="fas fa-map-marker-alt ml-2 mr-1"></i>${formData.location.substring(0, 30)}... |
+            <i class="fas fa-users ml-2 mr-1"></i>${formData.peopleCount} people
+          </div>
+        </div>
+      `;
+      
+      requestsContainer.insertBefore(newRequest, requestsContainer.firstChild);
+      noRequestsMsg.style.display = 'none';
+    }
+
+    // Get help type label
+    function getHelpTypeLabel(type) {
+      const labels = {
+        'medical': 'Medical Emergency',
+        'rescue': 'Rescue & Evacuation',
+        'shelter': 'Shelter & Housing',
+        'supplies': 'Food & Water',
+        'transport': 'Transportation',
+        'communication': 'Communication',
+        'other': 'Other Assistance'
+      };
+      return labels[type] || 'Help Request';
+    }
+
+    // Emergency call function
+    function callEmergency() {
+      if (confirm('Call Emergency Services (911)?\n\nThis will connect you directly to emergency dispatch.')) {
+        alert('In a real emergency, this would dial 911. For demo purposes, emergency services have been notified of your location and situation.');
+      }
+    }
+
+    // Close sidebar when clicking outside
+    document.addEventListener('click', function(event) {
+      const sidebar = document.getElementById('mySidebar');
+      const openBtn = document.querySelector('.openbtn');
+      
+      if (!sidebar.contains(event.target) && !openBtn.contains(event.target)) {
+        closeNav();
+      }
+    });
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+      // Auto-update request statuses every 30 seconds
+      setInterval(updateRequestStatuses, 30000);
+    });
+
+    // Simulate status updates
+    function updateRequestStatuses() {
+      // This would normally fetch real updates from a server
+      console.log('Checking for status updates...');
+    }
+  </script>
+
+  <script src="chatbot.js"></script>
+    <script id="alertaid-shared-components">
+        const THEME_STORAGE_KEY = 'theme';
+        const HTML_ELEMENT = document.documentElement;
+        function applyTheme(theme) {
+            HTML_ELEMENT.setAttribute('data-theme', theme);
+            document.body.setAttribute('data-theme', theme);
+        }
+        function setTheme(theme) {
+            applyTheme(theme);
+            try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch(e){}
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            const display = document.getElementById('currentThemeDisplay');
+            if (theme === 'dark') {
+                if (icon) icon.className = 'fas fa-sun';
+                if (text) text.textContent = 'Light Theme';
+                if (display) display.textContent = 'Dark';
+            } else {
+                if (icon) icon.className = 'fas fa-moon';
+                if (text) text.textContent = 'Dark Theme';
+                if (display) display.textContent = 'Light';
+            }
+        }
+        window.toggleTheme = function() {
+            const next = HTML_ELEMENT.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            setTheme(next);
+        }
+        window.openNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '260px'; }
+        window.closeNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '0'; }
+        function showPopup(message, opts){
+            const modal = document.getElementById('app-modal');
+            const body = document.getElementById('app-modal-body');
+            const titleEl = document.getElementById('app-modal-title');
+            const closeBtn = document.getElementById('app-modal-close');
+            const okBtn = document.getElementById('app-modal-ok');
+            const cancelBtn = document.getElementById('app-modal-cancel');
+            if (!modal || !body) return console.error('Modal elements missing', message);
+            const options = opts || {};
+            const isConfirm = options.type === 'confirm';
+            titleEl.textContent = options.title || (isConfirm ? 'Confirmation' : 'Notice');
+            body.textContent = (message == null ? '' : String(message));
+            okBtn.textContent = options.okText || (isConfirm ? 'Confirm' : 'OK');
+            okBtn.className = `app-btn ${options.okClass || (isConfirm ? 'app-btn-critical' : '')}`;
+            cancelBtn.style.display = isConfirm ? 'block' : 'none';
+            function hide(result = false){ modal.classList.remove('show'); cleanup(); if(isConfirm && typeof options.callback === 'function'){ options.callback(result); } }
+            function cleanup(){ closeBtn.removeEventListener('click', onClose); okBtn.removeEventListener('click', onOk); cancelBtn.removeEventListener('click', onCancel); modal.removeEventListener('click', onBackdrop); document.removeEventListener('keydown', onEsc); }
+            function onClose(){ hide(false); }
+            function onOk(){ hide(true); }
+            function onCancel(){ hide(false); }
+            function onBackdrop(e){ if(e.target === modal) hide(false); }
+            function onEsc(e){ if(e.key === 'Escape') hide(false); }
+            closeBtn.addEventListener('click', onClose);
+            okBtn.addEventListener('click', onOk);
+            cancelBtn.addEventListener('click', onCancel);
+            modal.addEventListener('click', onBackdrop);
+            document.addEventListener('keydown', onEsc);
+            modal.classList.add('show');
+        }
+        function showConfirm(message, callback){ showPopup(message, { type:'confirm', title:'Action Required', okText:'Yes', okClass:'app-btn-critical', cancelText:'Cancel', callback }); }
+        window.alert = function(msg){ try { showPopup(msg); } catch { console.error('Modal failed', msg); } };
+        window.showPopup = showPopup;
+        window.showConfirm = showConfirm;
+        function getValidToken(){ const token = localStorage.getItem('token'); return token && token !== 'null' ? token : null; }
+        window.checkAuthStatus = function(){
+            const token = getValidToken();
+            const userOptions = document.getElementById('userOnlyOptions');
+            const guestOptions = document.getElementById('guestOnlyOptions');
+            const navAuthLink = document.getElementById('navAuthLink');
+            if (token){
+                if (userOptions) userOptions.style.display = 'flex';
+                if (guestOptions) guestOptions.style.display = 'none';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-tachometer-alt\"></i> Dashboard'; navAuthLink.href = resolveDashboardHref(); }
+            } else {
+                if (userOptions) userOptions.style.display = 'none';
+                if (guestOptions) guestOptions.style.display = 'block';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-sign-in-alt\"></i> Sign In'; navAuthLink.href = 'login.html'; }
+            }
+        }
+        window.getLocation = function(){
+            if (navigator.geolocation){
+                navigator.geolocation.getCurrentPosition((p)=>{
+                    showPopup(`Your Location:
+Latitude: ${p.coords.latitude.toFixed(6)}
+Longitude: ${p.coords.longitude.toFixed(6)}`, { title:'Current Location' });
+                },()=>showPopup('Unable to retrieve your location.', { title:'Location Error' }));
+            } else {
+                showPopup('Geolocation is not supported by this browser.', { title:'Location Error' });
+            }
+        }
+        window.showNotifications = function(){ if (!getValidToken()) { showPopup('Please sign in to view notifications.', { title:'Authorization Required' }); return; } showPopup('Notifications will appear here.', { title:'Notifications' }); }
+        window.showProfile = function(){ if (!getValidToken()) { showPopup('Please sign in to view profile.', { title:'Authorization Required' }); return; } showPopup('Profile Information (demo)', { title:'User Profile' }); }
+        window.signOut = function(){ showConfirm('Are you sure you want to sign out?', (confirmed)=>{ if (confirmed){ try { localStorage.removeItem('token'); } catch {} window.location.replace('login.html'); } }); }
+        document.addEventListener('DOMContentLoaded', function(){ setTheme(localStorage.getItem(THEME_STORAGE_KEY) || 'light'); checkAuthStatus(); });
+    </script>
+</body>
+</html>

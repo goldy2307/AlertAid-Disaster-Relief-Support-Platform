@@ -1,0 +1,15 @@
+server:
+  port: 8080
+
+# Note: No global context-path to allow app at http://localhost:8080/
+
+# If you later enable Thymeleaf templates, configure here.
+# spring:
+#   thymeleaf:
+#     enabled: true
+#     prefix: classpath:/templates/
+#     suffix: .html
+
+# OAuth client configuration has been removed from default profile to avoid
+# hardcoding credentials. Use env variables with the custom OAuth controller,
+# or enable a dedicated profile in application-oauth.yml.

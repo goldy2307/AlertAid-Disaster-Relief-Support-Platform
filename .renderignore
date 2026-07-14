@@ -1,0 +1,68 @@
+# Render ignore file - files/directories to exclude from deployment
+
+# Build artifacts
+**/target/
+**/bin/
+**/build/
+**/dist/
+**/.mvn/wrapper/maven-wrapper.jar
+
+# IDE files
+**/.idea/
+**/.vscode/
+**/*.iml
+**/*.iws
+**/*.ipr
+**/.settings/
+**/.project
+**/.classpath
+
+# OS files
+**/.DS_Store
+**/Thumbs.db
+**/ehthumbs.db
+
+# Logs
+**/*.log
+**/logs/
+
+# Test files
+**/src/test/
+**/test/
+
+# Documentation (optional - uncomment if you want to exclude)
+# **/*.md
+# **/README.md
+# **/HELP.md
+
+# Environment files
+**/.env
+**/.env.*
+**/application-secret.properties
+**/oauth-credentials.txt
+
+# Temporary files
+**/*.tmp
+**/*.temp
+**/*.bak
+**/*.swp
+**/*.swo
+
+# Database files
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+
+# Docker files (not needed for Render deployment)
+**/Dockerfile
+**/docker-compose*.yml
+**/.dockerignore
+
+# Scripts (optional - keep if needed)
+# **/*.bat
+# **/*.ps1
+# **/*.sh
+
+# Duplicate bin directory
+backend/Alertaid/bin/
+

@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <style id="alertaid-shared-components">
+        :root {
+            --color-bg: #fafbfc;
+            --color-surface: #ffffff;
+            --color-surface-soft: #fef3ef;
+            --color-muted: #666666;
+            --color-text: #1a1a1a;
+            --color-primary: #FF3B30;
+            --color-secondary: #FF6F00;
+            --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            --color-border: rgba(26, 26, 26, 0.08);
+            --color-shadow-soft: 0 20px 45px rgba(17, 24, 39, 0.15);
+            --color-nav-bg: rgba(255, 255, 255, 0.95);
+            --color-sidebar-bg-top: rgba(255, 86, 33, 0.98);
+        }
+        html[data-theme="dark"] {
+            --color-bg: #121212;
+            --color-surface: #1e1e1e;
+            --color-surface-soft: #281c1b;
+            --color-muted: #aaaaaa;
+            --color-text: #ffffff;
+            --color-primary: #FF6F00;
+            --color-secondary: #FF3B30;
+            --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            --color-border: rgba(255, 255, 255, 0.1);
+            --color-shadow-soft: 0 20px 45px rgba(0, 0, 0, 0.5);
+            --color-nav-bg: rgba(30, 30, 30, 0.95);
+            --color-sidebar-bg-top: rgba(255, 111, 0, 0.98);
+        }
+        body {
+            min-height: 100vh;
+            background: var(--color-bg) !important;
+            color: var(--color-text);
+            transition: background 0.4s, color 0.4s;
+            font-family: 'Inter', sans-serif;
+            padding-top: 150px;
+        }
+        select option, select optgroup { color: #111 !important; background: #fff !important; }
+        html[data-theme="dark"] select option,
+        html[data-theme="dark"] select optgroup { color: #fff !important; background: #333 !important; }
+        .main-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 24px;
+            background: var(--color-nav-bg);
+            border-radius: 18px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            margin: 12px;
+            width: calc(100% - 24px);
+            max-width: none;
+            z-index: 1000;
+            box-shadow: var(--color-shadow-soft);
+            border: 1px solid var(--color-border);
+            backdrop-filter: blur(10px);
+        }
+        .nav-left, .nav-right { display: flex; align-items: center; gap: 16px; }
+        .nav-spacer {
+            height: 140px;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .nav-spacer { height: 180px; }
+        }
+
+        .nav-brand { font-size: 1.9rem; font-weight: 800; color: var(--color-primary); text-decoration: none; transition: color 0.4s; }
+        .weather-widget { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 30px; background: linear-gradient(135deg, #4A90E2, #357ABD); color: #fff; cursor: pointer; font-weight: 500; box-shadow: 0 5px 15px rgba(53, 122, 189, 0.3); }
+        .weather-widget i { font-size: 1.1rem; color: #fff; }
+        .weather-info { font-size: 0.85rem; text-align: left; }
+        .nav-signin { display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; text-decoration: none; background: var(--color-gradient); padding: 10px 26px; border-radius: 999px; box-shadow: 0 12px 25px rgba(255, 59, 48, 0.35); border: none; font-size: 1rem; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .nav-signin i {
+            margin-right: 8px;
+        }
+        .nav-signin:hover { transform: translateY(-2px); box-shadow: 0 18px 30px rgba(255, 59, 48, 0.4); }
+
+        .sidebar { height: 100%; width: 0; position: fixed; top: 0; left: 0; background: none !important; color: var(--color-text); overflow-x: hidden; transition: 0.4s; padding-top: 110px; z-index: 1000; box-shadow: var(--color-shadow-soft); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; }
+        .sidebar-content { width: 100%; height: 100%; display: flex; flex-direction: column; overflow-y: auto; background: var(--color-sidebar-bg-top) !important; padding-top: 20px; }
+        .sidebar a { color: #fff !important; font-weight: 600; padding: 12px 32px; margin-right: 20px; display: flex; align-items: center; gap: 12px; border-radius: 0 20px 20px 0; transition: background 0.2s ease, transform 0.2s ease; text-decoration: none; }
+        .sidebar a:hover { background: rgba(255,255,255,0.15) !important; transform: translateX(4px); }
+        .sidebar a i { width: 22px; text-align: center; color: #fff !important; }
+        .sidebar .closebtn { position: absolute; top: 24px; right: 24px; width: 42px; height: 42px; border-radius: 14px; background: var(--color-surface); color: var(--color-primary) !important; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 15px 28px rgba(0,0,0,0.25); }
+        .sidebar .closebtn:hover { background: var(--color-surface-soft); }
+        .theme-toggle { padding: 10px 18px; border-radius: 16px; cursor: pointer; font-size: 16px; display: flex; align-items: center; gap: 8px; background: var(--color-surface); color: var(--color-primary); border: 1px solid rgba(26,26,26,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        html[data-theme="dark"] .theme-toggle { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); box-shadow: none; }
+        .theme-toggle:hover { transform: translateY(-1px); background: rgba(255,59,48,0.05); }
+        html[data-theme="dark"] .theme-toggle:hover { background: rgba(255,255,255,0.2); }
+        .app-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:2000}
+        .app-modal.show{display:flex}
+        .app-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.55);backdrop-filter: blur(4px);}
+        .app-modal-dialog{position:relative;background:var(--color-surface);color:var(--color-text);min-width:280px;max-width:520px;width:90%;border-radius:18px;box-shadow:var(--color-shadow-soft);overflow:hidden;border: 1px solid var(--color-border);}
+        .app-modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--color-primary);color:#fff}
+        .app-modal-header button{background:none;border:none;color:#fff;font-size:20px;cursor:pointer}
+        .app-modal-body{padding:16px;white-space:pre-wrap}
+        .app-modal-actions{padding:12px 16px;display:flex;justify-content:flex-end;gap:8px;background:var(--color-surface-soft);}
+        .app-btn{background:var(--color-secondary);color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer; transition: all 0.2s;}
+        .app-btn:hover{background: #e66600;}
+        .app-btn-secondary { background: var(--color-surface-soft); color: var(--color-text); border: 1px solid var(--color-border); }
+        .app-btn-secondary:hover { background: rgba(255, 59, 48, 0.05); }
+        .app-btn-critical { background: #FF3B30; color: #fff; }
+    </style>
+    <style id="alertaid-openbtn-override">
+        .openbtn {
+            width: 48px !important;
+            height: 48px !important;
+            border-radius: 16px !important;
+            background: #ffffff !important;
+            border: 1px solid rgba(15, 23, 42, 0.08) !important;
+            box-shadow: 0 15px 30px rgba(15, 23, 42, 0.12) !important;
+            cursor: pointer;
+            position: relative;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .openbtn::before,
+        .openbtn::after,
+        .openbtn .openbtn-line {
+            content: '';
+            position: absolute;
+            left: 50%;
+            width: 26px;
+            height: 2px;
+            border-radius: 999px;
+            background: #FF3B30 !important;
+            transform: translateX(-50%);
+        }
+        .openbtn::before { top: 16px; }
+        .openbtn .openbtn-line { top: 50%; transform: translate(-50%, -50%); }
+        .openbtn::after { bottom: 16px; }
+        .openbtn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 32px rgba(15, 23, 42, 0.18);
+        }
+    </style>
+
+<title>AlertAid</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #134E5E, #71B280);
+      color: #fff;
+      padding: 20px;
+    }
+
+        /* === Navbar === */
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 22px 32px;
+      background: #ffffff;
+      border-radius: 32px;
+      margin: 18px auto 35px;
+      position: relative;
+      z-index: 1000;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+      width: calc(100% - 40px);
+    }
+
+    .nav-brand {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: #FF3B30;
+      text-decoration: none;
+    }
+
+    .weather-widget {
+      margin-left: auto;
+      margin-right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      cursor: pointer;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .alert-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-left: 5px solid #10b981;
+      transition: all 0.3s ease;
+    }
+
+    .alert-card.critical { border-left-color: #dc2626; background: rgba(220, 38, 38, 0.1); }
+    .alert-card.high { border-left-color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
+    .alert-card.medium { border-left-color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+    .alert-card.low { border-left-color: #10b981; }
+
+    .severity-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 15px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .badge-critical { background: rgba(220, 38, 38, 0.2); color: #dc2626; border: 1px solid #dc2626; }
+    .badge-high { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; }
+    .badge-medium { background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid #3b82f6; }
+    .badge-low { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+
+    .emergency-btn {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      color: white;
+      padding: 20px 40px;
+      border: none;
+      border-radius: 15px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      width: 100%;
+      justify-content: center;
+      animation: emergencyPulse 2s infinite;
+    }
+
+    @keyframes emergencyPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+      50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary { background: #10b981; color: white; }
+    .btn-secondary { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); }
+    .btn-warning { background: #f59e0b; color: white; }
+    .btn-danger { background: #dc2626; color: white; }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #FFD700;
+    }
+
+    .form-input, .form-textarea, .form-select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      outline: none;
+      border-color: #FFD700;
+      background: rgba(255,255,255,0.15);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .template-btn {
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: left;
+    }
+
+    .template-btn:hover {
+      border-color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+  <link rel="stylesheet" href="landing-theme.css">
+  
+
+<link rel="stylesheet" href="chatbot.css">
+  <script src="role-router.js"></script>
+  <script src="nav-auth.js"></script>
+</head>
+<body class="landing-palette">    <nav class="main-nav">
+        <div class="nav-left">
+            <button class="openbtn" onclick="openNav()" aria-label="Open navigation menu">
+                <span class="openbtn-line"></span>
+            </button>
+            <a href="citizen_dashboard.html" class="nav-brand" data-route="dashboard">AlertAid</a>
+        </div>
+
+        <div class="nav-right">
+            <a class="weather-widget" href="https://www.msn.com/en-in/weather/forecast/in-Indore,MP" target="_blank" rel="noopener">
+                <i id="weather-icon" class="fas fa-cloud-sun"></i>
+                <div class="weather-info">
+                    <div id="weather-details">-- | --°C | --</div>
+                    <div id="weather-time">--:-- | --</div>
+                </div>
+            </a>
+
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light and dark mode">
+                <i id="theme-icon" class="fas fa-sun"></i><span id="theme-text">Light Theme</span>
+            </button>
+
+            <a href="login.html" class="nav-signin" id="navAuthLink">Sign In</a>
+        </div>
+    </nav>
+    <div class="nav-spacer"></div>
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="sidebar-content">
+            <a href="citizen_dashboard.html" data-route="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="alerts.html"><i class="fas fa-exclamation-triangle"></i> Active Alerts</a>
+            <a href="helpforpeople.html"><i class="fas fa-hands-helping"></i> Seek Help</a>
+            <a href="report.html"><i class="fas fa-flag"></i> Report Disaster</a>
+            <a href="donatemoney.html"><i class="fas fa-heart"></i> Make Donation</a>
+            <a href="#" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i> My Location</a>
+            <a href="#" onclick="showNotifications()"><i class="fas fa-bell"></i> Notifications</a>
+                        <div id="userOnlyOptions" style="display: none; flex-direction: column">
+                <a href="profile.html" data-route="profile"><i class="fas fa-user"></i> Profile</a>
+                <a href="change_password.html" data-route="change_password"><i class="fas fa-cog"></i> Settings</a>
+                <a href="javascript:void(0)" onclick="signOut()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+            </div>
+            <div id="guestOnlyOptions">
+                <a href="login.html"><i class="fas fa-sign-in-alt"></i> Sign In</a>
+            </div>
+        </div>
+    </div>
+    
+    <div id="app-modal" class="app-modal" role="dialog" aria-modal="true" aria-labelledby="app-modal-title">
+        <div class="app-modal-backdrop"></div>
+        <div class="app-modal-dialog">
+            <div class="app-modal-header">
+                <div id="app-modal-title">Notice</div>
+                <button id="app-modal-close" aria-label="Close">×</button>
+            </div>
+            <div id="app-modal-body" class="app-modal-body"></div>
+            <div class="app-modal-actions">
+                <button id="app-modal-cancel" class="app-btn app-btn-secondary" style="display:none;">Cancel</button>
+                <button id="app-modal-ok" class="app-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+<div class="container mx-auto max-w-6xl">
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold mb-4">
+        <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+        Emergency Alert System
+      </h1>
+      <p class="text-lg opacity-80">Send critical alerts and emergency notifications to volunteers and community</p>
+    </div>
+
+    <!-- Emergency Button -->
+    <div class="card">
+      <button class="emergency-btn" onclick="sendEmergencyAlert()">
+        <i class="fas fa-siren"></i>
+        SEND EMERGENCY ALERT NOW
+      </button>
+      <p class="text-center text-sm opacity-70 mt-3">Click for immediate broadcast to all contacts</p>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number text-green-400" id="totalContacts">1,247</div>
+        <div class="stat-label">Total Contacts</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number text-blue-400" id="alertsSent">23</div>
+        <div class="stat-label">Alerts Sent Today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number text-yellow-400" id="deliveryRate">98.5%</div>
+        <div class="stat-label">Delivery Rate</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number text-purple-400" id="responses">156</div>
+        <div class="stat-label">Responses Received</div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Alert Creation Form -->
+      <div class="card">
+        <h2 class="text-xl font-bold mb-4">Create Alert</h2>
+        
+        <form onsubmit="sendAlert(event)">
+          <div class="form-group">
+            <label class="form-label" for="alertType">Emergency Type</label>
+            <select id="alertType" class="form-select" onchange="loadTemplate()" required>
+              <option value="">Select emergency type...</option>
+              <option value="earthquake">Earthquake</option>
+              <option value="flood">Flood</option>
+              <option value="fire">Wildfire</option>
+              <option value="storm">Severe Storm</option>
+              <option value="evacuation">Evacuation Order</option>
+              <option value="shelter">Shelter Opening</option>
+              <option value="medical">Medical Emergency</option>
+              <option value="custom">Custom Alert</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="severity">Severity Level</label>
+            <select id="severity" class="form-select" required>
+              <option value="">Select severity...</option>
+              <option value="critical">Critical - Life Threatening</option>
+              <option value="high">High - Immediate Action Required</option>
+              <option value="medium">Medium - Caution Advised</option>
+              <option value="low">Low - Informational</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="alertTitle">Alert Title</label>
+            <input type="text" id="alertTitle" class="form-input" placeholder="Brief alert headline..." required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="alertMessage">Alert Message</label>
+            <textarea id="alertMessage" class="form-textarea" placeholder="Detailed alert message..." required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="location">Affected Area</label>
+            <input type="text" id="location" class="form-input" placeholder="Geographic area or address..." required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Send To:</label>
+            <div class="checkbox-group">
+              <div class="checkbox-item">
+                <input type="checkbox" id="volunteers" checked>
+                <label for="volunteers">All Volunteers (542)</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="community" checked>
+                <label for="community">Community Members (705)</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="emergency">
+                <label for="emergency">Emergency Contacts (89)</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Delivery Methods:</label>
+            <div class="checkbox-group">
+              <div class="checkbox-item">
+                <input type="checkbox" id="sms" checked>
+                <label for="sms">SMS Text</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="email" checked>
+                <label for="email">Email</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="push" checked>
+                <label for="push">Push Notification</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="social">
+                <label for="social">Social Media</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <button type="submit" class="btn btn-danger">
+              <i class="fas fa-paper-plane"></i>Send Alert
+            </button>
+            <button type="button" class="btn btn-warning" onclick="scheduleAlert()">
+              <i class="fas fa-clock"></i>Schedule
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="previewAlert()">
+              <i class="fas fa-eye"></i>Preview
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Quick Templates & Recent Alerts -->
+      <div>
+        <!-- Quick Templates -->
+        <div class="card">
+          <h2 class="text-xl font-bold mb-4">Quick Templates</h2>
+          
+          <div class="template-btn" onclick="useTemplate('evacuation')">
+            <div class="font-bold text-red-400">Immediate Evacuation</div>
+            <div class="text-sm opacity-80">Mandatory evacuation order issued</div>
+          </div>
+          
+          <div class="template-btn" onclick="useTemplate('shelter')">
+            <div class="font-bold text-blue-400">Shelter Opening</div>
+            <div class="text-sm opacity-80">Emergency shelter now available</div>
+          </div>
+          
+          <div class="template-btn" onclick="useTemplate('allclear')">
+            <div class="font-bold text-green-400">All Clear</div>
+            <div class="text-sm opacity-80">Emergency situation resolved</div>
+          </div>
+          
+          <div class="template-btn" onclick="useTemplate('volunteer')">
+            <div class="font-bold text-yellow-400">Volunteer Request</div>
+            <div class="text-sm opacity-80">Urgent volunteers needed</div>
+          </div>
+        </div>
+
+        <!-- Recent Alerts -->
+        <div class="card">
+          <h2 class="text-xl font-bold mb-4">Recent Alerts</h2>
+          <div id="recentAlerts">
+            <!-- Recent alerts will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const alertTemplates = {
+      earthquake: {
+        title: "Earthquake Alert",
+        message: "A magnitude earthquake has been detected in your area. Drop, Cover, and Hold On. Check for injuries and hazards. Be prepared for aftershocks."
+      },
+      flood: {
+        title: "Flood Warning",
+        message: "Flood warning issued for your area. Avoid driving through flooded roads. Move to higher ground if necessary. Monitor local conditions."
+      },
+      fire: {
+        title: "Wildfire Alert",
+        message: "Wildfire reported in your vicinity. Be prepared to evacuate if ordered. Close windows, turn off AC, and monitor emergency broadcasts."
+      },
+      evacuation: {
+        title: "EVACUATION ORDER",
+        message: "MANDATORY EVACUATION ORDER issued for your area. Leave immediately via designated evacuation routes. Take essential items only."
+      },
+      shelter: {
+        title: "Emergency Shelter Open",
+        message: "Emergency shelter is now open at [LOCATION]. Food, water, and basic supplies available. Bring ID and medications if possible."
+      }
+    };
+
+    const recentAlerts = [
+      {
+        id: 1,
+        title: "Flood Warning - Downtown",
+        severity: "high",
+        time: "2 hours ago",
+        recipients: 1247,
+        delivered: 1235
+      },
+      {
+        id: 2,
+        title: "Volunteer Request - Shelter",
+        severity: "medium",
+        time: "5 hours ago",
+        recipients: 542,
+        delivered: 538
+      },
+      {
+        id: 3,
+        title: "All Clear - Fire Contained",
+        severity: "low",
+        time: "1 day ago",
+        recipients: 892,
+        delivered: 889
+      }
+    ];
+
+    function initializePage() {
+      displayRecentAlerts();
+    }
+
+    function displayRecentAlerts() {
+      const alertsContainer = document.getElementById('recentAlerts');
+      alertsContainer.innerHTML = '';
+
+      recentAlerts.forEach(alert => {
+        const alertCard = document.createElement('div');
+        alertCard.className = `alert-card ${alert.severity}`;
+        
+        alertCard.innerHTML = `
+          <div class="severity-badge badge-${alert.severity}">${alert.severity.toUpperCase()}</div>
+          <h4 class="font-bold mb-2">${alert.title}</h4>
+          <div class="text-sm opacity-80 mb-2">
+            <div><i class="fas fa-clock mr-1"></i>${alert.time}</div>
+            <div><i class="fas fa-users mr-1"></i>${alert.delivered}/${alert.recipients} delivered</div>
+          </div>
+          <div class="flex gap-2">
+            <button class="btn btn-secondary" onclick="viewAlertDetails(${alert.id})">
+              <i class="fas fa-eye"></i>View
+            </button>
+            <button class="btn btn-secondary" onclick="resendAlert(${alert.id})">
+              <i class="fas fa-redo"></i>Resend
+            </button>
+          </div>
+        `;
+        
+        alertsContainer.appendChild(alertCard);
+      });
+    }
+
+    function loadTemplate() {
+      const alertType = document.getElementById('alertType').value;
+      if (alertTemplates[alertType]) {
+        document.getElementById('alertTitle').value = alertTemplates[alertType].title;
+        document.getElementById('alertMessage').value = alertTemplates[alertType].message;
+      }
+    }
+
+    function useTemplate(templateType) {
+      const templates = {
+        evacuation: {
+          type: 'evacuation',
+          severity: 'critical',
+          title: 'MANDATORY EVACUATION ORDER',
+          message: 'MANDATORY EVACUATION ORDER issued for your area. Leave immediately via designated evacuation routes. Take essential items only. Do not delay.'
+        },
+        shelter: {
+          type: 'shelter',
+          severity: 'medium',
+          title: 'Emergency Shelter Available',
+          message: 'Emergency shelter is now open at Sacramento Community Center. Food, water, and basic supplies available. Bring ID and medications.'
+        },
+        allclear: {
+          type: 'custom',
+          severity: 'low',
+          title: 'All Clear - Emergency Resolved',
+          message: 'The emergency situation has been resolved. It is now safe to return to normal activities. Thank you for your cooperation.'
+        },
+        volunteer: {
+          type: 'custom',
+          severity: 'high',
+          title: 'Urgent Volunteers Needed',
+          message: 'We urgently need volunteers for emergency response operations. Report to staging area if available. Training will be provided.'
+        }
+      };
+
+      const template = templates[templateType];
+      document.getElementById('alertType').value = template.type;
+      document.getElementById('severity').value = template.severity;
+      document.getElementById('alertTitle').value = template.title;
+      document.getElementById('alertMessage').value = template.message;
+    }
+
+    function sendEmergencyAlert() {
+      if (confirm('SEND EMERGENCY ALERT?\n\nThis will immediately send a critical alert to ALL contacts via SMS, email, and push notifications.\n\nThis action cannot be undone.')) {
+        alert('EMERGENCY ALERT SENT!\n\nCritical alert broadcast to 1,247 contacts:\n- SMS: Sending to all mobile numbers\n- Email: Sending to all email addresses\n- Push: Sending to all app users\n- Social: Posted to emergency channels\n\nDelivery status will be updated in real-time.\n\nEstimated delivery time: 2-5 minutes');
+        
+        // Update stats
+        const currentAlerts = parseInt(document.getElementById('alertsSent').textContent);
+        document.getElementById('alertsSent').textContent = currentAlerts + 1;
+      }
+    }
+
+    function sendAlert(event) {
+      event.preventDefault();
+      
+      const alertData = {
+        type: document.getElementById('alertType').value,
+        severity: document.getElementById('severity').value,
+        title: document.getElementById('alertTitle').value,
+        message: document.getElementById('alertMessage').value,
+        location: document.getElementById('location').value
+      };
+
+      // Count recipients
+      let recipients = 0;
+      if (document.getElementById('volunteers').checked) recipients += 542;
+      if (document.getElementById('community').checked) recipients += 705;
+      if (document.getElementById('emergency').checked) recipients += 89;
+
+      // Count delivery methods
+      const methods = [];
+      if (document.getElementById('sms').checked) methods.push('SMS');
+      if (document.getElementById('email').checked) methods.push('Email');
+      if (document.getElementById('push').checked) methods.push('Push');
+      if (document.getElementById('social').checked) methods.push('Social Media');
+
+      if (confirm(`Send Alert: "${alertData.title}"\n\nSeverity: ${alertData.severity.toUpperCase()}\nRecipients: ${recipients} contacts\nMethods: ${methods.join(', ')}\nLocation: ${alertData.location}\n\nSend this alert now?`)) {
+        alert(`Alert sent successfully!\n\nTitle: ${alertData.title}\nSeverity: ${alertData.severity.toUpperCase()}\nRecipients: ${recipients}\nDelivery Methods: ${methods.join(', ')}\n\nMessages are being delivered now. Delivery status will be updated in real-time.`);
+        
+        // Update stats
+        const currentAlerts = parseInt(document.getElementById('alertsSent').textContent);
+        document.getElementById('alertsSent').textContent = currentAlerts + 1;
+        
+        // Clear form
+        document.querySelector('form').reset();
+      }
+    }
+
+    function scheduleAlert() {
+      const datetime = prompt('Schedule alert for when?\n\nEnter date and time (MM/DD/YYYY HH:MM):');
+      if (datetime) {
+        alert(`Alert scheduled for ${datetime}\n\nThe alert will be automatically sent at the specified time. You can view and modify scheduled alerts in the dashboard.`);
+      }
+    }
+
+    function previewAlert() {
+      const title = document.getElementById('alertTitle').value;
+      const message = document.getElementById('alertMessage').value;
+      const severity = document.getElementById('severity').value;
+      
+      if (!title || !message) {
+        alert('Please fill in the alert title and message first.');
+        return;
+      }
+      
+      alert(`ALERT PREVIEW\n\n${severity.toUpperCase()} ALERT\n\n${title}\n\n${message}\n\n---\nThis is how your alert will appear to recipients.`);
+    }
+
+    function viewAlertDetails(alertId) {
+      const alert = recentAlerts.find(a => a.id === alertId);
+      alert(`Alert Details\n\nTitle: ${alert.title}\nSeverity: ${alert.severity.toUpperCase()}\nSent: ${alert.time}\nRecipients: ${alert.recipients}\nDelivered: ${alert.delivered}\nDelivery Rate: ${((alert.delivered/alert.recipients)*100).toFixed(1)}%\n\nClick 'View Full Report' for detailed delivery status.`);
+    }
+
+    function resendAlert(alertId) {
+      const alert = recentAlerts.find(a => a.id === alertId);
+      const failed = alert.recipients - alert.delivered;
+      if (confirm(`Resend "${alert.title}" to ${failed} failed recipients?`)) {
+        alert(`Alert resent to ${failed} recipients who didn't receive the original message.\n\nDelivery attempts in progress...`);
+      }
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+      initializePage();
+    });
+  </script>
+<script src="chatbot.js"></script>
+    <script id="alertaid-shared-components">
+        const THEME_STORAGE_KEY = 'theme';
+        const HTML_ELEMENT = document.documentElement;
+        function applyTheme(theme) {
+            HTML_ELEMENT.setAttribute('data-theme', theme);
+            document.body.setAttribute('data-theme', theme);
+        }
+        function setTheme(theme) {
+            applyTheme(theme);
+            try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch(e){}
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            const display = document.getElementById('currentThemeDisplay');
+            if (theme === 'dark') {
+                if (icon) icon.className = 'fas fa-sun';
+                if (text) text.textContent = 'Light Theme';
+                if (display) display.textContent = 'Dark';
+            } else {
+                if (icon) icon.className = 'fas fa-moon';
+                if (text) text.textContent = 'Dark Theme';
+                if (display) display.textContent = 'Light';
+            }
+        }
+        window.toggleTheme = function() {
+            const next = HTML_ELEMENT.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            setTheme(next);
+        }
+        window.openNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '260px'; }
+        window.closeNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '0'; }
+        function showPopup(message, opts){
+            const modal = document.getElementById('app-modal');
+            const body = document.getElementById('app-modal-body');
+            const titleEl = document.getElementById('app-modal-title');
+            const closeBtn = document.getElementById('app-modal-close');
+            const okBtn = document.getElementById('app-modal-ok');
+            const cancelBtn = document.getElementById('app-modal-cancel');
+            if (!modal || !body) return console.error('Modal elements missing', message);
+            const options = opts || {};
+            const isConfirm = options.type === 'confirm';
+            titleEl.textContent = options.title || (isConfirm ? 'Confirmation' : 'Notice');
+            body.textContent = (message == null ? '' : String(message));
+            okBtn.textContent = options.okText || (isConfirm ? 'Confirm' : 'OK');
+            okBtn.className = `app-btn ${options.okClass || (isConfirm ? 'app-btn-critical' : '')}`;
+            cancelBtn.style.display = isConfirm ? 'block' : 'none';
+            function hide(result = false){ modal.classList.remove('show'); cleanup(); if(isConfirm && typeof options.callback === 'function'){ options.callback(result); } }
+            function cleanup(){ closeBtn.removeEventListener('click', onClose); okBtn.removeEventListener('click', onOk); cancelBtn.removeEventListener('click', onCancel); modal.removeEventListener('click', onBackdrop); document.removeEventListener('keydown', onEsc); }
+            function onClose(){ hide(false); }
+            function onOk(){ hide(true); }
+            function onCancel(){ hide(false); }
+            function onBackdrop(e){ if(e.target === modal) hide(false); }
+            function onEsc(e){ if(e.key === 'Escape') hide(false); }
+            closeBtn.addEventListener('click', onClose);
+            okBtn.addEventListener('click', onOk);
+            cancelBtn.addEventListener('click', onCancel);
+            modal.addEventListener('click', onBackdrop);
+            document.addEventListener('keydown', onEsc);
+            modal.classList.add('show');
+        }
+        function showConfirm(message, callback){ showPopup(message, { type:'confirm', title:'Action Required', okText:'Yes', okClass:'app-btn-critical', cancelText:'Cancel', callback }); }
+        window.alert = function(msg){ try { showPopup(msg); } catch { console.error('Modal failed', msg); } };
+        window.showPopup = showPopup;
+        window.showConfirm = showConfirm;
+        function getValidToken(){ const token = localStorage.getItem('token'); return token && token !== 'null' ? token : null; }
+        window.checkAuthStatus = function(){
+            const token = getValidToken();
+            const userOptions = document.getElementById('userOnlyOptions');
+            const guestOptions = document.getElementById('guestOnlyOptions');
+            const navAuthLink = document.getElementById('navAuthLink');
+            if (token){
+                if (userOptions) userOptions.style.display = 'flex';
+                if (guestOptions) guestOptions.style.display = 'none';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-tachometer-alt\"></i> Dashboard'; navAuthLink.href = resolveDashboardHref(); }
+            } else {
+                if (userOptions) userOptions.style.display = 'none';
+                if (guestOptions) guestOptions.style.display = 'block';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-sign-in-alt\"></i> Sign In'; navAuthLink.href = 'login.html'; }
+            }
+        }
+        window.getLocation = function(){
+            if (navigator.geolocation){
+                navigator.geolocation.getCurrentPosition((p)=>{
+                    showPopup(`Your Location:
+Latitude: ${p.coords.latitude.toFixed(6)}
+Longitude: ${p.coords.longitude.toFixed(6)}`, { title:'Current Location' });
+                },()=>showPopup('Unable to retrieve your location.', { title:'Location Error' }));
+            } else {
+                showPopup('Geolocation is not supported by this browser.', { title:'Location Error' });
+            }
+        }
+        window.showNotifications = function(){ if (!getValidToken()) { showPopup('Please sign in to view notifications.', { title:'Authorization Required' }); return; } showPopup('Notifications will appear here.', { title:'Notifications' }); }
+        window.showProfile = function(){ if (!getValidToken()) { showPopup('Please sign in to view profile.', { title:'Authorization Required' }); return; } showPopup('Profile Information (demo)', { title:'User Profile' }); }
+        window.signOut = function(){ showConfirm('Are you sure you want to sign out?', (confirmed)=>{ if (confirmed){ try { localStorage.removeItem('token'); } catch {} window.location.replace('login.html'); } }); }
+        document.addEventListener('DOMContentLoaded', function(){ setTheme(localStorage.getItem(THEME_STORAGE_KEY) || 'light'); checkAuthStatus(); });
+    </script>
+</body>
+</html>

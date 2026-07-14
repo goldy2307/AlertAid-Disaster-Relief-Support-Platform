@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <style id="alertaid-shared-components">
+        :root {
+            --color-bg: #fafbfc;
+            --color-surface: #ffffff;
+            --color-surface-soft: #fef3ef;
+            --color-muted: #666666;
+            --color-text: #1a1a1a;
+            --color-primary: #FF3B30;
+            --color-secondary: #FF6F00;
+            --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            --color-border: rgba(26, 26, 26, 0.08);
+            --color-shadow-soft: 0 20px 45px rgba(17, 24, 39, 0.15);
+            --color-nav-bg: rgba(255, 255, 255, 0.95);
+            --color-sidebar-bg-top: rgba(255, 86, 33, 0.98);
+        }
+        html[data-theme="dark"] {
+            --color-bg: #121212;
+            --color-surface: #1e1e1e;
+            --color-surface-soft: #281c1b;
+            --color-muted: #aaaaaa;
+            --color-text: #ffffff;
+            --color-primary: #FF6F00;
+            --color-secondary: #FF3B30;
+            --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            --color-border: rgba(255, 255, 255, 0.1);
+            --color-shadow-soft: 0 20px 45px rgba(0, 0, 0, 0.5);
+            --color-nav-bg: rgba(30, 30, 30, 0.95);
+            --color-sidebar-bg-top: rgba(255, 111, 0, 0.98);
+        }
+        body {
+            min-height: 100vh;
+            background: var(--color-bg) !important;
+            color: var(--color-text);
+            transition: background 0.4s, color 0.4s;
+            font-family: 'Inter', sans-serif;
+            padding-top: 150px;
+        }
+        select option, select optgroup { color: #111 !important; background: #fff !important; }
+        html[data-theme="dark"] select option,
+        html[data-theme="dark"] select optgroup { color: #fff !important; background: #333 !important; }
+        .main-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 24px;
+            background: var(--color-nav-bg);
+            border-radius: 18px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            margin: 12px;
+            width: calc(100% - 24px);
+            max-width: none;
+            z-index: 1000;
+            box-shadow: var(--color-shadow-soft);
+            border: 1px solid var(--color-border);
+            backdrop-filter: blur(10px);
+        }
+        .nav-left, .nav-right { display: flex; align-items: center; gap: 16px; }
+        .nav-spacer {
+            height: 140px;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .nav-spacer { height: 180px; }
+        }
+
+        .nav-brand { font-size: 1.9rem; font-weight: 800; color: var(--color-primary); text-decoration: none; transition: color 0.4s; }
+        .weather-widget { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 30px; background: linear-gradient(135deg, #4A90E2, #357ABD); color: #fff; cursor: pointer; font-weight: 500; box-shadow: 0 5px 15px rgba(53, 122, 189, 0.3); }
+        .weather-widget i { font-size: 1.1rem; color: #fff; }
+        .weather-info { font-size: 0.85rem; text-align: left; }
+        .nav-signin { display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; text-decoration: none; background: var(--color-gradient); padding: 10px 26px; border-radius: 999px; box-shadow: 0 12px 25px rgba(255, 59, 48, 0.35); border: none; font-size: 1rem; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .nav-signin i {
+            margin-right: 8px;
+        }
+        .nav-signin:hover { transform: translateY(-2px); box-shadow: 0 18px 30px rgba(255, 59, 48, 0.4); }
+
+        .sidebar { height: 100%; width: 0; position: fixed; top: 0; left: 0; background: none !important; color: var(--color-text); overflow-x: hidden; transition: 0.4s; padding-top: 110px; z-index: 1000; box-shadow: var(--color-shadow-soft); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; }
+        .sidebar-content { width: 100%; height: 100%; display: flex; flex-direction: column; overflow-y: auto; background: var(--color-sidebar-bg-top) !important; padding-top: 20px; }
+        .sidebar a { color: #fff !important; font-weight: 600; padding: 12px 32px; margin-right: 20px; display: flex; align-items: center; gap: 12px; border-radius: 0 20px 20px 0; transition: background 0.2s ease, transform 0.2s ease; text-decoration: none; }
+        .sidebar a:hover { background: rgba(255,255,255,0.15) !important; transform: translateX(4px); }
+        .sidebar a i { width: 22px; text-align: center; color: #fff !important; }
+        .sidebar .closebtn { position: absolute; top: 24px; right: 24px; width: 42px; height: 42px; border-radius: 14px; background: var(--color-surface); color: var(--color-primary) !important; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 15px 28px rgba(0,0,0,0.25); }
+        .sidebar .closebtn:hover { background: var(--color-surface-soft); }
+        .theme-toggle { padding: 10px 18px; border-radius: 16px; cursor: pointer; font-size: 16px; display: flex; align-items: center; gap: 8px; background: var(--color-surface); color: var(--color-primary); border: 1px solid rgba(26,26,26,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        html[data-theme="dark"] .theme-toggle { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); box-shadow: none; }
+        .theme-toggle:hover { transform: translateY(-1px); background: rgba(255,59,48,0.05); }
+        html[data-theme="dark"] .theme-toggle:hover { background: rgba(255,255,255,0.2); }
+        .app-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:2000}
+        .app-modal.show{display:flex}
+        .app-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.55);backdrop-filter: blur(4px);}
+        .app-modal-dialog{position:relative;background:var(--color-surface);color:var(--color-text);min-width:280px;max-width:520px;width:90%;border-radius:18px;box-shadow:var(--color-shadow-soft);overflow:hidden;border: 1px solid var(--color-border);}
+        .app-modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--color-primary);color:#fff}
+        .app-modal-header button{background:none;border:none;color:#fff;font-size:20px;cursor:pointer}
+        .app-modal-body{padding:16px;white-space:pre-wrap}
+        .app-modal-actions{padding:12px 16px;display:flex;justify-content:flex-end;gap:8px;background:var(--color-surface-soft);}
+        .app-btn{background:var(--color-secondary);color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer; transition: all 0.2s;}
+        .app-btn:hover{background: #e66600;}
+        .app-btn-secondary { background: var(--color-surface-soft); color: var(--color-text); border: 1px solid var(--color-border); }
+        .app-btn-secondary:hover { background: rgba(255, 59, 48, 0.05); }
+        .app-btn-critical { background: #FF3B30; color: #fff; }
+    </style>
+    <style id="alertaid-openbtn-override">
+        .openbtn {
+            width: 48px !important;
+            height: 48px !important;
+            border-radius: 16px !important;
+            background: #ffffff !important;
+            border: 1px solid rgba(15, 23, 42, 0.08) !important;
+            box-shadow: 0 15px 30px rgba(15, 23, 42, 0.12) !important;
+            cursor: pointer;
+            position: relative;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .openbtn::before,
+        .openbtn::after,
+        .openbtn .openbtn-line {
+            content: '';
+            position: absolute;
+            left: 50%;
+            width: 26px;
+            height: 2px;
+            border-radius: 999px;
+            background: #FF3B30 !important;
+            transform: translateX(-50%);
+        }
+        .openbtn::before { top: 16px; }
+        .openbtn .openbtn-line { top: 50%; transform: translate(-50%, -50%); }
+        .openbtn::after { bottom: 16px; }
+        .openbtn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 32px rgba(15, 23, 42, 0.18);
+        }
+    </style>
+
+<title>AlertAid</title>
+  <meta name="page-key" content="alerts">
+  <script src="role-router.js"></script>
+  <script src="nav-auth.js"></script>
+  <script type="module" src="./dashboard-guard.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* === Base === */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #134E5E, #71B280);
+      color: #fff;
+      overflow-x: hidden;
+      transition: margin-left .4s ease;
+      padding: 20px;
+    }
+
+    /* === Navbar === */
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 22px 32px;
+      background: #ffffff;
+      border-radius: 32px;
+      margin: 18px auto 35px;
+      position: relative;
+      z-index: 1000;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+      width: calc(100% - 40px);
+    }
+
+    .nav-brand {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: #FF3B30;
+      text-decoration: none;
+    }
+
+    .weather-widget {
+      margin-left: auto;
+      margin-right: 20px;
+      display: flex;
+      alignments: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      cursor: pointer;
+    }
+
+    .weather-widget i { font-size: 1.2rem; color: #FFD700; }
+    .weather-info { font-size: 0.8rem; }
+    .nav-signin {
+      margin-left: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 600;
+      text-decoration: none;
+      background: #FF3B30;
+      padding: 10px 24px;
+      border-radius: 999px;
+      box-shadow: 0 14px 26px rgba(255, 59, 48, 0.3);
+      border: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .nav-signin:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 32px rgba(255, 59, 48, 0.35);
+    }
+
+
+    /* === Sidebar === */
+    .sidebar {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      top: 0; left: 0;
+      background: rgba(0,0,0,0.9);
+      overflow-x: hidden;
+      transition: 0.4s;
+      padding-top: 60px;
+      z-index: 1000;
+    }
+    .sidebar a {
+      padding: 12px 25px;
+      text-decoration: none;
+      font-size: 18px;
+      color: #FFD700;
+      display: block;
+      transition: 0.3s;
+    }
+    .sidebar a:hover { background: rgba(255,255,255,0.1); }
+    .sidebar .closebtn {
+      position: absolute;
+      top: 20px;
+      right: 25px;
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: #fff;
+      color: #FF3B30;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 18px 30px rgba(0,0,0,0.25);
+    }
+
+
+
+
+    /* === Alert Styles === */
+    .alert-critical {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      border-left: 6px solid #fca5a5;
+      animation: pulse 2s infinite;
+    }
+    .alert-high {
+      background: linear-gradient(135deg, #ea580c, #c2410c);
+      border-left: 6px solid #fed7aa;
+    }
+    .alert-medium {
+      background: linear-gradient(135deg, #d97706, #b45309);
+      border-left: 6px solid #fde68a;
+    }
+    .alert-low {
+      background: linear-gradient(135deg, #059669, #047857);
+      border-left: 6px solid #a7f3d0;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+
+    .alert-card {
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 15px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .alert-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    .alert-header {
+      display: flex;
+      justify-content: between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .severity-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .filter-container {
+      background: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 25px;
+      backdrop-filter: blur(8px);
+    }
+
+    .filter-btn {
+      padding: 8px 16px;
+      margin: 5px;
+      border: none;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .filter-btn.active {
+      background: #FFD700;
+      color: #134E5E;
+    }
+
+    .filter-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .distance-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .emergency-contact {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #dc2626;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+      animation: emergencyPulse 2s infinite;
+      z-index: 1000;
+    }
+
+    @keyframes emergencyPulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4); }
+      50% { transform: scale(1.1); box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6); }
+    }
+
+    .alert-details {
+      display: none;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .alert-details.show {
+      display: block;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .action-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+    }
+  </style>
+  <link rel="stylesheet" href="landing-theme.css">
+  
+
+
+</head>
+<link rel="stylesheet" href="chatbot.css">
+<body class="landing-palette">    <nav class="main-nav">
+        <div class="nav-left">
+            <button class="openbtn" onclick="openNav()" aria-label="Open navigation menu">
+                <span class="openbtn-line"></span>
+            </button>
+            <a href="citizen_dashboard.html" class="nav-brand" data-route="dashboard">AlertAid</a>
+        </div>
+
+        <div class="nav-right">
+            <a class="weather-widget" href="https://www.msn.com/en-in/weather/forecast/in-Indore,MP" target="_blank" rel="noopener">
+                <i id="weather-icon" class="fas fa-cloud-sun"></i>
+                <div class="weather-info">
+                    <div id="weather-details">-- | --°C | --</div>
+                    <div id="weather-time">--:-- | --</div>
+                </div>
+            </a>
+
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light and dark mode">
+                <i id="theme-icon" class="fas fa-sun"></i><span id="theme-text">Light Theme</span>
+            </button>
+
+            <a href="login.html" class="nav-signin" id="navAuthLink">Sign In</a>
+        </div>
+    </nav>
+    <div class="nav-spacer"></div>
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="sidebar-content">
+            <a href="citizen_dashboard.html" data-route="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="alerts.html"><i class="fas fa-exclamation-triangle"></i> Active Alerts</a>
+            <a href="helpforpeople.html"><i class="fas fa-hands-helping"></i> Seek Help</a>
+            <a href="report.html"><i class="fas fa-flag"></i> Report Disaster</a>
+            <a href="donatemoney.html"><i class="fas fa-heart"></i> Make Donation</a>
+            <a href="#" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i> My Location</a>
+            <a href="#" onclick="showNotifications()"><i class="fas fa-bell"></i> Notifications</a>
+                        <div id="userOnlyOptions" style="display: none; flex-direction: column">
+                <a href="profile.html" data-route="profile"><i class="fas fa-user"></i> Profile</a>
+                <a href="change_password.html" data-route="change_password"><i class="fas fa-cog"></i> Settings</a>
+                <a href="javascript:void(0)" onclick="signOut()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+            </div>
+            <div id="guestOnlyOptions">
+                <a href="login.html"><i class="fas fa-sign-in-alt"></i> Sign In</a>
+            </div>
+        </div>
+    </div>
+    
+    <div id="app-modal" class="app-modal" role="dialog" aria-modal="true" aria-labelledby="app-modal-title">
+        <div class="app-modal-backdrop"></div>
+        <div class="app-modal-dialog">
+            <div class="app-modal-header">
+                <div id="app-modal-title">Notice</div>
+                <button id="app-modal-close" aria-label="Close">×</button>
+            </div>
+            <div id="app-modal-body" class="app-modal-body"></div>
+            <div class="app-modal-actions">
+                <button id="app-modal-cancel" class="app-btn app-btn-secondary" style="display:none;">Cancel</button>
+                <button id="app-modal-ok" class="app-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+<!-- Navbar -->
+  
+
+
+  <!-- Sidebar -->
+  
+
+
+  <!-- Main Content -->
+  <div class="container mx-auto max-w-6xl">
+    <!-- Page Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold mb-4">
+        <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+         Alerts Near You
+      </h1>
+      <p class="text-lg opacity-80">Stay informed about emergency situations in your area</p>
+    </div>
+
+    <!-- Filter Controls -->
+    <div class="filter-container">
+      <div class="flex flex-wrap items-center justify-between">
+        <div>
+          <h3 class="text-lg font-semibold mb-3">Filter by Severity:</h3>
+          <button class="filter-btn active" onclick="filterAlerts('all')">All Alerts</button>
+          <button class="filter-btn" onclick="filterAlerts('critical')">Critical</button>
+          <button class="filter-btn" onclick="filterAlerts('high')">High</button>
+          <button class="filter-btn" onclick="filterAlerts('medium')">Medium</button>
+          <button class="filter-btn" onclick="filterAlerts('low')">Low</button>
+        </div>
+        <div class="text-right">
+          <div class="text-sm opacity-80">Last Updated:</div>
+          <div class="font-semibold" id="lastUpdated">2 minutes ago</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alerts Container -->
+    <div id="alertsContainer">
+      <!-- Alerts will be loaded here -->
+      <div class="alert-card alert-critical" data-severity="critical" onclick="toggleDetails(this)">
+        <div class="alert-header">
+          <div class="flex items-center gap-3">
+            <i class="fas fa-fire text-3xl"></i>
+            <div>
+              <h3 class="text-xl font-bold">Wildfire Emergency</h3>
+              <div class="distance-indicator">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>2.3 km away</span>
+              </div>
+            </div>
+          </div>
+          <div class="severity-badge" style="background: rgba(255,255,255,0.9); color: #dc2626;">CRITICAL</div>
+        </div>
+        <p class="text-lg mb-3">Large wildfire spreading rapidly near Pine Valley. Immediate evacuation required for residents within 5km radius.</p>
+        <div class="text-sm opacity-90">
+          <i class="fas fa-clock mr-2"></i>Active since: 14:30 | 
+          <i class="fas fa-users ml-3 mr-2"></i>Affected: ~2,500 people
+        </div>
+        
+        <div class="alert-details">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <h4 class="font-semibold mb-2">Evacuation Routes:</h4>
+              <ul class="text-sm space-y-1">
+                <li>• Highway 101 North (OPEN)</li>
+                <li>• Mountain Road East (CONGESTED)</li>
+                <li>• Valley Drive South (CLOSED)</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-semibold mb-2">Emergency Shelters:</h4>
+              <ul class="text-sm space-y-1">
+                <li>• Community Center (15 km)</li>
+                <li>• High School Gym (18 km)</li>
+                <li>• Sports Complex (22 km)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="action-buttons">
+            <button class="action-btn btn-primary" onclick="getDirections('evacuation')">
+              <i class="fas fa-route mr-2"></i>Get Evacuation Route
+            </button>
+            <button class="action-btn btn-secondary" onclick="shareAlert()">
+              <i class="fas fa-share mr-2"></i>Share Alert
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- High Alert -->
+      <div class="alert-card alert-high" data-severity="high" onclick="toggleDetails(this)">
+        <div class="alert-header">
+          <div class="flex items-center gap-3">
+            <i class="fas fa-cloud-rain text-3xl"></i>
+            <div>
+              <h3 class="text-xl font-bold">Flash Flood Warning</h3>
+              <div class="distance-indicator">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>5.7 km away</span>
+              </div>
+            </div>
+          </div>
+          <div class="severity-badge" style="background: rgba(255,255,255,0.9); color: #ea580c;">HIGH</div>
+        </div>
+        <p class="text-lg mb-3">Heavy rainfall causing rapid water rise in Creek Valley area. Avoid low-lying roads and bridges.</p>
+        <div class="text-sm opacity-90">
+          <i class="fas fa-clock mr-2"></i>Active since: 16:15 | 
+          <i class="fas fa-eye ml-3 mr-2"></i>Status: Monitoring
+        </div>
+        
+        <div class="alert-details">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <h4 class="font-semibold mb-2">Affected Areas:</h4>
+              <ul class="text-sm space-y-1">
+                <li>• Creek Valley Road</li>
+                <li>• Riverside Park</li>
+                <li>• Lower Main Street</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-semibold mb-2">Safety Tips:</h4>
+              <ul class="text-sm space-y-1">
+                <li>• Avoid driving through water</li>
+                <li>• Stay on higher ground</li>
+                <li>• Monitor weather updates</li>
+              </ul>
+            </div>
+          </div>
+          <div class="action-buttons">
+            <button class="action-btn btn-primary" onclick="getDirections('alternate')">
+              <i class="fas fa-route mr-2"></i>Alternate Routes
+            </button>
+            <button class="action-btn btn-secondary" onclick="reportCondition()">
+              <i class="fas fa-camera mr-2"></i>Report Conditions
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Medium Alert -->
+      <div class="alert-card alert-medium" data-severity="medium" onclick="toggleDetails(this)">
+        <div class="alert-header">
+          <div class="flex items-center gap-3">
+            <i class="fas fa-wind text-3xl"></i>
+            <div>
+              <h3 class="text-xl font-bold">High Wind Advisory</h3>
+              <div class="distance-indicator">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>8.2 km away</span>
+              </div>
+            </div>
+          </div>
+          <div class="severity-badge" style="background: rgba(255,255,255,0.9); color: #d97706;">MEDIUM</div>
+        </div>
+        <p class="text-lg mb-3">Strong winds up to 65 mph expected. Secure outdoor items and avoid unnecessary travel.</p>
+        <div class="text-sm opacity-90">
+          <i class="fas fa-clock mr-2"></i>Valid until: Tomorrow 06:00 | 
+          <i class="fas fa-thermometer-half ml-3 mr-2"></i>Gusts: 45-65 mph
+        </div>
+        
+        <div class="alert-details">
+          <div class="mb-4">
+            <h4 class="font-semibold mb-2">Precautions:</h4>
+            <ul class="text-sm space-y-1">
+              <li>• Secure loose outdoor furniture and decorations</li>
+              <li>• Avoid parking under trees</li>
+              <li>• Be cautious when driving high-profile vehicles</li>
+              <li>• Check for power outages in your area</li>
+            </ul>
+          </div>
+          <div class="action-buttons">
+            <button class="action-btn btn-primary" onclick="checkPowerStatus()">
+              <i class="fas fa-bolt mr-2"></i>Check Power Status
+            </button>
+            <button class="action-btn btn-secondary" onclick="setReminder()">
+              <i class="fas fa-bell mr-2"></i>Set Reminder
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Low Alert -->
+      <div class="alert-card alert-low" data-severity="low" onclick="toggleDetails(this)">
+        <div class="alert-header">
+          <div class="flex items-center gap-3">
+            <i class="fas fa-road text-3xl"></i>
+            <div>
+              <h3 class="text-xl font-bold">Road Construction Notice</h3>
+              <div class="distance-indicator">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>12.1 km away</span>
+              </div>
+            </div>
+          </div>
+          <div class="severity-badge" style="background: rgba(255,255,255,0.9); color: #059669;">LOW</div>
+        </div>
+        <p class="text-lg mb-3">Lane closures on Highway 50 between exits 15-18. Expect delays during peak hours.</p>
+        <div class="text-sm opacity-90">
+          <i class="fas fa-clock mr-2"></i>Duration: 3 weeks | 
+          <i class="fas fa-car ml-3 mr-2"></i>Delay: 15-30 min
+        </div>
+        
+        <div class="alert-details">
+          <div class="mb-4">
+            <h4 class="font-semibold mb-2">Construction Schedule:</h4>
+            <ul class="text-sm space-y-1">
+              <li>• Monday-Friday: 9:00 AM - 3:00 PM</li>
+              <li>• Saturday: 10:00 AM - 2:00 PM</li>
+              <li>• Sunday: No construction</li>
+            </ul>
+          </div>
+          <div class="action-buttons">
+            <button class="action-btn btn-primary" onclick="getDirections('construction')">
+              <i class="fas fa-route mr-2"></i>Alternate Route
+            </button>
+            <button class="action-btn btn-secondary" onclick="subscribeUpdates()">
+              <i class="fas fa-envelope mr-2"></i>Get Updates
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Alerts Message (hidden by default) -->
+    <div id="noAlertsMessage" class="text-center py-12" style="display: none;">
+      <i class="fas fa-check-circle text-6xl text-green-400 mb-4"></i>
+      <h3 class="text-2xl font-semibold mb-2">No Active Alerts</h3>
+      <p class="text-lg opacity-80">There are currently no disaster alerts matching your filter criteria.</p>
+    </div>
+  </div>
+
+  <!-- Emergency Contact Button -->
+  <button class="emergency-contact" onclick="callEmergency()" title="Emergency Services">
+    <i class="fas fa-phone"></i>
+  </button>
+
+  <script>
+    // Sidebar functionality
+    function openNav() {
+      document.getElementById("mySidebar").style.width = "250px";
+    }
+
+    function closeNav() {
+      document.getElementById("mySidebar").style.width = "0";
+    }
+
+    // Weather widget toggle
+    function toggleWeather() {
+      alert("Weather details: Clear skies, 22°C, Light winds from the west at 8 mph. UV Index: 6 (High)");
+    }
+
+    // Filter alerts by severity
+    function filterAlerts(severity) {
+      const alerts = document.querySelectorAll('.alert-card');
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      const noAlertsMsg = document.getElementById('noAlertsMessage');
+      
+      // Update active filter button
+      filterBtns.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      let visibleCount = 0;
+      
+      alerts.forEach(alert => {
+        if (severity === 'all' || alert.dataset.severity === severity) {
+          alert.style.display = 'block';
+          visibleCount++;
+        } else {
+          alert.style.display = 'none';
+        }
+      });
+      
+      // Show/hide no alerts message
+      if (visibleCount === 0) {
+        noAlertsMsg.style.display = 'block';
+        document.getElementById('alertsContainer').style.display = 'none';
+      } else {
+        noAlertsMsg.style.display = 'none';
+        document.getElementById('alertsContainer').style.display = 'block';
+      }
+    }
+
+    // Toggle alert details
+    function toggleDetails(alertCard) {
+      const details = alertCard.querySelector('.alert-details');
+      details.classList.toggle('show');
+    }
+
+    // Action button functions
+    function getDirections(type) {
+      const messages = {
+        'evacuation': 'Opening evacuation route to nearest safe zone...',
+        'alternate': 'Finding alternate routes avoiding flood areas...',
+        'construction': 'Calculating best route around construction zone...'
+      };
+      alert(messages[type] || 'Opening navigation...');
+    }
+
+    function shareAlert() {
+      if (navigator.share) {
+        navigator.share({
+          title: 'Disaster Alert',
+          text: 'Important emergency alert in our area',
+          url: window.location.href
+        });
+      } else {
+        alert('Alert shared to your contacts and social media!');
+      }
+    }
+
+    function reportCondition() {
+      alert('Opening camera to report current conditions. Your report helps keep the community informed!');
+    }
+
+    function checkPowerStatus() {
+      alert('Power Status: 98% of area has power. 2 minor outages reported, estimated restoration in 2 hours.');
+    }
+
+    function setReminder() {
+      alert('Reminder set! You\'ll be notified when wind conditions improve.');
+    }
+
+    function subscribeUpdates() {
+      alert('Subscribed to construction updates! You\'ll receive notifications about schedule changes.');
+    }
+
+    function callEmergency() {
+      if (confirm('Call Emergency Services (911)?')) {
+        alert('In a real emergency, this would dial 911. For demo purposes, emergency services have been notified.');
+      }
+    }
+
+    // Update last updated time
+    function updateLastUpdated() {
+      const now = new Date();
+      const minutes = Math.floor(Math.random() * 5) + 1;
+      document.getElementById('lastUpdated').textContent = `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    }
+
+    async function loadAlerts() {
+      try {
+        const res = await fetch('/api/weather-alerts');
+        if (!res.ok) return;
+        const data = await res.json();
+        const container = document.getElementById('alertsContainer');
+        container.innerHTML = '';
+        if (!data || data.length === 0) {
+          document.getElementById('noAlertsMessage').style.display = 'block';
+          container.style.display = 'none';
+          return;
+        }
+        document.getElementById('noAlertsMessage').style.display = 'none';
+        container.style.display = 'block';
+        data.forEach(a => {
+          const sev = (a.severity || 'LOW').toLowerCase();
+          const card = document.createElement('div');
+          card.className = `alert-card ${sev === 'high' ? 'alert-high' : sev === 'medium' ? 'alert-medium' : sev === 'low' ? 'alert-low' : 'alert-critical'}`;
+          card.setAttribute('data-severity', sev === 'critical' ? 'critical' : sev);
+          card.onclick = () => toggleDetails(card);
+          card.innerHTML = `
+            <div class="alert-header">
+              <div class="flex items-center gap-3">
+                <i class="fas fa-bell text-3xl"></i>
+                <div>
+                  <h3 class="text-xl font-bold">${a.title || 'Alert'}</h3>
+                  <div class="distance-indicator">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>${a.region || 'Unknown region'}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="severity-badge" style="background: rgba(255,255,255,0.9); color: #111;">${(a.severity || 'LOW').toUpperCase()}</div>
+            </div>
+            <p class="text-lg mb-3">${a.description || ''}</p>
+            <div class="text-sm opacity-90">
+              <i class="fas fa-clock mr-2"></i>Issued: ${a.issuedAt ? new Date(a.issuedAt).toLocaleString() : 'N/A'}
+            </div>
+            <div class="alert-details">
+              <div class="action-buttons">
+                <button class="action-btn btn-primary" onclick="getDirections('evacuation')">
+                  <i class="fas fa-route mr-2"></i>Get Route
+                </button>
+                <button class="action-btn btn-secondary" onclick="shareAlert()">
+                  <i class="fas fa-share mr-2"></i>Share Alert
+                </button>
+              </div>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      } catch (e) {
+        // fail silent
+      }
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      updateLastUpdated();
+      loadAlerts();
+      setInterval(updateLastUpdated, 60000);
+    });
+
+    // Close sidebar when clicking outside
+    document.addEventListener('click', function(event) {
+      const sidebar = document.getElementById('mySidebar');
+      const openBtn = document.querySelector('.openbtn');
+      
+      if (!sidebar.contains(event.target) && !openBtn.contains(event.target)) {
+        closeNav();
+      }
+    });
+  </script>
+<script src="chatbot.js"></script>
+    <script id="alertaid-shared-components">
+        const THEME_STORAGE_KEY = 'theme';
+        const HTML_ELEMENT = document.documentElement;
+        function applyTheme(theme) {
+            HTML_ELEMENT.setAttribute('data-theme', theme);
+            document.body.setAttribute('data-theme', theme);
+        }
+        function setTheme(theme) {
+            applyTheme(theme);
+            try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch(e){}
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            const display = document.getElementById('currentThemeDisplay');
+            if (theme === 'dark') {
+                if (icon) icon.className = 'fas fa-sun';
+                if (text) text.textContent = 'Light Theme';
+                if (display) display.textContent = 'Dark';
+            } else {
+                if (icon) icon.className = 'fas fa-moon';
+                if (text) text.textContent = 'Dark Theme';
+                if (display) display.textContent = 'Light';
+            }
+        }
+        window.toggleTheme = function() {
+            const next = HTML_ELEMENT.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            setTheme(next);
+        }
+        window.openNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '260px'; }
+        window.closeNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '0'; }
+        function showPopup(message, opts){
+            const modal = document.getElementById('app-modal');
+            const body = document.getElementById('app-modal-body');
+            const titleEl = document.getElementById('app-modal-title');
+            const closeBtn = document.getElementById('app-modal-close');
+            const okBtn = document.getElementById('app-modal-ok');
+            const cancelBtn = document.getElementById('app-modal-cancel');
+            if (!modal || !body) return console.error('Modal elements missing', message);
+            const options = opts || {};
+            const isConfirm = options.type === 'confirm';
+            titleEl.textContent = options.title || (isConfirm ? 'Confirmation' : 'Notice');
+            body.textContent = (message == null ? '' : String(message));
+            okBtn.textContent = options.okText || (isConfirm ? 'Confirm' : 'OK');
+            okBtn.className = `app-btn ${options.okClass || (isConfirm ? 'app-btn-critical' : '')}`;
+            cancelBtn.style.display = isConfirm ? 'block' : 'none';
+            function hide(result = false){ modal.classList.remove('show'); cleanup(); if(isConfirm && typeof options.callback === 'function'){ options.callback(result); } }
+            function cleanup(){ closeBtn.removeEventListener('click', onClose); okBtn.removeEventListener('click', onOk); cancelBtn.removeEventListener('click', onCancel); modal.removeEventListener('click', onBackdrop); document.removeEventListener('keydown', onEsc); }
+            function onClose(){ hide(false); }
+            function onOk(){ hide(true); }
+            function onCancel(){ hide(false); }
+            function onBackdrop(e){ if(e.target === modal) hide(false); }
+            function onEsc(e){ if(e.key === 'Escape') hide(false); }
+            closeBtn.addEventListener('click', onClose);
+            okBtn.addEventListener('click', onOk);
+            cancelBtn.addEventListener('click', onCancel);
+            modal.addEventListener('click', onBackdrop);
+            document.addEventListener('keydown', onEsc);
+            modal.classList.add('show');
+        }
+        function showConfirm(message, callback){ showPopup(message, { type:'confirm', title:'Action Required', okText:'Yes', okClass:'app-btn-critical', cancelText:'Cancel', callback }); }
+        window.alert = function(msg){ try { showPopup(msg); } catch { console.error('Modal failed', msg); } };
+        window.showPopup = showPopup;
+        window.showConfirm = showConfirm;
+        function getValidToken(){ const token = localStorage.getItem('token'); return token && token !== 'null' ? token : null; }
+        window.checkAuthStatus = function(){
+            const token = getValidToken();
+            const userOptions = document.getElementById('userOnlyOptions');
+            const guestOptions = document.getElementById('guestOnlyOptions');
+            const navAuthLink = document.getElementById('navAuthLink');
+            if (token){
+                if (userOptions) userOptions.style.display = 'flex';
+                if (guestOptions) guestOptions.style.display = 'none';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-tachometer-alt\"></i> Dashboard'; navAuthLink.href = resolveDashboardHref(); }
+            } else {
+                if (userOptions) userOptions.style.display = 'none';
+                if (guestOptions) guestOptions.style.display = 'block';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-sign-in-alt\"></i> Sign In'; navAuthLink.href = 'login.html'; }
+            }
+        }
+        window.getLocation = function(){
+            if (navigator.geolocation){
+                navigator.geolocation.getCurrentPosition((p)=>{
+                    showPopup(`Your Location:
+Latitude: ${p.coords.latitude.toFixed(6)}
+Longitude: ${p.coords.longitude.toFixed(6)}`, { title:'Current Location' });
+                },()=>showPopup('Unable to retrieve your location.', { title:'Location Error' }));
+            } else {
+                showPopup('Geolocation is not supported by this browser.', { title:'Location Error' });
+            }
+        }
+        window.showNotifications = function(){ if (!getValidToken()) { showPopup('Please sign in to view notifications.', { title:'Authorization Required' }); return; } showPopup('Notifications will appear here.', { title:'Notifications' }); }
+        window.showProfile = function(){ if (!getValidToken()) { showPopup('Please sign in to view profile.', { title:'Authorization Required' }); return; } showPopup('Profile Information (demo)', { title:'User Profile' }); }
+        window.signOut = function(){ showConfirm('Are you sure you want to sign out?', (confirmed)=>{ if (confirmed){ try { localStorage.removeItem('token'); } catch {} window.location.replace('login.html'); } }); }
+        document.addEventListener('DOMContentLoaded', function(){ setTheme(localStorage.getItem(THEME_STORAGE_KEY) || 'light'); checkAuthStatus(); });
+    </script>
+</body>
+</html>
+

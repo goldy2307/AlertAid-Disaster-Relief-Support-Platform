@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <style id="alertaid-shared-components">
+        :root {
+            --color-bg: #fafbfc;
+            --color-surface: #ffffff;
+            --color-surface-soft: #fef3ef;
+            --color-muted: #666666;
+            --color-text: #1a1a1a;
+            --color-primary: #FF3B30;
+            --color-secondary: #FF6F00;
+            --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            --color-border: rgba(26, 26, 26, 0.08);
+            --color-shadow-soft: 0 20px 45px rgba(17, 24, 39, 0.15);
+            --color-nav-bg: rgba(255, 255, 255, 0.95);
+            --color-sidebar-bg-top: rgba(255, 86, 33, 0.98);
+        }
+        html[data-theme="dark"] {
+            --color-bg: #121212;
+            --color-surface: #1e1e1e;
+            --color-surface-soft: #281c1b;
+            --color-muted: #aaaaaa;
+            --color-text: #ffffff;
+            --color-primary: #FF6F00;
+            --color-secondary: #FF3B30;
+            --color-gradient: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            --color-border: rgba(255, 255, 255, 0.1);
+            --color-shadow-soft: 0 20px 45px rgba(0, 0, 0, 0.5);
+            --color-nav-bg: rgba(30, 30, 30, 0.95);
+            --color-sidebar-bg-top: rgba(255, 111, 0, 0.98);
+        }
+        body {
+            min-height: 100vh;
+            background: var(--color-bg) !important;
+            color: var(--color-text);
+            transition: background 0.4s, color 0.4s;
+            font-family: 'Inter', sans-serif;
+            padding-top: 150px;
+        }
+        select option, select optgroup { color: #111 !important; background: #fff !important; }
+        html[data-theme="dark"] select option,
+        html[data-theme="dark"] select optgroup { color: #fff !important; background: #333 !important; }
+        .main-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 24px;
+            background: var(--color-nav-bg);
+            border-radius: 18px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            margin: 12px;
+            width: calc(100% - 24px);
+            max-width: none;
+            z-index: 1000;
+            box-shadow: var(--color-shadow-soft);
+            border: 1px solid var(--color-border);
+            backdrop-filter: blur(10px);
+        }
+        .nav-left, .nav-right { display: flex; align-items: center; gap: 16px; }
+        .nav-spacer {
+            height: 140px;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .nav-spacer { height: 180px; }
+        }
+
+        .nav-brand { font-size: 1.9rem; font-weight: 800; color: var(--color-primary); text-decoration: none; transition: color 0.4s; }
+        .weather-widget { display: flex; align-items: center; gap: 10px; padding: 8px 16px; border-radius: 30px; background: linear-gradient(135deg, #4A90E2, #357ABD); color: #fff; cursor: pointer; font-weight: 500; box-shadow: 0 5px 15px rgba(53, 122, 189, 0.3); }
+        .weather-widget i { font-size: 1.1rem; color: #fff; }
+        .weather-info { font-size: 0.85rem; text-align: left; }
+        .nav-signin { display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; text-decoration: none; background: var(--color-gradient); padding: 10px 26px; border-radius: 999px; box-shadow: 0 12px 25px rgba(255, 59, 48, 0.35); border: none; font-size: 1rem; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .nav-signin i {
+            margin-right: 8px;
+        }
+        .nav-signin:hover { transform: translateY(-2px); box-shadow: 0 18px 30px rgba(255, 59, 48, 0.4); }
+
+        .sidebar { height: 100%; width: 0; position: fixed; top: 0; left: 0; background: none !important; color: var(--color-text); overflow-x: hidden; transition: 0.4s; padding-top: 110px; z-index: 1000; box-shadow: var(--color-shadow-soft); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; }
+        .sidebar-content { width: 100%; height: 100%; display: flex; flex-direction: column; overflow-y: auto; background: var(--color-sidebar-bg-top) !important; padding-top: 20px; }
+        .sidebar a { color: #fff !important; font-weight: 600; padding: 12px 32px; margin-right: 20px; display: flex; align-items: center; gap: 12px; border-radius: 0 20px 20px 0; transition: background 0.2s ease, transform 0.2s ease; text-decoration: none; }
+        .sidebar a:hover { background: rgba(255,255,255,0.15) !important; transform: translateX(4px); }
+        .sidebar a i { width: 22px; text-align: center; color: #fff !important; }
+        .sidebar .closebtn { position: absolute; top: 24px; right: 24px; width: 42px; height: 42px; border-radius: 14px; background: var(--color-surface); color: var(--color-primary) !important; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 15px 28px rgba(0,0,0,0.25); }
+        .sidebar .closebtn:hover { background: var(--color-surface-soft); }
+        .theme-toggle { padding: 10px 18px; border-radius: 16px; cursor: pointer; font-size: 16px; display: flex; align-items: center; gap: 8px; background: var(--color-surface); color: var(--color-primary); border: 1px solid rgba(26,26,26,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        html[data-theme="dark"] .theme-toggle { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); box-shadow: none; }
+        .theme-toggle:hover { transform: translateY(-1px); background: rgba(255,59,48,0.05); }
+        html[data-theme="dark"] .theme-toggle:hover { background: rgba(255,255,255,0.2); }
+        .app-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:2000}
+        .app-modal.show{display:flex}
+        .app-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.55);backdrop-filter: blur(4px);}
+        .app-modal-dialog{position:relative;background:var(--color-surface);color:var(--color-text);min-width:280px;max-width:520px;width:90%;border-radius:18px;box-shadow:var(--color-shadow-soft);overflow:hidden;border: 1px solid var(--color-border);}
+        .app-modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--color-primary);color:#fff}
+        .app-modal-header button{background:none;border:none;color:#fff;font-size:20px;cursor:pointer}
+        .app-modal-body{padding:16px;white-space:pre-wrap}
+        .app-modal-actions{padding:12px 16px;display:flex;justify-content:flex-end;gap:8px;background:var(--color-surface-soft);}
+        .app-btn{background:var(--color-secondary);color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer; transition: all 0.2s;}
+        .app-btn:hover{background: #e66600;}
+        .app-btn-secondary { background: var(--color-surface-soft); color: var(--color-text); border: 1px solid var(--color-border); }
+        .app-btn-secondary:hover { background: rgba(255, 59, 48, 0.05); }
+        .app-btn-critical { background: #FF3B30; color: #fff; }
+    </style>
+    <style id="alertaid-openbtn-override">
+        .openbtn {
+            width: 48px !important;
+            height: 48px !important;
+            border-radius: 16px !important;
+            background: #ffffff !important;
+            border: 1px solid rgba(15, 23, 42, 0.08) !important;
+            box-shadow: 0 15px 30px rgba(15, 23, 42, 0.12) !important;
+            cursor: pointer;
+            position: relative;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .openbtn::before,
+        .openbtn::after,
+        .openbtn .openbtn-line {
+            content: '';
+            position: absolute;
+            left: 50%;
+            width: 26px;
+            height: 2px;
+            border-radius: 999px;
+            background: #FF3B30 !important;
+            transform: translateX(-50%);
+        }
+        .openbtn::before { top: 16px; }
+        .openbtn .openbtn-line { top: 50%; transform: translate(-50%, -50%); }
+        .openbtn::after { bottom: 16px; }
+        .openbtn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 32px rgba(15, 23, 42, 0.18);
+        }
+    </style>
+
+<title>AlertAid</title>
+    <script src="role-router.js"></script>
+  <script src="nav-auth.js"></script>
+    <meta name="page-key" content="donate">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <script src="role-router.js"></script>
+  <script type="module" src="./dashboard-guard.js"></script>
+    <style>
+        /* === Base === */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body {
+          display: flex; justify-content: center; align-items: center;
+          min-height: 100vh;
+          background: linear-gradient(135deg, #141E30, #243B55);
+          color: #fff;
+          padding: 20px;
+        }
+
+        /* === Donation Card === */
+        .donation-box {
+          background: rgba(255,255,255,0.08);
+          backdrop-filter: blur(10px);
+          padding: 35px 30px;
+          border-radius: 15px;
+          width: 420px;
+          box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+          text-align: center;
+          animation: fadeIn 0.8s ease;
+        }
+        .donation-box h2 {
+          font-size: 1.8rem;
+          margin-bottom: 20px;
+          display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        .donation-box h2 i { color: #28A745; }
+
+        /* === Amount Buttons === */
+        .amount-options {
+          display: flex; flex-wrap: wrap; gap: 10px;
+          justify-content: center;
+          margin-bottom: 20px;
+        }
+        .amount-btn {
+          background: rgba(255,255,255,0.12);
+          border: 2px solid transparent;
+          color: #fff;
+          padding: 12px 18px;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 15px;
+          font-weight: 500;
+          transition: 0.3s;
+        }
+        .amount-btn:hover, .amount-btn.active {
+          border-color: #FFD700;
+          background: rgba(255,255,255,0.2);
+          color: #FFD700;
+        }
+
+        /* === Custom Input === */
+        .input-group {
+          margin-bottom: 18px;
+          text-align: left;
+        }
+        .input-group label {
+          display: block;
+          margin-bottom: 6px;
+          font-size: 14px;
+          color: #ccc;
+        }
+        .input-group input, .input-group select {
+          width: 100%;
+          padding: 12px;
+          border: none;
+          border-radius: 8px;
+          background: rgba(255,255,255,0.15);
+          color: #fff;
+          font-size: 15px;
+          outline: none;
+        }
+        .input-group input::placeholder { color: #bbb; }
+
+        /* === Donate Button === */
+        .donation-box button {
+          width: 100%;
+          padding: 14px;
+          background: #28A745;
+          border: none;
+          border-radius: 8px;
+          color: #fff;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: 0.3s;
+          margin-top: 10px;
+        }
+        .donation-box button:hover { background: #218838; }
+
+        /* === Links === */
+        .links {
+          margin-top: 18px;
+          font-size: 14px;
+        }
+        .links a {
+          color: #FFD700;
+          text-decoration: none;
+          transition: 0.3s;
+        }
+        .links a:hover { text-decoration: underline; }
+
+        /* Animation */
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-15px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+  <link rel="stylesheet" href="landing-theme.css">
+  
+
+
+</head>
+<link rel="stylesheet" href="chatbot.css">
+<body class="landing-palette">    <nav class="main-nav">
+        <div class="nav-left">
+            <button class="openbtn" onclick="openNav()" aria-label="Open navigation menu">
+                <span class="openbtn-line"></span>
+            </button>
+            <a href="citizen_dashboard.html" class="nav-brand" data-route="dashboard">AlertAid</a>
+        </div>
+
+        <div class="nav-right">
+            <a class="weather-widget" href="https://www.msn.com/en-in/weather/forecast/in-Indore,MP" target="_blank" rel="noopener">
+                <i id="weather-icon" class="fas fa-cloud-sun"></i>
+                <div class="weather-info">
+                    <div id="weather-details">-- | --°C | --</div>
+                    <div id="weather-time">--:-- | --</div>
+                </div>
+            </a>
+
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light and dark mode">
+                <i id="theme-icon" class="fas fa-sun"></i><span id="theme-text">Light Theme</span>
+            </button>
+
+            <a href="login.html" class="nav-signin" id="navAuthLink">Sign In</a>
+        </div>
+    </nav>
+    <div class="nav-spacer"></div>
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="sidebar-content">
+            <a href="citizen_dashboard.html" data-route="dashboard"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="alerts.html"><i class="fas fa-exclamation-triangle"></i> Active Alerts</a>
+            <a href="helpforpeople.html"><i class="fas fa-hands-helping"></i> Seek Help</a>
+            <a href="report.html"><i class="fas fa-flag"></i> Report Disaster</a>
+            <a href="donatemoney.html"><i class="fas fa-heart"></i> Make Donation</a>
+            <a href="#" onclick="getLocation()"><i class="fas fa-map-marker-alt"></i> My Location</a>
+            <a href="#" onclick="showNotifications()"><i class="fas fa-bell"></i> Notifications</a>
+                        <div id="userOnlyOptions" style="display: none; flex-direction: column">
+                <a href="profile.html" data-route="profile"><i class="fas fa-user"></i> Profile</a>
+                <a href="change_password.html" data-route="change_password"><i class="fas fa-cog"></i> Settings</a>
+                <a href="javascript:void(0)" onclick="signOut()"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+            </div>
+            <div id="guestOnlyOptions">
+                <a href="login.html"><i class="fas fa-sign-in-alt"></i> Sign In</a>
+            </div>
+        </div>
+    </div>
+    
+    <div id="app-modal" class="app-modal" role="dialog" aria-modal="true" aria-labelledby="app-modal-title">
+        <div class="app-modal-backdrop"></div>
+        <div class="app-modal-dialog">
+            <div class="app-modal-header">
+                <div id="app-modal-title">Notice</div>
+                <button id="app-modal-close" aria-label="Close">×</button>
+            </div>
+            <div id="app-modal-body" class="app-modal-body"></div>
+            <div class="app-modal-actions">
+                <button id="app-modal-cancel" class="app-btn app-btn-secondary" style="display:none;">Cancel</button>
+                <button id="app-modal-ok" class="app-btn">OK</button>
+            </div>
+        </div>
+    </div>
+
+<a class="back-dash" href="#" data-route="dashboard" title="Back to Dashboard"
+   style="position:fixed;top:16px;left:16px;z-index:9999;background:#FF3B30;color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;font-weight:600;box-shadow:0 6px 18px rgba(0,0,0,.25);">
+    ← Dashboard
+</a>
+
+<div class="donation-box">
+    <h2><i class="fas fa-indian-rupee-sign"></i> Donate to <span id="campaignTitle">Campaign</span></h2>
+
+    <!-- FORM linked to backend -->
+    <form id="donationForm">
+        <!-- Hidden campaignId -->
+        <input type="hidden" id="campaignIdInput" name="campaignId">
+
+        <!-- Preset Amounts -->
+        <div class="amount-options">
+            <button type="button" class="amount-btn" onclick="setAmount(500)">₹500</button>
+            <button type="button" class="amount-btn" onclick="setAmount(1000)">₹1000</button>
+            <button type="button" class="amount-btn" onclick="setAmount(2500)">₹2500</button>
+            <button type="button" class="amount-btn" onclick="setAmount(5000)">₹5000</button>
+        </div>
+
+        <!-- Custom Amount -->
+        <div class="input-group">
+            <label for="custom">Custom Amount (₹)</label>
+            <input type="number" id="custom" name="amount" placeholder="Enter amount" required>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="input-group">
+            <label for="method">Payment Method</label>
+            <select id="method" name="paymentMethod" required>
+                <option value="">-- Select --</option>
+                <option>UPI</option>
+                <option>Net Banking</option>
+                <option>Credit Card</option>
+                <option>Debit Card</option>
+            </select>
+        </div>
+
+        <button type="submit"><i class="fas fa-donate"></i> Donate Now</button>
+    </form>
+
+    <div class="links">
+        <p><a href="index.html">⬅ Back to Home</a></p>
+    </div>
+</div>
+
+<script>
+  let razorpayScriptPromise = null;
+  const paymentOrderEndpoint = '/api/payments/order';
+
+  function loadPaymentScript() {
+    if (window.Razorpay) return Promise.resolve();
+    if (razorpayScriptPromise) return razorpayScriptPromise;
+    razorpayScriptPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('Unable to load payment gateway script'));
+      document.body.appendChild(script);
+    });
+    return razorpayScriptPromise;
+  }
+
+  async function createPaymentOrder(amount, purpose, token) {
+    const res = await fetch(paymentOrderEndpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({
+        amount: Math.round(amount),
+        currency: 'INR',
+        receipt: `don-${Date.now()}`,
+        notes: { purpose: purpose || 'campaign-donation' }
+      })
+    });
+    if (!res.ok) throw new Error('Unable to initiate payment');
+    return res.json();
+  }
+
+  async function launchPaymentCheckout(order, donorMeta) {
+    if (order.provider === 'MOCK') {
+      return {
+        order_id: order.orderId,
+        payment_id: `pay_mock_${Date.now()}`,
+        signature: 'mock-signature'
+      };
+    }
+    await loadPaymentScript();
+    return new Promise((resolve, reject) => {
+      const gateway = new Razorpay({
+        key: order.key,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'AlertAid Campaign',
+        description: donorMeta.purpose || 'Relief donation',
+        order_id: order.orderId,
+        handler: response => resolve(response),
+        modal: {
+          ondismiss: () => reject(new Error('Payment cancelled'))
+        },
+        prefill: {
+          name: donorMeta.name || 'AlertAid Donor',
+          email: donorMeta.email || ''
+        },
+        theme: { color: '#28A745' }
+      });
+      gateway.on('payment.failed', event => {
+        reject(new Error(event.error.description || 'Payment failed'));
+      });
+      gateway.open();
+    });
+  }
+
+  async function recordDonation(campaignId, payload, token) {
+    const res = await fetch(`/api/donations/${campaignId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Saving donation failed');
+    return res.json();
+  }
+
+    // Highlight selected amount & autofill input
+    function setAmount(value) {
+      document.getElementById("custom").value = value;
+      document.querySelectorAll(".amount-btn").forEach(btn => btn.classList.remove("active"));
+      event.target.classList.add("active");
+    }
+
+    // Get query params
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+// On page load
+window.onload = function() {
+  const campaignTitle = getQueryParam("title");
+  const campaignId = getQueryParam("campaignId");
+
+  if (campaignTitle) {
+    document.getElementById("campaignTitle").innerText = campaignTitle;
+  }
+
+  if (campaignId) {
+    document.getElementById("campaignIdInput").value = campaignId;
+  }
+
+  // Attach submit handler to call backend donations API
+  const form = document.getElementById('donationForm');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+    if (!token) { showToast('Please sign in first.', 'warning'); return; }
+    const cid = document.getElementById('campaignIdInput').value;
+    const amount = parseFloat(document.getElementById('custom').value || '0');
+    if (!cid || !amount || isNaN(amount) || amount <= 0) {
+      showToast('Please provide a valid amount.', 'warning');
+      return;
+    }
+    const method = document.getElementById('method').value;
+    if (!method) { showToast('Select a payment method.', 'warning'); return; }
+    const userEmail = localStorage.getItem('email') || '';
+    const donorName = localStorage.getItem('name') || 'Anonymous';
+    try {
+      const demoUrl = 'https://goldylokhande7.mojo.page/monetary-donation-p';
+      window.open(demoUrl, '_blank', 'noopener');
+      const payload = {
+        donorName,
+        donorEmail: userEmail,
+        amount,
+        currency: 'INR',
+        paymentMethod: 'EXTERNAL_DEMO',
+        paymentStatus: 'PENDING',
+        gatewayOrderId: `demo_${Date.now()}`,
+        paymentReference: 'demo-link',
+        testMode: true
+      };
+      await recordDonation(cid, payload, token);
+      showToast('Demo payment page opened. Once confirmed, we will mark the donation as received.', 'success');
+      form.reset();
+    } catch (e) {
+      showToast(e.message || 'Error processing donation.', 'error');
+    }
+  });
+}
+</script>
+<script src="chatbot.js"></script>
+    <script id="alertaid-shared-components">
+        const THEME_STORAGE_KEY = 'theme';
+        const HTML_ELEMENT = document.documentElement;
+        function applyTheme(theme) {
+            HTML_ELEMENT.setAttribute('data-theme', theme);
+            document.body.setAttribute('data-theme', theme);
+        }
+        function setTheme(theme) {
+            applyTheme(theme);
+            try { localStorage.setItem(THEME_STORAGE_KEY, theme); } catch(e){}
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            const display = document.getElementById('currentThemeDisplay');
+            if (theme === 'dark') {
+                if (icon) icon.className = 'fas fa-sun';
+                if (text) text.textContent = 'Light Theme';
+                if (display) display.textContent = 'Dark';
+            } else {
+                if (icon) icon.className = 'fas fa-moon';
+                if (text) text.textContent = 'Dark Theme';
+                if (display) display.textContent = 'Light';
+            }
+        }
+        window.toggleTheme = function() {
+            const next = HTML_ELEMENT.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            setTheme(next);
+        }
+        window.openNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '260px'; }
+        window.closeNav = function(){ const el = document.getElementById('mySidebar'); if (el) el.style.width = '0'; }
+        function showPopup(message, opts){
+            const modal = document.getElementById('app-modal');
+            const body = document.getElementById('app-modal-body');
+            const titleEl = document.getElementById('app-modal-title');
+            const closeBtn = document.getElementById('app-modal-close');
+            const okBtn = document.getElementById('app-modal-ok');
+            const cancelBtn = document.getElementById('app-modal-cancel');
+            if (!modal || !body) return console.error('Modal elements missing', message);
+            const options = opts || {};
+            const isConfirm = options.type === 'confirm';
+            titleEl.textContent = options.title || (isConfirm ? 'Confirmation' : 'Notice');
+            body.textContent = (message == null ? '' : String(message));
+            okBtn.textContent = options.okText || (isConfirm ? 'Confirm' : 'OK');
+            okBtn.className = `app-btn ${options.okClass || (isConfirm ? 'app-btn-critical' : '')}`;
+            cancelBtn.style.display = isConfirm ? 'block' : 'none';
+            function hide(result = false){ modal.classList.remove('show'); cleanup(); if(isConfirm && typeof options.callback === 'function'){ options.callback(result); } }
+            function cleanup(){ closeBtn.removeEventListener('click', onClose); okBtn.removeEventListener('click', onOk); cancelBtn.removeEventListener('click', onCancel); modal.removeEventListener('click', onBackdrop); document.removeEventListener('keydown', onEsc); }
+            function onClose(){ hide(false); }
+            function onOk(){ hide(true); }
+            function onCancel(){ hide(false); }
+            function onBackdrop(e){ if(e.target === modal) hide(false); }
+            function onEsc(e){ if(e.key === 'Escape') hide(false); }
+            closeBtn.addEventListener('click', onClose);
+            okBtn.addEventListener('click', onOk);
+            cancelBtn.addEventListener('click', onCancel);
+            modal.addEventListener('click', onBackdrop);
+            document.addEventListener('keydown', onEsc);
+            modal.classList.add('show');
+        }
+        function showConfirm(message, callback){ showPopup(message, { type:'confirm', title:'Action Required', okText:'Yes', okClass:'app-btn-critical', cancelText:'Cancel', callback }); }
+        window.alert = function(msg){ try { showPopup(msg); } catch { console.error('Modal failed', msg); } };
+        window.showPopup = showPopup;
+        window.showConfirm = showConfirm;
+        function getValidToken(){ const token = localStorage.getItem('token'); return token && token !== 'null' ? token : null; }
+        window.checkAuthStatus = function(){
+            const token = getValidToken();
+            const userOptions = document.getElementById('userOnlyOptions');
+            const guestOptions = document.getElementById('guestOnlyOptions');
+            const navAuthLink = document.getElementById('navAuthLink');
+            if (token){
+                if (userOptions) userOptions.style.display = 'flex';
+                if (guestOptions) guestOptions.style.display = 'none';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-tachometer-alt\"></i> Dashboard'; navAuthLink.href = resolveDashboardHref(); }
+            } else {
+                if (userOptions) userOptions.style.display = 'none';
+                if (guestOptions) guestOptions.style.display = 'block';
+                if (navAuthLink){ navAuthLink.innerHTML = '<i class=\"fas fa-sign-in-alt\"></i> Sign In'; navAuthLink.href = 'login.html'; }
+            }
+        }
+        window.getLocation = function(){
+            if (navigator.geolocation){
+                navigator.geolocation.getCurrentPosition((p)=>{
+                    showPopup(`Your Location:
+Latitude: ${p.coords.latitude.toFixed(6)}
+Longitude: ${p.coords.longitude.toFixed(6)}`, { title:'Current Location' });
+                },()=>showPopup('Unable to retrieve your location.', { title:'Location Error' }));
+            } else {
+                showPopup('Geolocation is not supported by this browser.', { title:'Location Error' });
+            }
+        }
+        window.showNotifications = function(){ if (!getValidToken()) { showPopup('Please sign in to view notifications.', { title:'Authorization Required' }); return; } showPopup('Notifications will appear here.', { title:'Notifications' }); }
+        window.showProfile = function(){ if (!getValidToken()) { showPopup('Please sign in to view profile.', { title:'Authorization Required' }); return; } showPopup('Profile Information (demo)', { title:'User Profile' }); }
+        window.signOut = function(){ showConfirm('Are you sure you want to sign out?', (confirmed)=>{ if (confirmed){ try { localStorage.removeItem('token'); } catch {} window.location.replace('login.html'); } }); }
+        document.addEventListener('DOMContentLoaded', function(){ setTheme(localStorage.getItem(THEME_STORAGE_KEY) || 'light'); checkAuthStatus(); });
+    </script>
+</body>
+</html>
+<script>
+  function showToast(message, variant = 'info') {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toastContainer';
+      container.style.position = 'fixed';
+      container.style.top = '20px';
+      container.style.right = '20px';
+      container.style.zIndex = '10000';
+      container.style.display = 'flex';
+      container.style.flexDirection = 'column';
+      container.style.gap = '10px';
+      document.body.appendChild(container);
+    }
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.padding = '12px 16px';
+    toast.style.borderRadius = '10px';
+    toast.style.minWidth = '220px';
+    toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.35)';
+    toast.style.background = variant === 'error' ? 'rgba(239,68,68,0.95)' :
+      variant === 'warning' ? 'rgba(253,224,71,0.95)' :
+      variant === 'success' ? 'rgba(16,185,129,0.95)' :
+      'rgba(15,23,42,0.95)';
+    toast.style.color = '#fff';
+    toast.style.fontWeight = '600';
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '×';
+    closeBtn.style.marginLeft = '16px';
+    closeBtn.style.color = '#fff';
+    closeBtn.style.background = 'transparent';
+    closeBtn.style.border = 'none';
+    closeBtn.style.fontSize = '18px';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.onclick = () => toast.remove();
+    toast.appendChild(closeBtn);
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.style.transition = 'opacity 0.5s ease';
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 500);
+    }, 4000);
+  }
+

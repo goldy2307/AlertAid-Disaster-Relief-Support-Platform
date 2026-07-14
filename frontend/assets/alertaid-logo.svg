@@ -1,0 +1,7 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" rx="32" ry="32" fill="#f8efe7"/>
+  <text x="50%" y="55%" font-family="'Segoe UI', Arial, sans-serif" font-size="96" font-weight="700"
+        text-anchor="middle" fill="#e62817">A</text>
+  <text x="50%" y="80%" font-family="'Segoe UI', Arial, sans-serif" font-size="48" font-weight="700"
+        text-anchor="middle" fill="#e62817">AlertAid</text>
+</svg>

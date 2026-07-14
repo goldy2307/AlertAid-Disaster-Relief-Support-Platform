@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: alertaid_db
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-alertaid}
+      MYSQL_USER: ${MYSQL_USER:-alertaid}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-alertaid}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/alertaid_schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/quick_setup.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
+    command: --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-alertaid}"]
+      timeout: 5s
+      retries: 5
+      interval: 10s
+      start_period: 30s
+
+  backend:
+    build:
+      context: ./backend/Alertaid
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # MySQL Configuration
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/alertaid_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-alertaid}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-alertaid}
+      SPRING_DATASOURCE_DRIVER: com.mysql.cj.jdbc.Driver
+      HIBERNATE_DIALECT: org.hibernate.dialect.MySQLDialect
+      # JWT Configuration - required, no fallback, set in your local .env file
+      APP_JWT_SECRET: ${APP_JWT_SECRET:?set APP_JWT_SECRET in .env, e.g. openssl rand -base64 32}
+      APP_JWT_EXPIRATION_MS: ${APP_JWT_EXPIRATION_MS:-86400000}
+      # CORS Configuration
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      timeout: 5s
+      retries: 5
+      interval: 30s
+      start_period: 60s
+
+volumes:
+  mysql_data:
+    driver: local
